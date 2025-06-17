@@ -222,10 +222,7 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const handleUpdateDoc = async (
-    id: string,
-    updatedData: Partial<GoogleDoc>
-  ) => {
+  const handleUpdateDoc = async (id: string, updatedData: GoogleDoc) => {
     if (!id) {
       toast.error("Cannot update document: Missing document ID");
       return;
