@@ -7,7 +7,7 @@ import Overview from "../components/Overview";
 import Events from "../components/Events";
 import Projects from "../components/Projects";
 import Tasks from "../components/Tasks";
-import GoogleDocs from "../components/GoogleDocs";
+import GoogleDocs, { Doc } from "../components/GoogleDocs";
 import Settings from "../components/Settings";
 import { getAllDocs, addDoc, updateDoc, deleteDoc } from "../service/docs";
 import { toast } from "react-hot-toast";
@@ -50,7 +50,7 @@ const Dashboard: React.FC = () => {
   });
 
   // Project state
-  const [projects, setProjects] = useState<
+  const [projects] = useState<
     Array<{
       id: number;
       name: string;
@@ -119,14 +119,7 @@ const Dashboard: React.FC = () => {
   });
 
   // Google Docs state
-  const [docs, setDocs] = useState<
-    Array<{
-      id: string; // Changed from number to string to match MongoDB _id
-      title: string;
-      url: string;
-      addedOn: string;
-    }>
-  >([]);
+  const [docs, setDocs] = useState<Doc[]>([]);
 
   const [loading, setLoading] = useState({
     docs: false,

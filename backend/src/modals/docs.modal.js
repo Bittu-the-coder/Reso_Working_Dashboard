@@ -3,15 +3,15 @@ const mongoose = require("mongoose");
 const docsSchema = new mongoose.Schema({
   title: {
     type: String,
-    required: true
-  },
-  description: {
-    type: String,
-    default: ''
+    required: [true, 'Please add a title'],
+    trim: true,
+    maxlength: [200, 'Title cannot be more than 200 characters']
   },
   url: {
     type: String,
-    required: true
+    required: [true, 'Please add a URL'],
+    unique: true,
+    trim: true
   },
   addedOn: {
     type: String,
@@ -21,6 +21,4 @@ const docsSchema = new mongoose.Schema({
   timestamps: true
 });
 
-const Docs = mongoose.model("Docs", docsSchema);
-
-module.exports = Docs;
+module.exports = mongoose.model('Docs', docsSchema);

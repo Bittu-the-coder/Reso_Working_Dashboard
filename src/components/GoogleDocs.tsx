@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState } from "react";
 import { FiFileText, FiExternalLink, FiTrash2 } from "react-icons/fi";
 import { addDoc, deleteDoc } from "../service/docs";
@@ -21,13 +20,11 @@ const GoogleDocs: React.FC<GoogleDocsProps> = ({ docs, setDocs }) => {
     title: "",
     url: "",
   });
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleAddDoc = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      setIsLoading(true);
       const addedDoc = await addDoc(newDoc);
 
       setDocs([...docs, addedDoc]);
@@ -39,22 +36,17 @@ const GoogleDocs: React.FC<GoogleDocsProps> = ({ docs, setDocs }) => {
     } catch (error: any) {
       // console.error("Error adding document:", error);
       toast.error(error.message || "Failed to add document");
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const handleDeleteDoc = async (id: string) => {
     try {
-      setIsLoading(true);
       await deleteDoc(id);
       setDocs(docs.filter((doc) => doc.id !== id));
       toast.success("Document deleted successfully");
     } catch (error) {
       console.error("Error deleting document:", error);
       toast.error("Failed to delete document");
-    } finally {
-      setIsLoading(false);
     }
   };
 
