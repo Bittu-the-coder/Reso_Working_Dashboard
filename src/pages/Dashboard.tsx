@@ -315,14 +315,45 @@ const Dashboard: React.FC = () => {
         return <Overview events={events} projects={projects} tasks={tasks} />;
     }
   };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 to-purple-800 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col relative overflow-hidden">
+      {/* Decorative background elements */}
+      <div className="absolute top-20 left-0 w-72 h-72 bg-gradient-to-br from-blue-200/30 to-purple-300/30 rounded-full blur-3xl -z-10" />
+      <div className="absolute bottom-20 right-0 w-96 h-96 bg-gradient-to-br from-indigo-200/30 to-pink-300/30 rounded-full blur-3xl -z-10" />
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-lg max-h-lg bg-gradient-to-br from-purple-200/20 to-pink-200/20 rounded-full blur-3xl -z-10" />
+
       <Header />
 
       <main className="flex-grow max-w-7xl w-full mx-auto px-4 pt-6 pb-12 sm:px-6 lg:px-8">
-        <div className="bg-white/10 backdrop-blur-lg p-6 rounded-2xl border border-white/20 shadow-lg">
-          <h2 className="text-2xl font-bold text-white mb-6">Dashboard</h2>
+        <div className="bg-white/80 backdrop-blur-lg p-6 rounded-2xl border border-blue-100 shadow-lg relative">
+          {/* Decorative corner elements */}
+          <div className="absolute -top-4 -left-4 w-8 h-8 border-t-2 border-l-2 border-blue-200 rounded-tl-lg" />
+          <div className="absolute -top-4 -right-4 w-8 h-8 border-t-2 border-r-2 border-blue-200 rounded-tr-lg" />
+          <div className="absolute -bottom-4 -left-4 w-8 h-8 border-b-2 border-l-2 border-blue-200 rounded-bl-lg" />
+          <div className="absolute -bottom-4 -right-4 w-8 h-8 border-b-2 border-r-2 border-blue-200 rounded-br-lg" />
+
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-gradient-to-r from-blue-100 to-indigo-200 rounded-lg">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-6 h-6 text-indigo-600"
+              >
+                <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                <line x1="16" x2="16" y1="2" y2="6" />
+                <line x1="8" x2="8" y1="2" y2="6" />
+                <line x1="3" x2="21" y1="10" y2="10" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600">
+              Dashboard
+            </h2>
+          </div>
 
           <NavigationTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
