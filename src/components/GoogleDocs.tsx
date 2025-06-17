@@ -1,10 +1,8 @@
 import React, { useState } from "react";
-import { FiFileText, FiExternalLink, FiTrash2 } from "react-icons/fi";
-import { addDoc, deleteDoc } from "../service/docs";
-import { toast } from "react-hot-toast";
+import { FiFileText, FiExternalLink, FiTrash2, FiEdit2 } from "react-icons/fi";
 
-interface GoogleDoc {
-  id: string; // Changed from number to string to match MongoDB _id
+export interface GoogleDoc {
+  id: string;
   title: string;
   url: string;
   addedOn: string;
@@ -12,41 +10,65 @@ interface GoogleDoc {
 
 interface GoogleDocsProps {
   docs: GoogleDoc[];
-  setDocs: React.Dispatch<React.SetStateAction<GoogleDoc[]>>;
+  newDoc: {
+    title: string;
+    url: string;
+  };
+  setNewDoc: React.Dispatch<
+    React.SetStateAction<{ title: string; url: string }>
+  >;
+  handleAddDoc: (e: React.FormEvent) => Promise<void>;
+  handleUpdateDoc: (
+    id: string,
+    updatedData: Partial<GoogleDoc>
+  ) => Promise<void>;
+  handleDeleteDoc: (id: string) => Promise<void>;
+  loading: {
+    addingDoc: boolean;
+    updatingDoc: boolean;
+    deletingDoc: boolean;
+  };
 }
 
-const GoogleDocs: React.FC<GoogleDocsProps> = ({ docs, setDocs }) => {
-  const [newDoc, setNewDoc] = useState({
+const GoogleDocs: React.FC<GoogleDocsProps> = ({
+  docs,
+  newDoc,
+  setNewDoc,
+  handleAddDoc,
+  handleUpdateDoc,
+  handleDeleteDoc,
+  loading,
+}) => {
+  const [editingDoc, setEditingDoc] = useState<GoogleDoc | null>(null);
+  const [editFormData, setEditFormData] = useState({
     title: "",
     url: "",
   });
 
-  const handleAddDoc = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      const addedDoc = await addDoc(newDoc);
-
-      setDocs([...docs, addedDoc]);
-      setNewDoc({
-        title: "",
-        url: "",
-      });
-      toast.success("Document added successfully");
-    } catch (error: any) {
-      // console.error("Error adding document:", error);
-      toast.error(error.message || "Failed to add document");
-    }
+  const startEditing = (doc: GoogleDoc) => {
+    setEditingDoc(doc);
+    setEditFormData({
+      title: doc.title,
+      url: doc.url,
+    });
   };
 
-  const handleDeleteDoc = async (id: string) => {
+  const cancelEditing = () => {
+    setEditingDoc(null);
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingDoc) return;
+
     try {
-      await deleteDoc(id);
-      setDocs(docs.filter((doc) => doc.id !== id));
-      toast.success("Document deleted successfully");
+      await handleUpdateDoc(editingDoc.id, {
+        title: editFormData.title,
+        url: editFormData.url,
+      });
+      setEditingDoc(null);
     } catch (error) {
-      console.error("Error deleting document:", error);
-      toast.error("Failed to delete document");
+      console.error("Error updating document:", error);
     }
   };
 
@@ -54,56 +76,106 @@ const GoogleDocs: React.FC<GoogleDocsProps> = ({ docs, setDocs }) => {
     <div className="space-y-6">
       <div className="bg-white/10 backdrop-blur-lg p-6 rounded-lg shadow border border-white/20">
         <h3 className="text-lg font-medium text-white mb-4">
-          Add Google Document
+          {editingDoc ? "Edit Document" : "Add Google Document"}
         </h3>
-        <form onSubmit={handleAddDoc} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label
-                htmlFor="doc-title"
-                className="block text-sm font-medium text-white/80 mb-2"
-              >
-                Document Title
-              </label>
-              <input
-                type="text"
-                id="doc-title"
-                className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent"
-                placeholder="Meeting Notes"
-                value={newDoc.title}
-                onChange={(e) =>
-                  setNewDoc({ ...newDoc, title: e.target.value })
-                }
-                required
-              />
+        {editingDoc ? (
+          <form onSubmit={handleEditSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-white/80 mb-2">
+                  Document Title
+                </label>
+                <input
+                  type="text"
+                  className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent"
+                  value={editFormData.title}
+                  onChange={(e) =>
+                    setEditFormData({ ...editFormData, title: e.target.value })
+                  }
+                  required
+                  disabled={loading.updatingDoc}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-white/80 mb-2">
+                  Google Docs URL
+                </label>
+                <input
+                  type="url"
+                  className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent"
+                  value={editFormData.url}
+                  onChange={(e) =>
+                    setEditFormData({ ...editFormData, url: e.target.value })
+                  }
+                  required
+                  disabled={loading.updatingDoc}
+                />
+              </div>
             </div>
-            <div>
-              <label
-                htmlFor="doc-url"
-                className="block text-sm font-medium text-white/80 mb-2"
+            <div className="flex justify-end space-x-3">
+              <button
+                type="button"
+                onClick={cancelEditing}
+                className="bg-transparent border border-white/20 text-white hover:bg-white/10 transition-colors py-3 px-6 rounded-lg font-semibold"
               >
-                Google Docs URL
-              </label>
-              <input
-                type="url"
-                id="doc-url"
-                className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent"
-                placeholder="https://docs.google.com/document/d/..."
-                value={newDoc.url}
-                onChange={(e) => setNewDoc({ ...newDoc, url: e.target.value })}
-                required
-              />
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="bg-white text-indigo-900 hover:bg-white/90 transition-colors py-3 px-6 rounded-lg font-semibold shadow-md disabled:opacity-50"
+                disabled={loading.updatingDoc}
+              >
+                {loading.updatingDoc ? "Updating..." : "Update Document"}
+              </button>
             </div>
-          </div>
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              className="bg-white text-indigo-900 hover:bg-white/90 transition-colors py-3 px-6 rounded-lg font-semibold shadow-md"
-            >
-              Add Document
-            </button>
-          </div>
-        </form>
+          </form>
+        ) : (
+          <form onSubmit={handleAddDoc} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-white/80 mb-2">
+                  Document Title
+                </label>
+                <input
+                  type="text"
+                  className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent"
+                  placeholder="Meeting Notes"
+                  value={newDoc.title}
+                  onChange={(e) =>
+                    setNewDoc({ ...newDoc, title: e.target.value })
+                  }
+                  required
+                  disabled={loading.addingDoc}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-white/80 mb-2">
+                  Google Docs URL
+                </label>
+                <input
+                  type="url"
+                  className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent"
+                  placeholder="https://docs.google.com/document/d/..."
+                  value={newDoc.url}
+                  onChange={(e) =>
+                    setNewDoc({ ...newDoc, url: e.target.value })
+                  }
+                  required
+                  disabled={loading.addingDoc}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                className="bg-white text-indigo-900 hover:bg-white/90 transition-colors py-3 px-6 rounded-lg font-semibold shadow-md disabled:opacity-50"
+                disabled={loading.addingDoc}
+              >
+                {loading.addingDoc ? "Adding..." : "Add Document"}
+              </button>
+            </div>
+          </form>
+        )}
       </div>
 
       <div className="bg-white/10 backdrop-blur-lg p-6 rounded-lg shadow border border-white/20">
@@ -114,7 +186,7 @@ const GoogleDocs: React.FC<GoogleDocsProps> = ({ docs, setDocs }) => {
           <div className="grid grid-cols-1 gap-4">
             {docs.map((doc) => (
               <div
-                key={Date.now() + doc.id}
+                key={doc.id}
                 className="p-4 bg-white/5 border border-white/10 rounded-lg flex justify-between items-center"
               >
                 <div className="flex items-center">
@@ -129,6 +201,13 @@ const GoogleDocs: React.FC<GoogleDocsProps> = ({ docs, setDocs }) => {
                   </div>
                 </div>
                 <div className="flex space-x-3">
+                  <button
+                    onClick={() => startEditing(doc)}
+                    className="text-white hover:text-blue-300 transition-colors p-2 disabled:opacity-50"
+                    disabled={loading.updatingDoc || loading.deletingDoc}
+                  >
+                    <FiEdit2 size={18} />
+                  </button>
                   <a
                     href={doc.url}
                     target="_blank"
@@ -139,7 +218,8 @@ const GoogleDocs: React.FC<GoogleDocsProps> = ({ docs, setDocs }) => {
                   </a>
                   <button
                     onClick={() => handleDeleteDoc(doc.id)}
-                    className="text-white hover:text-red-300 transition-colors p-2"
+                    className="text-white hover:text-red-300 transition-colors p-2 disabled:opacity-50"
+                    disabled={loading.deletingDoc}
                   >
                     <FiTrash2 size={18} />
                   </button>

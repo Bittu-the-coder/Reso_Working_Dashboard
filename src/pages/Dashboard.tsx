@@ -7,26 +7,47 @@ import Overview from "../components/Overview";
 import Events from "../components/Events";
 import Projects from "../components/Projects";
 import Tasks from "../components/Tasks";
-import GoogleDocs, { Doc } from "../components/GoogleDocs";
+import GoogleDocs from "../components/GoogleDocs";
 import Settings from "../components/Settings";
 import { getAllDocs, addDoc, updateDoc, deleteDoc } from "../service/docs";
 import { toast } from "react-hot-toast";
 
+interface GoogleDoc {
+  id: string;
+  title: string;
+  url: string;
+  addedOn: string;
+}
+
+interface Project {
+  id: number;
+  name: string;
+  progress: number;
+  members: number;
+}
+
+interface Task {
+  id: number;
+  title: string;
+  assignee: string;
+  deadline: string;
+  status: string;
+}
+
+interface Event {
+  id: number;
+  title: string;
+  date: string;
+  description: string;
+}
+
 const Dashboard: React.FC = () => {
   const [searchParams] = useSearchParams();
   const tabFromUrl = searchParams.get("tab") || "overview";
-
   const [activeTab, setActiveTab] = useState(tabFromUrl);
 
   // Event state
-  const [events, setEvents] = useState<
-    Array<{
-      id: number;
-      title: string;
-      date: string;
-      description: string;
-    }>
-  >([
+  const [events, setEvents] = useState<Event[]>([
     {
       id: 1,
       title: "Monthly Team Meeting",
@@ -50,14 +71,7 @@ const Dashboard: React.FC = () => {
   });
 
   // Project state
-  const [projects] = useState<
-    Array<{
-      id: number;
-      name: string;
-      progress: number;
-      members: number;
-    }>
-  >([
+  const projects: Project[] = [
     {
       id: 1,
       name: "RESO Website Redesign",
@@ -76,18 +90,10 @@ const Dashboard: React.FC = () => {
       progress: 60,
       members: 5,
     },
-  ]);
+  ];
 
   // Task state
-  const [tasks, setTasks] = useState<
-    Array<{
-      id: number;
-      title: string;
-      assignee: string;
-      deadline: string;
-      status: string;
-    }>
-  >([
+  const [tasks, setTasks] = useState<Task[]>([
     {
       id: 1,
       title: "Design homepage mockup",
@@ -119,8 +125,11 @@ const Dashboard: React.FC = () => {
   });
 
   // Google Docs state
-  const [docs, setDocs] = useState<Doc[]>([]);
-
+  const [docs, setDocs] = useState<GoogleDoc[]>([]);
+  const [newDoc, setNewDoc] = useState({
+    title: "",
+    url: "",
+  });
   const [loading, setLoading] = useState({
     docs: false,
     addingDoc: false,
@@ -128,17 +137,10 @@ const Dashboard: React.FC = () => {
     deletingDoc: false,
   });
 
-  const [newDoc, setNewDoc] = useState({
-    title: "",
-    url: "",
-  });
-
-  // Update active tab when URL changes
   useEffect(() => {
     setActiveTab(tabFromUrl);
   }, [tabFromUrl]);
 
-  // Fetch docs from backend API
   useEffect(() => {
     const fetchDocs = async () => {
       try {
@@ -197,7 +199,6 @@ const Dashboard: React.FC = () => {
     });
   };
 
-  // Add new doc
   const handleAddDoc = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -211,7 +212,6 @@ const Dashboard: React.FC = () => {
       toast.success("Document added successfully");
     } catch (error: any) {
       console.error("Error adding doc:", error);
-      // Check for the specific error message about duplicate URL
       if (error.message.includes("already exists")) {
         toast.error("Document with this URL already exists");
       } else {
@@ -222,14 +222,10 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // Update existing doc
-  const handleUpdateDoc = async (id: string, updatedData: any) => {
-    console.log(
-      "handleUpdateDoc called with ID:",
-      id,
-      "and data:",
-      updatedData
-    );
+  const handleUpdateDoc = async (
+    id: string,
+    updatedData: Partial<GoogleDoc>
+  ) => {
     if (!id) {
       toast.error("Cannot update document: Missing document ID");
       return;
@@ -237,9 +233,7 @@ const Dashboard: React.FC = () => {
 
     try {
       setLoading((prev) => ({ ...prev, updatingDoc: true }));
-      const result = await updateDoc(id, updatedData);
-      console.log("Update successful, response:", result);
-
+      await updateDoc(id, updatedData);
       setDocs(
         docs.map((doc) => (doc.id === id ? { ...doc, ...updatedData } : doc))
       );
@@ -252,7 +246,6 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // Delete a doc
   const handleDeleteDoc = async (id: string) => {
     try {
       setLoading((prev) => ({ ...prev, deletingDoc: true }));
@@ -267,7 +260,6 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // Render the appropriate component based on the active tab
   const renderTabContent = () => {
     switch (activeTab) {
       case "overview":
@@ -296,13 +288,16 @@ const Dashboard: React.FC = () => {
         return (
           <GoogleDocs
             docs={docs}
-            setDocs={setDocs}
             newDoc={newDoc}
             setNewDoc={setNewDoc}
             handleAddDoc={handleAddDoc}
-            handleUpdateDoc={handleUpdateDoc}
             handleDeleteDoc={handleDeleteDoc}
-            loading={loading}
+            handleUpdateDoc={handleUpdateDoc}
+            loading={{
+              addingDoc: loading.addingDoc,
+              updatingDoc: loading.updatingDoc,
+              deletingDoc: loading.deletingDoc,
+            }}
           />
         );
       case "settings":
