@@ -227,10 +227,7 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const handleUpdateDoc = async (
-    id: string,
-    updatedData: Partial<UpdateDoc>
-  ) => {
+  const handleUpdateDoc = async (id: string, updatedData: UpdateDoc) => {
     if (!id) {
       toast.error("Cannot update document: Missing document ID");
       return;
