@@ -11,10 +11,31 @@ require('dotenv').config();
 
 const app = express();
 
-app.use(cors());
+// Enhanced CORS configuration
+const corsOptions = {
+  origin: [
+    'https://reso-working-dashboard.vercel.app',
+    'http://localhost:3000',
+    'http://localhost:5173'
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  credentials: true,
+  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization']
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
+
+// Handle OPTIONS preflight requests directly to prevent redirect issues
+// This is a more compatible way of handling all OPTIONS requests
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  next();
+});
 
 // Connect to MongoDB only if not already connected
 // This prevents multiple connection attempts in serverless environment

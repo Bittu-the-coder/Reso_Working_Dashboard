@@ -1,3 +1,4 @@
+// Ensure correct case sensitivity for file paths (important for Linux-based hosting)
 const Docs = require("../modals/docs.modal.js");
 const asyncHandler = require("../utils/asyncHandler.js");
 const ErrorResponse = require("../utils/ErrorResponse.js");
@@ -7,6 +8,13 @@ const addDocs = asyncHandler(async (req, res) => {
 
   if (!title || !url) {
     throw new ErrorResponse("Please provide title and URL", 400);
+  }
+
+  // Validate URL format - we don't want path-to-regexp to try to parse this as a route
+  try {
+    new URL(url);
+  } catch (error) {
+    throw new ErrorResponse("Invalid URL format", 400);
   }
 
   // First check if document with the URL already exists

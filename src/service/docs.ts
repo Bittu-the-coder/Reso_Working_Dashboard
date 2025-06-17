@@ -1,5 +1,8 @@
-import axios from "axios";
-const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3030";
+import axios, { AxiosError } from "axios";
+// Make sure baseUrl doesn't end with a trailing slash
+const baseUrl = (
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:3030"
+).replace(/\/+$/, "");
 
 export interface DocInput {
   title: string;
@@ -13,14 +16,20 @@ export interface Doc {
   addedOn: string;
 }
 
+interface ApiErrorResponse {
+  success: boolean;
+  message: string;
+}
+
 export const getAllDocs = async (): Promise<Doc[]> => {
   try {
     const response = await axios.get(`${baseUrl}/api/docs`);
     return response.data.data;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching documents:", error);
+    const axiosError = error as AxiosError<ApiErrorResponse>;
     const errorMessage =
-      error.response?.data?.message || "Failed to fetch documents";
+      axiosError.response?.data?.message || "Failed to fetch documents";
     throw new Error(errorMessage);
   }
 };
@@ -29,17 +38,18 @@ export const addDoc = async (doc: DocInput): Promise<Doc> => {
   try {
     const response = await axios.post(`${baseUrl}/api/docs/add-docs`, doc);
     return response.data.data;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error adding document:", error);
+    const axiosError = error as AxiosError<ApiErrorResponse>;
     // Check for specific error message about duplicate URL
     if (
-      error.response?.status === 409 ||
-      error.response?.data?.message?.includes("already exists")
+      axiosError.response?.status === 409 ||
+      axiosError.response?.data?.message?.includes("already exists")
     ) {
       throw new Error("Document with this URL already exists");
     }
     const errorMessage =
-      error.response?.data?.message || "Failed to add document";
+      axiosError.response?.data?.message || "Failed to add document";
     throw new Error(errorMessage);
   }
 };
@@ -55,10 +65,11 @@ export const updateDoc = async (id: string, doc: DocInput): Promise<Doc> => {
       doc
     );
     return response.data.data;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error updating document:", error);
+    const axiosError = error as AxiosError<ApiErrorResponse>;
     const errorMessage =
-      error.response?.data?.message || "Failed to update document";
+      axiosError.response?.data?.message || "Failed to update document";
     throw new Error(errorMessage);
   }
 };
@@ -70,10 +81,11 @@ export const deleteDoc = async (id: string): Promise<void> => {
 
   try {
     await axios.delete(`${baseUrl}/api/docs/delete-docs/${id}`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error deleting document:", error);
+    const axiosError = error as AxiosError<ApiErrorResponse>;
     const errorMessage =
-      error.response?.data?.message || "Failed to delete document";
+      axiosError.response?.data?.message || "Failed to delete document";
     throw new Error(errorMessage);
   }
 };
