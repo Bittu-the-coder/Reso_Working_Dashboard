@@ -1,10 +1,16 @@
-const ErrorResponse = require('../utils/ErrorResponse');
+const ErrorResponse = require('../utils/ErrorResponse.js');
 
 const errorHandler = (err, req, res, next) => {
   let error = { ...err };
   error.message = err.message;
 
-  console.log(err.stack);
+  // Log error to console for debugging (in development)
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(err.stack);
+  } else {
+    // For production, log important errors but not the full stack trace
+    console.error(`${err.name || 'Error'}: ${err.message}`);
+  }
 
   // Mongoose bad ObjectId
   if (err.name === 'CastError') {
@@ -22,6 +28,11 @@ const errorHandler = (err, req, res, next) => {
   if (err.name === 'ValidationError') {
     const message = Object.values(err.errors).map(val => val.message);
     error = new ErrorResponse(message, 400);
+  }
+
+  // MongoDB connection errors
+  if (err.name === 'MongoNetworkError' || err.name === 'MongoServerSelectionError') {
+    error = new ErrorResponse('Database connection error. Please try again later.', 500);
   }
 
   res.status(error.statusCode || 500).json({

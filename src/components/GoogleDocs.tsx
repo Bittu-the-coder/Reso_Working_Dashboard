@@ -45,6 +45,25 @@ const GoogleDocs: React.FC<GoogleDocsProps> = ({
     url: "",
   });
 
+  // Group documents by date
+
+  const groupDocsByDate = () => {
+    const grouped: { [key: string]: GoogleDoc[] } = {};
+    // Sort docs by date (newest first)
+    const sortedDocs = [...docs].sort(
+      (a, b) => new Date(b.addedOn).getTime() - new Date(a.addedOn).getTime()
+    );
+    sortedDocs.forEach((doc) => {
+      const date = doc.addedOn.split("T")[0]; // Extract just the date part
+      if (!grouped[date]) {
+        grouped[date] = [];
+      }
+      grouped[date].push(doc);
+    });
+    return grouped;
+  };
+  const groupedDocs = groupDocsByDate();
+
   const startEditing = (doc: GoogleDoc) => {
     setEditingDoc(doc);
     setEditFormData({
@@ -70,6 +89,17 @@ const GoogleDocs: React.FC<GoogleDocsProps> = ({
     } catch (error) {
       console.error("Error updating document:", error);
     }
+  };
+
+  // Format date to be more readable (e.g., "June 17, 2023")
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
   };
 
   return (
@@ -183,46 +213,57 @@ const GoogleDocs: React.FC<GoogleDocsProps> = ({
           Google Documents
         </h3>
         {docs.length > 0 ? (
-          <div className="grid grid-cols-1 gap-4">
-            {docs.map((doc) => (
-              <div
-                key={doc.id}
-                className="p-4 bg-white/5 border border-white/10 rounded-lg flex justify-between items-center"
-              >
-                <div className="flex items-center">
-                  <div className="p-2 rounded-full bg-white/20 text-white mr-3">
-                    <FiFileText size={20} />
-                  </div>
-                  <div>
-                    <h4 className="text-white font-medium">{doc.title}</h4>
-                    <p className="text-white/70 text-sm">
-                      Added on {doc.addedOn}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex space-x-3">
-                  <button
-                    onClick={() => startEditing(doc)}
-                    className="text-white hover:text-blue-300 transition-colors p-2 disabled:opacity-50"
-                    disabled={loading.updatingDoc || loading.deletingDoc}
-                  >
-                    <FiEdit2 size={18} />
-                  </button>
-                  <a
-                    href={doc.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-white hover:text-white/80 transition-colors p-2"
-                  >
-                    <FiExternalLink size={18} />
-                  </a>
-                  <button
-                    onClick={() => handleDeleteDoc(doc.id)}
-                    className="text-white hover:text-red-300 transition-colors p-2 disabled:opacity-50"
-                    disabled={loading.deletingDoc}
-                  >
-                    <FiTrash2 size={18} />
-                  </button>
+          <div className="space-y-6">
+            {Object.entries(groupedDocs).map(([date, docsForDate]) => (
+              <div key={date} className="space-y-3">
+                <h4 className="text-white/80 font-medium border-b border-white/20 pb-2">
+                  {formatDate(date)}
+                </h4>
+                <div className="grid grid-cols-1 gap-3">
+                  {docsForDate.map((doc) => (
+                    <div
+                      key={doc.id}
+                      className="p-4 bg-white/5 border border-white/10 rounded-lg flex justify-between items-center"
+                    >
+                      <div className="flex items-center">
+                        <div className="p-2 rounded-full bg-white/20 text-white mr-3">
+                          <FiFileText size={20} />
+                        </div>
+                        <div>
+                          <h4 className="text-white font-medium">
+                            {doc.title}
+                          </h4>
+                          <p className="text-white/70 text-sm">
+                            Added on {new Date(doc.addedOn).toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex space-x-3">
+                        <button
+                          onClick={() => startEditing(doc)}
+                          className="text-white hover:text-blue-300 transition-colors p-2 disabled:opacity-50"
+                          disabled={loading.updatingDoc || loading.deletingDoc}
+                        >
+                          <FiEdit2 size={18} />
+                        </button>
+                        <a
+                          href={doc.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-white hover:text-white/80 transition-colors p-2"
+                        >
+                          <FiExternalLink size={18} />
+                        </a>
+                        <button
+                          onClick={() => handleDeleteDoc(doc.id)}
+                          className="text-white hover:text-red-300 transition-colors p-2 disabled:opacity-50"
+                          disabled={loading.deletingDoc}
+                        >
+                          <FiTrash2 size={18} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             ))}
