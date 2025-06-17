@@ -24,6 +24,10 @@ export const addDoc = async (doc: DocInput): Promise<Doc> => {
 };
 
 export const updateDoc = async (id: string, doc: DocInput): Promise<Doc> => {
+  if (!id) {
+    throw new Error("Document ID is required for update");
+  }
+  console.log("Updating document with ID:", id, "and data:", doc);
   const response = await axios.put(
     `${baseUrl}/api/docs/update-docs/${id}`,
     doc

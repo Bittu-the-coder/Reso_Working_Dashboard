@@ -130,7 +130,14 @@ const Dashboard: React.FC = () => {
 
   const [loading, setLoading] = useState({
     docs: false,
-    // ...other loading states if needed
+    addingDoc: false,
+    updatingDoc: false,
+    deletingDoc: false,
+  });
+
+  const [newDoc, setNewDoc] = useState({
+    title: "",
+    url: "",
   });
 
   // Update active tab when URL changes
@@ -197,6 +204,71 @@ const Dashboard: React.FC = () => {
     });
   };
 
+  // Add new doc
+  const handleAddDoc = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setLoading((prev) => ({ ...prev, addingDoc: true }));
+      const currentDate = new Date().toISOString().split("T")[0];
+      const docToAdd = { ...newDoc, addedOn: currentDate };
+      const addedDoc = await addDoc(docToAdd);
+
+      setDocs([...docs, addedDoc]);
+      setNewDoc({ title: "", url: "" });
+      toast.success("Document added successfully");
+    } catch (error) {
+      console.error("Error adding doc:", error);
+      toast.error("Failed to add document");
+    } finally {
+      setLoading((prev) => ({ ...prev, addingDoc: false }));
+    }
+  };
+
+  // Update existing doc
+  const handleUpdateDoc = async (id: string, updatedData: any) => {
+    console.log(
+      "handleUpdateDoc called with ID:",
+      id,
+      "and data:",
+      updatedData
+    );
+    if (!id) {
+      toast.error("Cannot update document: Missing document ID");
+      return;
+    }
+
+    try {
+      setLoading((prev) => ({ ...prev, updatingDoc: true }));
+      const result = await updateDoc(id, updatedData);
+      console.log("Update successful, response:", result);
+
+      setDocs(
+        docs.map((doc) => (doc.id === id ? { ...doc, ...updatedData } : doc))
+      );
+      toast.success("Document updated successfully");
+    } catch (error: any) {
+      console.error("Error updating doc:", error);
+      toast.error(error.response?.data?.message || "Failed to update document");
+    } finally {
+      setLoading((prev) => ({ ...prev, updatingDoc: false }));
+    }
+  };
+
+  // Delete a doc
+  const handleDeleteDoc = async (id: string) => {
+    try {
+      setLoading((prev) => ({ ...prev, deletingDoc: true }));
+      await deleteDoc(id);
+      setDocs(docs.filter((doc) => doc.id !== id));
+      toast.success("Document deleted successfully");
+    } catch (error) {
+      console.error("Error deleting doc:", error);
+      toast.error("Failed to delete document");
+    } finally {
+      setLoading((prev) => ({ ...prev, deletingDoc: false }));
+    }
+  };
+
   // Render the appropriate component based on the active tab
   const renderTabContent = () => {
     switch (activeTab) {
@@ -223,7 +295,18 @@ const Dashboard: React.FC = () => {
           />
         );
       case "docs":
-        return <GoogleDocs docs={docs} setDocs={setDocs} />;
+        return (
+          <GoogleDocs
+            docs={docs}
+            setDocs={setDocs}
+            newDoc={newDoc}
+            setNewDoc={setNewDoc}
+            handleAddDoc={handleAddDoc}
+            handleUpdateDoc={handleUpdateDoc}
+            handleDeleteDoc={handleDeleteDoc}
+            loading={loading}
+          />
+        );
       case "settings":
         return <Settings />;
       default:

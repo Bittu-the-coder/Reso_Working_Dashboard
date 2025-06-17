@@ -1,4 +1,5 @@
-const Docs = require("../modals/docs.modal");
+
+const Docs = require("../modals/Docs.modal");
 const asyncHandler = require("../utils/asyncHandler");
 
 const addDocs = asyncHandler(async (req, res) => {
