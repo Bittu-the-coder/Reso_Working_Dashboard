@@ -10,6 +10,7 @@ import Tasks from "../components/Tasks";
 import GoogleDocs from "../components/GoogleDocs";
 import Settings from "../components/Settings";
 import { getAllDocs, addDoc, updateDoc, deleteDoc } from "../service/docs";
+import type { DocInput } from "../service/docs";
 import { toast } from "react-hot-toast";
 
 interface GoogleDoc {
@@ -41,10 +42,7 @@ interface Event {
   description: string;
 }
 
-interface UpdateDoc {
-  url: string;
-  title: string;
-}
+//Removed unused UpdateDoc interface
 
 const Dashboard: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -215,19 +213,23 @@ const Dashboard: React.FC = () => {
       setDocs([...docs, addedDoc]);
       setNewDoc({ title: "", url: "" });
       toast.success("Document added successfully");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error adding doc:", error);
-      if (error.message.includes("already exists")) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes("already exists")) {
         toast.error("Document with this URL already exists");
       } else {
-        toast.error(error.message || "Failed to add document");
+        toast.error(errorMessage || "Failed to add document");
       }
     } finally {
       setLoading((prev) => ({ ...prev, addingDoc: false }));
     }
   };
-
-  const handleUpdateDoc = async (id: string, updatedData: UpdateDoc) => {
+  const handleUpdateDoc = async (
+    id: string,
+    updatedData: Partial<GoogleDoc>
+  ) => {
     if (!id) {
       toast.error("Cannot update document: Missing document ID");
       return;
@@ -235,14 +237,19 @@ const Dashboard: React.FC = () => {
 
     try {
       setLoading((prev) => ({ ...prev, updatingDoc: true }));
-      await updateDoc(id, updatedData);
+      await updateDoc(id, updatedData as DocInput);
       setDocs(
         docs.map((doc) => (doc.id === id ? { ...doc, ...updatedData } : doc))
       );
       toast.success("Document updated successfully");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error updating doc:", error);
-      toast.error(error.response?.data?.message || "Failed to update document");
+      const errorMsg =
+        error instanceof Error
+          ? error.message
+          : (error as { response?: { data?: { message?: string } } })?.response
+              ?.data?.message || "Failed to update document";
+      toast.error(errorMsg);
     } finally {
       setLoading((prev) => ({ ...prev, updatingDoc: false }));
     }

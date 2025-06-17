@@ -1,12 +1,12 @@
 import axios from "axios";
 const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3030";
 
-interface DocInput {
+export interface DocInput {
   title: string;
   url: string;
 }
 
-interface Doc {
+export interface Doc {
   id: string;
   title: string;
   url: string;
