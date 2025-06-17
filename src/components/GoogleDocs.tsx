@@ -1,13 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState } from "react";
-import {
-  FiFileText,
-  FiExternalLink,
-  FiTrash2,
-  FiEdit,
-  FiX,
-  FiCheck,
-} from "react-icons/fi";
-import { addDoc, deleteDoc, updateDoc } from "../service/docs";
+import { FiFileText, FiExternalLink, FiTrash2 } from "react-icons/fi";
+import { addDoc, deleteDoc } from "../service/docs";
 import { toast } from "react-hot-toast";
 
 interface GoogleDoc {
@@ -28,11 +22,6 @@ const GoogleDocs: React.FC<GoogleDocsProps> = ({ docs, setDocs }) => {
     url: "",
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [editingDoc, setEditingDoc] = useState<{
-    id: string;
-    title: string;
-    url: string;
-  } | null>(null);
 
   const handleAddDoc = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,9 +36,9 @@ const GoogleDocs: React.FC<GoogleDocsProps> = ({ docs, setDocs }) => {
         url: "",
       });
       toast.success("Document added successfully");
-    } catch (error) {
-      console.error("Error adding document:", error);
-      toast.error("Failed to add document");
+    } catch (error: any) {
+      // console.error("Error adding document:", error);
+      toast.error(error.message || "Failed to add document");
     } finally {
       setIsLoading(false);
     }
@@ -64,39 +53,6 @@ const GoogleDocs: React.FC<GoogleDocsProps> = ({ docs, setDocs }) => {
     } catch (error) {
       console.error("Error deleting document:", error);
       toast.error("Failed to delete document");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleEditDoc = (doc: GoogleDoc) => {
-    setEditingDoc({
-      id: doc.id,
-      title: doc.title,
-      url: doc.url,
-    });
-  };
-
-  const handleCancelEdit = () => {
-    setEditingDoc(null);
-  };
-
-  const handleUpdateDoc = async (
-    id: string,
-    updatedData: Partial<GoogleDoc>
-  ) => {
-    try {
-      setIsLoading(true);
-      const updatedDoc = await updateDoc(id, updatedData);
-
-      // Update the docs array with the updated document
-      setDocs(docs.map((doc) => (doc.id === updatedDoc.id ? updatedDoc : doc)));
-
-      setEditingDoc(null);
-      toast.success("Document updated successfully");
-    } catch (error) {
-      console.error("Error updating document:", error);
-      toast.error("Failed to update document");
     } finally {
       setIsLoading(false);
     }
@@ -166,90 +122,36 @@ const GoogleDocs: React.FC<GoogleDocsProps> = ({ docs, setDocs }) => {
           <div className="grid grid-cols-1 gap-4">
             {docs.map((doc) => (
               <div
-                key={doc.id}
+                key={Date.now() + doc.id}
                 className="p-4 bg-white/5 border border-white/10 rounded-lg flex justify-between items-center"
               >
-                {editingDoc && editingDoc.id === doc.id ? (
-                  // Edit mode
-                  <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <input
-                      type="text"
-                      className="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50"
-                      value={editingDoc.title}
-                      onChange={(e) =>
-                        setEditingDoc({ ...editingDoc, title: e.target.value })
-                      }
-                      placeholder="Document Title"
-                    />
-                    <input
-                      type="url"
-                      className="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50"
-                      value={editingDoc.url}
-                      onChange={(e) =>
-                        setEditingDoc({ ...editingDoc, url: e.target.value })
-                      }
-                      placeholder="Document URL"
-                    />
-                    <div className="col-span-2 flex justify-end gap-2">
-                      <button
-                        onClick={handleCancelEdit}
-                        className="text-white hover:text-red-300 transition-colors p-2"
-                        disabled={isLoading}
-                      >
-                        <FiX size={18} />
-                      </button>
-                      <button
-                        onClick={() =>
-                          handleUpdateDoc(doc.id, {
-                            title: editingDoc.title,
-                            url: editingDoc.url,
-                          })
-                        }
-                        className="text-white hover:text-green-300 transition-colors p-2"
-                        disabled={isLoading}
-                      >
-                        <FiCheck size={18} />
-                      </button>
-                    </div>
+                <div className="flex items-center">
+                  <div className="p-2 rounded-full bg-white/20 text-white mr-3">
+                    <FiFileText size={20} />
                   </div>
-                ) : (
-                  // View mode
-                  <>
-                    <div className="flex items-center">
-                      <div className="p-2 rounded-full bg-white/20 text-white mr-3">
-                        <FiFileText size={20} />
-                      </div>
-                      <div>
-                        <h4 className="text-white font-medium">{doc.title}</h4>
-                        <p className="text-white/70 text-sm">
-                          Added on {doc.addedOn}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex space-x-3">
-                      <a
-                        href={doc.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-white hover:text-white/80 transition-colors p-2"
-                      >
-                        <FiExternalLink size={18} />
-                      </a>
-                      <button
-                        onClick={() => handleEditDoc(doc)}
-                        className="text-white hover:text-blue-300 transition-colors p-2"
-                      >
-                        <FiEdit size={18} />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteDoc(doc.id)}
-                        className="text-white hover:text-red-300 transition-colors p-2"
-                      >
-                        <FiTrash2 size={18} />
-                      </button>
-                    </div>
-                  </>
-                )}
+                  <div>
+                    <h4 className="text-white font-medium">{doc.title}</h4>
+                    <p className="text-white/70 text-sm">
+                      Added on {doc.addedOn}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex space-x-3">
+                  <a
+                    href={doc.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white hover:text-white/80 transition-colors p-2"
+                  >
+                    <FiExternalLink size={18} />
+                  </a>
+                  <button
+                    onClick={() => handleDeleteDoc(doc.id)}
+                    className="text-white hover:text-red-300 transition-colors p-2"
+                  >
+                    <FiTrash2 size={18} />
+                  </button>
+                </div>
               </div>
             ))}
           </div>

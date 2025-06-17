@@ -216,9 +216,14 @@ const Dashboard: React.FC = () => {
       setDocs([...docs, addedDoc]);
       setNewDoc({ title: "", url: "" });
       toast.success("Document added successfully");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error adding doc:", error);
-      toast.error("Failed to add document");
+      // Check for the specific error message about duplicate URL
+      if (error.message.includes("already exists")) {
+        toast.error("Document with this URL already exists");
+      } else {
+        toast.error(error.message || "Failed to add document");
+      }
     } finally {
       setLoading((prev) => ({ ...prev, addingDoc: false }));
     }
