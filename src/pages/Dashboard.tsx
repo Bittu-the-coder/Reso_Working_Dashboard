@@ -41,6 +41,11 @@ interface Event {
   description: string;
 }
 
+interface UpdateDoc {
+  url: string;
+  title: string;
+}
+
 const Dashboard: React.FC = () => {
   const [searchParams] = useSearchParams();
   const tabFromUrl = searchParams.get("tab") || "overview";
@@ -222,7 +227,10 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const handleUpdateDoc = async (id: string, updatedData: GoogleDoc) => {
+  const handleUpdateDoc = async (
+    id: string,
+    updatedData: Partial<UpdateDoc>
+  ) => {
     if (!id) {
       toast.error("Cannot update document: Missing document ID");
       return;
