@@ -10,6 +10,7 @@ import {
   NotebookPen,
   Users,
 } from "lucide-react";
+import { useTheme } from "../contexts/useTheme";
 
 interface NavigationTabsProps {
   activeTab: string;
@@ -27,6 +28,7 @@ const NavigationTabs: React.FC<NavigationTabsProps> = ({
   setActiveTab,
 }) => {
   const navigate = useNavigate();
+  const { isDarkMode } = useTheme();
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
@@ -63,9 +65,14 @@ const NavigationTabs: React.FC<NavigationTabsProps> = ({
       },
     },
   };
-
   return (
-    <div className="border-b border-blue-100 bg-white/70 backdrop-blur-sm rounded-lg shadow-sm mb-6">
+    <div
+      className={`border-b ${
+        isDarkMode
+          ? "border-gray-700 bg-gray-800/70"
+          : "border-blue-100 bg-white/70"
+      } backdrop-blur-sm rounded-lg shadow-sm mb-6`}
+    >
       <motion.nav
         className="flex flex-wrap gap-2 sm:gap-4 md:gap-8 px-4"
         variants={containerVariants}
@@ -77,10 +84,13 @@ const NavigationTabs: React.FC<NavigationTabsProps> = ({
             key={tab.id}
             onClick={() => handleTabChange(tab.id)}
             className={`
-              relative whitespace-nowrap py-4 px-3 font-medium text-sm flex items-center gap-2
-              ${
+              relative whitespace-nowrap py-4 px-3 font-medium text-sm flex items-center gap-2              ${
                 activeTab === tab.id
-                  ? "text-blue-600"
+                  ? isDarkMode
+                    ? "text-blue-400"
+                    : "text-blue-600"
+                  : isDarkMode
+                  ? "text-gray-400 hover:text-blue-400"
                   : "text-gray-600 hover:text-blue-600"
               }
               transition-colors duration-300
@@ -89,9 +99,16 @@ const NavigationTabs: React.FC<NavigationTabsProps> = ({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
+            {" "}
             <span
               className={
-                activeTab === tab.id ? "text-blue-600" : "text-gray-500"
+                activeTab === tab.id
+                  ? isDarkMode
+                    ? "text-blue-400"
+                    : "text-blue-600"
+                  : isDarkMode
+                  ? "text-gray-400"
+                  : "text-gray-500"
               }
             >
               {tab.icon}
@@ -99,7 +116,11 @@ const NavigationTabs: React.FC<NavigationTabsProps> = ({
             {tab.label}
             {activeTab === tab.id && (
               <motion.div
-                className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-blue-600 to-purple-600"
+                className={`absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r ${
+                  isDarkMode
+                    ? "from-blue-500 to-purple-500"
+                    : "from-blue-600 to-purple-600"
+                }`}
                 layoutId="underline"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}

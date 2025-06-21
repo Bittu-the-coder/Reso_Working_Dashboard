@@ -11,8 +11,8 @@ import Settings from "../components/Settings";
 import Teams from "../components/Teams";
 import CollaborativeTasks from "../components/CollaborativeTasks";
 import { getAllDocs, addDoc, updateDoc, deleteDoc } from "../service/docs";
-import type { DocInput } from "../service/docs";
 import { toast } from "react-hot-toast";
+import { useTheme } from "../contexts/useTheme";
 
 interface GoogleDoc {
   id: string;
@@ -50,6 +50,7 @@ const Dashboard: React.FC = () => {
   const [searchParams] = useSearchParams();
   const tabFromUrl = searchParams.get("tab") || "overview";
   const [activeTab, setActiveTab] = useState(tabFromUrl);
+  const { isDarkMode } = useTheme();
 
   // Event state
   const [events, setEvents] = useState<Event[]>([
@@ -122,12 +123,12 @@ const Dashboard: React.FC = () => {
     },
   ]);
 
-  const [newTask, setNewTask] = useState({
-    title: "",
-    assignee: "",
-    deadline: "",
-    status: "pending",
-  });
+  // const [newTask, setNewTask] = useState({
+  //   title: "",
+  //   assignee: "",
+  //   deadline: "",
+  //   status: "pending",
+  // });
   // Google Docs state
   const [docs, setDocs] = useState<GoogleDoc[]>([]);
   const [newDoc, setNewDoc] = useState({
@@ -187,7 +188,12 @@ const Dashboard: React.FC = () => {
     try {
       setLoading((prev) => ({ ...prev, addingDoc: true }));
       const currentDate = new Date().toISOString().split("T")[0];
-      const docToAdd = { ...newDoc, addedOn: currentDate };
+      const docToAdd = {
+        title: newDoc.title,
+        url: newDoc.url,
+        department: newDoc.department, // Make sure this is included
+        addedOn: currentDate,
+      };
       const addedDoc = await addDoc(docToAdd);
 
       setDocs([...docs, addedDoc]);
@@ -217,7 +223,12 @@ const Dashboard: React.FC = () => {
 
     try {
       setLoading((prev) => ({ ...prev, updatingDoc: true }));
-      await updateDoc(id, updatedData as DocInput);
+      await updateDoc(id, {
+        title: updatedData.title || "",
+        url: updatedData.url || "",
+        department: updatedData.department || "",
+        addedOn: updatedData.addedOn || new Date().toISOString().split("T")[0],
+      });
       setDocs(
         docs.map((doc) => (doc.id === id ? { ...doc, ...updatedData } : doc))
       );
@@ -290,7 +301,13 @@ const Dashboard: React.FC = () => {
     }
   };
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col relative overflow-hidden">
+    <div
+      className={`min-h-screen ${
+        isDarkMode
+          ? "bg-gradient-to-br from-gray-900 to-indigo-900"
+          : "bg-gradient-to-br from-blue-50 to-indigo-100"
+      } flex flex-col relative overflow-hidden`}
+    >
       {/* Decorative background elements */}
       <div className="absolute top-20 left-0 w-72 h-72 bg-gradient-to-br from-blue-200/30 to-purple-300/30 rounded-full blur-3xl -z-10" />
       <div className="absolute bottom-20 right-0 w-96 h-96 bg-gradient-to-br from-indigo-200/30 to-pink-300/30 rounded-full blur-3xl -z-10" />
@@ -299,15 +316,43 @@ const Dashboard: React.FC = () => {
       <Header />
 
       <main className="flex-grow max-w-7xl w-full mx-auto px-4 pt-6 pb-12 sm:px-6 lg:px-8">
-        <div className="bg-white/80 backdrop-blur-lg p-6 rounded-2xl border border-blue-100 shadow-lg relative">
-          {/* Decorative corner elements */}
-          <div className="absolute -top-4 -left-4 w-8 h-8 border-t-2 border-l-2 border-blue-200 rounded-tl-lg" />
-          <div className="absolute -top-4 -right-4 w-8 h-8 border-t-2 border-r-2 border-blue-200 rounded-tr-lg" />
-          <div className="absolute -bottom-4 -left-4 w-8 h-8 border-b-2 border-l-2 border-blue-200 rounded-bl-lg" />
-          <div className="absolute -bottom-4 -right-4 w-8 h-8 border-b-2 border-r-2 border-blue-200 rounded-br-lg" />
-
+        <div
+          className={`${
+            isDarkMode
+              ? "bg-gray-800/80 border-gray-700"
+              : "bg-white/80 border-blue-100"
+          } backdrop-blur-lg p-6 rounded-2xl border shadow-lg relative`}
+        >
+          {/* Decorative corner elements */}{" "}
+          <div
+            className={`absolute -top-4 -left-4 w-8 h-8 border-t-2 border-l-2 ${
+              isDarkMode ? "border-blue-600" : "border-blue-200"
+            } rounded-tl-lg`}
+          />
+          <div
+            className={`absolute -top-4 -right-4 w-8 h-8 border-t-2 border-r-2 ${
+              isDarkMode ? "border-blue-600" : "border-blue-200"
+            } rounded-tr-lg`}
+          />
+          <div
+            className={`absolute -bottom-4 -left-4 w-8 h-8 border-b-2 border-l-2 ${
+              isDarkMode ? "border-blue-600" : "border-blue-200"
+            } rounded-bl-lg`}
+          />
+          <div
+            className={`absolute -bottom-4 -right-4 w-8 h-8 border-b-2 border-r-2 ${
+              isDarkMode ? "border-blue-600" : "border-blue-200"
+            } rounded-br-lg`}
+          />
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-gradient-to-r from-blue-100 to-indigo-200 rounded-lg">
+            {" "}
+            <div
+              className={`p-2 ${
+                isDarkMode
+                  ? "bg-gradient-to-r from-blue-900 to-indigo-900"
+                  : "bg-gradient-to-r from-blue-100 to-indigo-200"
+              } rounded-lg`}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
@@ -316,7 +361,9 @@ const Dashboard: React.FC = () => {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="w-6 h-6 text-indigo-600"
+                className={`w-6 h-6 ${
+                  isDarkMode ? "text-indigo-400" : "text-indigo-600"
+                }`}
               >
                 <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
                 <line x1="16" x2="16" y1="2" y2="6" />
@@ -328,9 +375,7 @@ const Dashboard: React.FC = () => {
               Dashboard
             </h2>
           </div>
-
           <NavigationTabs activeTab={activeTab} setActiveTab={setActiveTab} />
-
           <div className="mt-6">{renderTabContent()}</div>
         </div>
       </main>

@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const User = require("../modals/user.modal");
+const User = require("../models/user.model");
 const ErrorResponse = require("../utils/ErrorResponse");
 const asyncHandler = require("../utils/asyncHandler");
 
@@ -60,7 +60,7 @@ exports.authorize = (...roles) => {
 
 // Check if user is team member
 exports.checkTeamMembership = asyncHandler(async (req, res, next) => {
-  const Team = require("../modals/team.modal");
+  const Team = require("../models/team.model");
   const teamId = req.params.teamId;
 
   if (!teamId) {
@@ -83,7 +83,7 @@ exports.checkTeamMembership = asyncHandler(async (req, res, next) => {
 
 // Check if user is team admin or owner
 exports.checkTeamAdmin = asyncHandler(async (req, res, next) => {
-  const Team = require("../modals/team.modal");
+  const Team = require("../models/team.model");
   const teamId = req.params.teamId;
 
   if (!teamId) {

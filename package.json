@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "fullstack": "concurrently \"npm run dev\" \"cd backend && npm run dev\"",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -16,6 +17,7 @@
     "framer-motion": "^12.18.1",
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.516.0",
+    "prop-types": "^15.8.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-hot-toast": "^2.5.2",
@@ -26,9 +28,11 @@
   "devDependencies": {
     "@eslint/js": "^9.25.0",
     "@types/js-cookie": "^3.0.6",
+    "@types/prop-types": "^15.7.15",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react": "^4.4.1",
+    "concurrently": "^9.1.2",
     "eslint": "^9.25.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",

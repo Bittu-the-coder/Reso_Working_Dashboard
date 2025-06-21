@@ -1,6 +1,6 @@
-const Task = require("../modals/task.modal");
-const Team = require("../modals/team.modal");
-const User = require("../modals/user.modal");
+const Task = require("../models/task.model");
+const Team = require("../models/team.model");
+const User = require("../models/user.model");
 const asyncHandler = require("../utils/asyncHandler.js");
 const ErrorResponse = require("../utils/ErrorResponse.js");
 

@@ -10,6 +10,7 @@ import {
   CheckSquare,
   BarChart,
 } from "lucide-react";
+import { useTheme } from "../contexts/useTheme";
 
 interface Event {
   id: number;
@@ -64,6 +65,8 @@ const itemVariants = {
 };
 
 const Overview: React.FC<OverviewProps> = ({ events, projects, tasks }) => {
+  const { isDarkMode } = useTheme();
+
   const stats = [
     {
       title: "Active Projects",
@@ -114,7 +117,11 @@ const Overview: React.FC<OverviewProps> = ({ events, projects, tasks }) => {
         {stats.map((stat, index) => (
           <motion.div
             key={index}
-            className="bg-white/80 backdrop-blur-lg p-6 rounded-2xl shadow-lg border border-blue-100 relative overflow-hidden"
+            className={`${
+              isDarkMode
+                ? "bg-gray-800/80 border-gray-700"
+                : "bg-white/80 border-blue-100"
+            } backdrop-blur-lg p-6 rounded-2xl shadow-lg border relative overflow-hidden`}
             variants={itemVariants}
             whileHover={{
               y: -5,
@@ -150,21 +157,43 @@ const Overview: React.FC<OverviewProps> = ({ events, projects, tasks }) => {
 
       {/* Recent Activity Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {" "}
         {/* Recent Activities */}
         <motion.div
-          className="bg-white/80 backdrop-blur-lg p-6 rounded-2xl shadow-lg border border-blue-100 relative overflow-hidden"
+          className={`${
+            isDarkMode
+              ? "bg-gray-800/80 border-gray-700"
+              : "bg-white/80 border-blue-100"
+          } backdrop-blur-lg p-6 rounded-2xl shadow-lg border relative overflow-hidden`}
           variants={itemVariants}
-          whileHover={{ boxShadow: "0 8px 30px rgba(59, 130, 246, 0.15)" }}
+          whileHover={{
+            boxShadow: `0 8px 30px ${
+              isDarkMode
+                ? "rgba(59, 130, 246, 0.2)"
+                : "rgba(59, 130, 246, 0.15)"
+            }`,
+          }}
         >
           <div className="flex items-center gap-3 mb-6 z-10 relative">
-            <div className="p-2 bg-indigo-100 rounded-lg">
-              <Activity className="w-5 h-5 text-indigo-600" />
+            <div
+              className={`p-2 ${
+                isDarkMode ? "bg-indigo-900" : "bg-indigo-100"
+              } rounded-lg`}
+            >
+              <Activity
+                className={`w-5 h-5 ${
+                  isDarkMode ? "text-indigo-400" : "text-indigo-600"
+                }`}
+              />
             </div>
-            <h3 className="text-xl font-bold text-indigo-900">
+            <h3
+              className={`text-xl font-bold ${
+                isDarkMode ? "text-indigo-300" : "text-indigo-900"
+              }`}
+            >
               Recent Activities
             </h3>
           </div>
-
           <div className="space-y-6 z-10 relative">
             <div>
               <h4 className="text-md font-semibold text-blue-900 mb-4 flex items-center gap-2">
@@ -180,53 +209,109 @@ const Overview: React.FC<OverviewProps> = ({ events, projects, tasks }) => {
                   .map((event) => (
                     <motion.div
                       key={event.id}
-                      className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-100 shadow-sm"
+                      className={`bg-gradient-to-r ${
+                        isDarkMode
+                          ? "from-blue-900/40 to-indigo-900/40 border-blue-800"
+                          : "from-blue-50 to-indigo-50 border-blue-100"
+                      } p-4 rounded-xl border shadow-sm`}
                       whileHover={{ scale: 1.01 }}
                     >
                       <div className="flex justify-between mb-1">
-                        <h5 className="font-medium text-blue-900">
+                        {" "}
+                        <h5
+                          className={`font-medium ${
+                            isDarkMode ? "text-blue-300" : "text-blue-900"
+                          }`}
+                        >
                           {event.title}
                         </h5>
-                        <span className="text-sm text-blue-700">
+                        <span
+                          className={`text-sm ${
+                            isDarkMode ? "text-blue-400" : "text-blue-700"
+                          }`}
+                        >
                           {event.date}
                         </span>
-                      </div>
-                      <p className="text-sm text-blue-700">
+                      </div>{" "}
+                      <p
+                        className={`text-sm ${
+                          isDarkMode ? "text-blue-400" : "text-blue-700"
+                        }`}
+                      >
                         {event.description}
                       </p>
                     </motion.div>
                   ))}
               </div>
             </div>
-          </div>
-
+          </div>{" "}
           {/* Decorative corner elements */}
-          <div className="absolute -top-4 -left-4 w-8 h-8 border-t-2 border-l-2 border-indigo-200 rounded-tl-lg" />
-          <div className="absolute -top-4 -right-4 w-8 h-8 border-t-2 border-r-2 border-indigo-200 rounded-tr-lg" />
-          <div className="absolute -bottom-4 -left-4 w-8 h-8 border-b-2 border-l-2 border-indigo-200 rounded-bl-lg" />
-          <div className="absolute -bottom-4 -right-4 w-8 h-8 border-b-2 border-r-2 border-indigo-200 rounded-br-lg" />
-        </motion.div>
-
+          <div
+            className={`absolute -top-4 -left-4 w-8 h-8 border-t-2 border-l-2 ${
+              isDarkMode ? "border-indigo-600" : "border-indigo-200"
+            } rounded-tl-lg`}
+          />
+          <div
+            className={`absolute -top-4 -right-4 w-8 h-8 border-t-2 border-r-2 ${
+              isDarkMode ? "border-indigo-600" : "border-indigo-200"
+            } rounded-tr-lg`}
+          />
+          <div
+            className={`absolute -bottom-4 -left-4 w-8 h-8 border-b-2 border-l-2 ${
+              isDarkMode ? "border-indigo-600" : "border-indigo-200"
+            } rounded-bl-lg`}
+          />
+          <div
+            className={`absolute -bottom-4 -right-4 w-8 h-8 border-b-2 border-r-2 ${
+              isDarkMode ? "border-indigo-600" : "border-indigo-200"
+            } rounded-br-lg`}
+          />
+        </motion.div>{" "}
         {/* Recent Projects */}
         <motion.div
-          className="bg-white/80 backdrop-blur-lg p-6 rounded-2xl shadow-lg border border-blue-100 relative overflow-hidden"
+          className={`${
+            isDarkMode
+              ? "bg-gray-800/80 border-gray-700"
+              : "bg-white/80 border-blue-100"
+          } backdrop-blur-lg p-6 rounded-2xl shadow-lg border relative overflow-hidden`}
           variants={itemVariants}
-          whileHover={{ boxShadow: "0 8px 30px rgba(59, 130, 246, 0.15)" }}
+          whileHover={{
+            boxShadow: `0 8px 30px ${
+              isDarkMode
+                ? "rgba(59, 130, 246, 0.2)"
+                : "rgba(59, 130, 246, 0.15)"
+            }`,
+          }}
         >
           <div className="flex items-center gap-3 mb-6 z-10 relative">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <BarChart className="w-5 h-5 text-purple-600" />
+            <div
+              className={`p-2 ${
+                isDarkMode ? "bg-purple-900" : "bg-purple-100"
+              } rounded-lg`}
+            >
+              <BarChart
+                className={`w-5 h-5 ${
+                  isDarkMode ? "text-purple-400" : "text-purple-600"
+                }`}
+              />
             </div>
-            <h3 className="text-xl font-bold text-purple-900">
+            <h3
+              className={`text-xl font-bold ${
+                isDarkMode ? "text-purple-300" : "text-purple-900"
+              }`}
+            >
               Project Status
             </h3>
           </div>
-
           <div className="space-y-4 z-10 relative">
             {projects.slice(0, 3).map((project) => (
               <motion.div
                 key={project.id}
-                className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-xl border border-purple-100 shadow-sm"
+                className={`bg-gradient-to-r ${
+                  isDarkMode
+                    ? "from-purple-900/40 to-pink-900/40 border-purple-800"
+                    : "from-purple-50 to-pink-50 border-purple-100"
+                } p-4 rounded-xl border shadow-sm`}
                 whileHover={{ scale: 1.01 }}
               >
                 <div className="flex justify-between mb-2">
@@ -245,36 +330,82 @@ const Overview: React.FC<OverviewProps> = ({ events, projects, tasks }) => {
                     animate={{ width: `${project.progress}%` }}
                     transition={{ duration: 0.8, ease: "easeOut" }}
                   ></motion.div>
-                </div>
-                <p className="text-right text-sm text-purple-700 mt-1">
+                </div>{" "}
+                <p
+                  className={`text-right text-sm ${
+                    isDarkMode ? "text-purple-400" : "text-purple-700"
+                  } mt-1`}
+                >
                   {project.progress}% complete
                 </p>
               </motion.div>
             ))}
-          </div>
-
+          </div>{" "}
           {/* Decorative corner elements */}
-          <div className="absolute -top-4 -left-4 w-8 h-8 border-t-2 border-l-2 border-purple-200 rounded-tl-lg" />
-          <div className="absolute -top-4 -right-4 w-8 h-8 border-t-2 border-r-2 border-purple-200 rounded-tr-lg" />
-          <div className="absolute -bottom-4 -left-4 w-8 h-8 border-b-2 border-l-2 border-purple-200 rounded-bl-lg" />
-          <div className="absolute -bottom-4 -right-4 w-8 h-8 border-b-2 border-r-2 border-purple-200 rounded-br-lg" />
-        </motion.div>
-
+          <div
+            className={`absolute -top-4 -left-4 w-8 h-8 border-t-2 border-l-2 ${
+              isDarkMode ? "border-purple-600" : "border-purple-200"
+            } rounded-tl-lg`}
+          />
+          <div
+            className={`absolute -top-4 -right-4 w-8 h-8 border-t-2 border-r-2 ${
+              isDarkMode ? "border-purple-600" : "border-purple-200"
+            } rounded-tr-lg`}
+          />
+          <div
+            className={`absolute -bottom-4 -left-4 w-8 h-8 border-b-2 border-l-2 ${
+              isDarkMode ? "border-purple-600" : "border-purple-200"
+            } rounded-bl-lg`}
+          />
+          <div
+            className={`absolute -bottom-4 -right-4 w-8 h-8 border-b-2 border-r-2 ${
+              isDarkMode ? "border-purple-600" : "border-purple-200"
+            } rounded-br-lg`}
+          />
+        </motion.div>{" "}
         {/* Recent Tasks */}
         <motion.div
-          className="bg-white/80 backdrop-blur-lg p-6 rounded-2xl shadow-lg border border-blue-100 relative overflow-hidden lg:col-span-2"
+          className={`${
+            isDarkMode
+              ? "bg-gray-800/80 border-gray-700"
+              : "bg-white/80 border-blue-100"
+          } backdrop-blur-lg p-6 rounded-2xl shadow-lg border relative overflow-hidden lg:col-span-2`}
           variants={itemVariants}
-          whileHover={{ boxShadow: "0 8px 30px rgba(59, 130, 246, 0.15)" }}
+          whileHover={{
+            boxShadow: `0 8px 30px ${
+              isDarkMode
+                ? "rgba(59, 130, 246, 0.2)"
+                : "rgba(59, 130, 246, 0.15)"
+            }`,
+          }}
         >
           <div className="flex items-center gap-3 mb-6 z-10 relative">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <CheckSquare className="w-5 h-5 text-blue-600" />
+            <div
+              className={`p-2 ${
+                isDarkMode ? "bg-blue-900" : "bg-blue-100"
+              } rounded-lg`}
+            >
+              <CheckSquare
+                className={`w-5 h-5 ${
+                  isDarkMode ? "text-blue-400" : "text-blue-600"
+                }`}
+              />
             </div>
-            <h3 className="text-xl font-bold text-blue-900">Recent Tasks</h3>
+            <h3
+              className={`text-xl font-bold ${
+                isDarkMode ? "text-blue-300" : "text-blue-900"
+              }`}
+            >
+              Recent Tasks
+            </h3>
           </div>
 
           <div className="overflow-x-auto z-10 relative">
-            <table className="min-w-full divide-y divide-blue-100">
+            <table
+              className={`min-w-full divide-y ${
+                isDarkMode ? "divide-gray-700" : "divide-blue-100"
+              }`}
+            >
               <thead className="bg-blue-50">
                 <tr>
                   <th
@@ -282,55 +413,96 @@ const Overview: React.FC<OverviewProps> = ({ events, projects, tasks }) => {
                     className="px-6 py-3 text-left text-xs font-medium text-blue-900 uppercase tracking-wider"
                   >
                     Task
-                  </th>
+                  </th>{" "}
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-blue-900 uppercase tracking-wider"
+                    className={`px-6 py-3 text-left text-xs font-medium ${
+                      isDarkMode ? "text-blue-300" : "text-blue-900"
+                    } uppercase tracking-wider`}
                   >
                     Assignee
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-blue-900 uppercase tracking-wider"
+                    className={`px-6 py-3 text-left text-xs font-medium ${
+                      isDarkMode ? "text-blue-300" : "text-blue-900"
+                    } uppercase tracking-wider`}
                   >
                     Deadline
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-blue-900 uppercase tracking-wider"
+                    className={`px-6 py-3 text-left text-xs font-medium ${
+                      isDarkMode ? "text-blue-300" : "text-blue-900"
+                    } uppercase tracking-wider`}
                   >
                     Status
                   </th>
                 </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-blue-100">
+              </thead>{" "}
+              <tbody
+                className={`${
+                  isDarkMode
+                    ? "bg-gray-800 divide-y divide-gray-700"
+                    : "bg-white divide-y divide-blue-100"
+                }`}
+              >
                 {tasks.slice(0, 4).map((task) => (
                   <motion.tr
                     key={task.id}
-                    whileHover={{ backgroundColor: "rgba(239, 246, 255, 0.6)" }}
+                    whileHover={{
+                      backgroundColor: isDarkMode
+                        ? "rgba(55, 65, 81, 0.6)"
+                        : "rgba(239, 246, 255, 0.6)",
+                    }}
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-blue-900">
+                      {" "}
+                      <div
+                        className={`text-sm font-medium ${
+                          isDarkMode ? "text-blue-300" : "text-blue-900"
+                        }`}
+                      >
                         {task.title}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-blue-700">
+                      <div
+                        className={`text-sm ${
+                          isDarkMode ? "text-blue-400" : "text-blue-700"
+                        }`}
+                      >
                         {task.assignee}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-blue-700 flex items-center gap-1">
-                        <Clock className="w-4 h-4" /> {task.deadline}
+                      <div
+                        className={`text-sm ${
+                          isDarkMode ? "text-blue-400" : "text-blue-700"
+                        } flex items-center gap-1`}
+                      >
+                        <Clock
+                          className={`w-4 h-4 ${
+                            isDarkMode ? "text-blue-400" : ""
+                          }`}
+                        />{" "}
+                        {task.deadline}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
+                      {" "}
                       <span
                         className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                           task.status === "completed"
-                            ? "bg-green-100 text-green-800"
+                            ? isDarkMode
+                              ? "bg-green-900 text-green-300"
+                              : "bg-green-100 text-green-800"
                             : task.status === "in-progress"
-                            ? "bg-blue-100 text-blue-800"
+                            ? isDarkMode
+                              ? "bg-blue-900 text-blue-300"
+                              : "bg-blue-100 text-blue-800"
+                            : isDarkMode
+                            ? "bg-yellow-900 text-yellow-300"
                             : "bg-yellow-100 text-yellow-800"
                         }`}
                       >

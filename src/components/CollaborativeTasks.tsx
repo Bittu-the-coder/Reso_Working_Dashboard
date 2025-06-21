@@ -12,11 +12,11 @@ import {
   Search,
 } from "lucide-react";
 import { taskAPI, teamAPI, type Task, type Team } from "../service/teams";
-import { useAuth } from "./Auth";
 import toast from "react-hot-toast";
+import { useTheme } from "../contexts/ThemeContext";
 
 const CollaborativeTasks: React.FC = () => {
-  const { user } = useAuth();
+  const { isDarkMode } = useTheme();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
@@ -104,24 +104,48 @@ const CollaborativeTasks: React.FC = () => {
     switch (status) {
       case "Done":
         return {
-          bgClass: "bg-green-50 border-green-100",
-          textClass: "text-green-800",
-          icon: <CheckCircle className="w-4 h-4 text-green-600" />,
+          bgClass: isDarkMode
+            ? "bg-green-900/30 border-green-800"
+            : "bg-green-50 border-green-100",
+          textClass: isDarkMode ? "text-green-300" : "text-green-800",
+          icon: (
+            <CheckCircle
+              className={`w-4 h-4 ${
+                isDarkMode ? "text-green-400" : "text-green-600"
+              }`}
+            />
+          ),
           label: "Done",
         };
       case "In Progress":
         return {
-          bgClass: "bg-blue-50 border-blue-100",
-          textClass: "text-blue-800",
-          icon: <Clock className="w-4 h-4 text-blue-600" />,
+          bgClass: isDarkMode
+            ? "bg-blue-900/30 border-blue-800"
+            : "bg-blue-50 border-blue-100",
+          textClass: isDarkMode ? "text-blue-300" : "text-blue-800",
+          icon: (
+            <Clock
+              className={`w-4 h-4 ${
+                isDarkMode ? "text-blue-400" : "text-blue-600"
+              }`}
+            />
+          ),
           label: "In Progress",
         };
       case "To Do":
       default:
         return {
-          bgClass: "bg-amber-50 border-amber-100",
-          textClass: "text-amber-800",
-          icon: <AlertCircle className="w-4 h-4 text-amber-600" />,
+          bgClass: isDarkMode
+            ? "bg-amber-900/30 border-amber-800"
+            : "bg-amber-50 border-amber-100",
+          textClass: isDarkMode ? "text-amber-300" : "text-amber-800",
+          icon: (
+            <AlertCircle
+              className={`w-4 h-4 ${
+                isDarkMode ? "text-amber-400" : "text-amber-600"
+              }`}
+            />
+          ),
           label: "To Do",
         };
     }
@@ -130,20 +154,32 @@ const CollaborativeTasks: React.FC = () => {
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case "High":
-        return "text-red-600 bg-red-50";
+        return isDarkMode
+          ? "text-red-400 bg-red-900/30"
+          : "text-red-600 bg-red-50";
       case "Medium":
-        return "text-yellow-600 bg-yellow-50";
+        return isDarkMode
+          ? "text-yellow-400 bg-yellow-900/30"
+          : "text-yellow-600 bg-yellow-50";
       case "Low":
-        return "text-green-600 bg-green-50";
+        return isDarkMode
+          ? "text-green-400 bg-green-900/30"
+          : "text-green-600 bg-green-50";
       default:
-        return "text-gray-600 bg-gray-50";
+        return isDarkMode
+          ? "text-gray-400 bg-gray-800/50"
+          : "text-gray-600 bg-gray-50";
     }
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div
+          className={`animate-spin rounded-full h-8 w-8 border-b-2 ${
+            isDarkMode ? "border-blue-400" : "border-blue-600"
+          }`}
+        ></div>
       </div>
     );
   }
@@ -153,14 +189,26 @@ const CollaborativeTasks: React.FC = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div className="flex items-center space-x-2">
-          <FileText className="w-6 h-6 text-blue-600" />
-          <h1 className="text-2xl font-bold text-gray-900">
+          <FileText
+            className={`w-6 h-6 ${
+              isDarkMode ? "text-blue-400" : "text-blue-600"
+            }`}
+          />
+          <h1
+            className={`text-2xl font-bold ${
+              isDarkMode ? "text-white" : "text-gray-900"
+            }`}
+          >
             Collaborative Tasks
           </h1>
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+          className={`${
+            isDarkMode
+              ? "bg-blue-600 hover:bg-blue-700"
+              : "bg-blue-600 hover:bg-blue-700"
+          } text-white px-4 py-2 rounded-lg flex items-center space-x-2`}
         >
           <Plus className="w-4 h-4" />
           <span>Create Task</span>
@@ -168,10 +216,20 @@ const CollaborativeTasks: React.FC = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-white border border-gray-200 rounded-lg p-4">
+      <div
+        className={`${
+          isDarkMode
+            ? "bg-gray-800 border-gray-700"
+            : "bg-white border-gray-200"
+        } border rounded-lg p-4`}
+      >
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              className={`block text-sm font-medium ${
+                isDarkMode ? "text-gray-300" : "text-gray-700"
+              } mb-1`}
+            >
               Search
             </label>
             <div className="relative">
@@ -182,20 +240,32 @@ const CollaborativeTasks: React.FC = () => {
                 onChange={(e) =>
                   setFilters({ ...filters, search: e.target.value })
                 }
-                className="pl-10 w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`pl-10 w-full ${
+                  isDarkMode
+                    ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500"
+                    : "border-gray-300 focus:ring-blue-500"
+                } border rounded-lg px-3 py-2 focus:outline-none focus:ring-2`}
                 placeholder="Search tasks..."
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              className={`block text-sm font-medium ${
+                isDarkMode ? "text-gray-300" : "text-gray-700"
+              } mb-1`}
+            >
               Team
             </label>
             <select
               value={filters.team}
               onChange={(e) => setFilters({ ...filters, team: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`w-full ${
+                isDarkMode
+                  ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500"
+                  : "border-gray-300 focus:ring-blue-500"
+              } border rounded-lg px-3 py-2 focus:outline-none focus:ring-2`}
             >
               <option value="">All Teams</option>
               {teams.map((team) => (
@@ -207,7 +277,11 @@ const CollaborativeTasks: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              className={`block text-sm font-medium ${
+                isDarkMode ? "text-gray-300" : "text-gray-700"
+              } mb-1`}
+            >
               Status
             </label>
             <select
@@ -215,7 +289,11 @@ const CollaborativeTasks: React.FC = () => {
               onChange={(e) =>
                 setFilters({ ...filters, status: e.target.value })
               }
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`w-full ${
+                isDarkMode
+                  ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500"
+                  : "border-gray-300 focus:ring-blue-500"
+              } border rounded-lg px-3 py-2 focus:outline-none focus:ring-2`}
             >
               <option value="">All Status</option>
               <option value="To Do">To Do</option>
@@ -225,7 +303,11 @@ const CollaborativeTasks: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              className={`block text-sm font-medium ${
+                isDarkMode ? "text-gray-300" : "text-gray-700"
+              } mb-1`}
+            >
               Priority
             </label>
             <select
@@ -233,7 +315,11 @@ const CollaborativeTasks: React.FC = () => {
               onChange={(e) =>
                 setFilters({ ...filters, priority: e.target.value })
               }
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`w-full ${
+                isDarkMode
+                  ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500"
+                  : "border-gray-300 focus:ring-blue-500"
+              } border rounded-lg px-3 py-2 focus:outline-none focus:ring-2`}
             >
               <option value="">All Priority</option>
               <option value="High">High</option>
@@ -247,7 +333,11 @@ const CollaborativeTasks: React.FC = () => {
               onClick={() =>
                 setFilters({ team: "", status: "", priority: "", search: "" })
               }
-              className="w-full bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200"
+              className={`w-full ${
+                isDarkMode
+                  ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              } px-3 py-2 rounded-lg`}
             >
               Clear Filters
             </button>
@@ -264,13 +354,21 @@ const CollaborativeTasks: React.FC = () => {
           return (
             <motion.div
               key={task._id}
-              className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow"
+              className={`${
+                isDarkMode
+                  ? "bg-gray-800 border-gray-700 hover:shadow-lg hover:shadow-gray-900/40"
+                  : "bg-white border-gray-200 hover:shadow-lg"
+              } border rounded-lg p-6 transition-shadow`}
               whileHover={{ scale: 1.02 }}
             >
               <div className="space-y-4">
                 {/* Header */}
                 <div className="flex items-start justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
+                  <h3
+                    className={`text-lg font-semibold ${
+                      isDarkMode ? "text-white" : "text-gray-900"
+                    } line-clamp-2`}
+                  >
                     {task.title}
                   </h3>
                   <span
@@ -282,7 +380,11 @@ const CollaborativeTasks: React.FC = () => {
 
                 {/* Description */}
                 {task.description && (
-                  <p className="text-sm text-gray-600 line-clamp-2">
+                  <p
+                    className={`text-sm ${
+                      isDarkMode ? "text-gray-300" : "text-gray-600"
+                    } line-clamp-2`}
+                  >
                     {task.description}
                   </p>
                 )}
@@ -290,12 +392,20 @@ const CollaborativeTasks: React.FC = () => {
                 {/* Team and Creator */}
                 <div className="space-y-2">
                   {task.teamId && (
-                    <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <div
+                      className={`flex items-center space-x-2 text-sm ${
+                        isDarkMode ? "text-gray-300" : "text-gray-600"
+                      }`}
+                    >
                       <Users className="w-4 h-4" />
                       <span>{task.teamId.name}</span>
                     </div>
                   )}
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                  <div
+                    className={`flex items-center space-x-2 text-sm ${
+                      isDarkMode ? "text-gray-300" : "text-gray-600"
+                    }`}
+                  >
                     <UserIcon className="w-4 h-4" />
                     <span>Created by {task.createdBy.name}</span>
                   </div>
@@ -304,14 +414,22 @@ const CollaborativeTasks: React.FC = () => {
                 {/* Assigned Users */}
                 {task.assignedTo.length > 0 && (
                   <div>
-                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                    <label
+                      className={`text-xs font-medium ${
+                        isDarkMode ? "text-gray-400" : "text-gray-500"
+                      } uppercase tracking-wide`}
+                    >
                       Assigned to
                     </label>
                     <div className="flex flex-wrap gap-1 mt-1">
                       {task.assignedTo.map((assignee) => (
                         <span
                           key={assignee._id}
-                          className="inline-flex items-center px-2 py-1 rounded text-xs bg-blue-100 text-blue-800"
+                          className={`inline-flex items-center px-2 py-1 rounded text-xs ${
+                            isDarkMode
+                              ? "bg-blue-900/50 text-blue-300"
+                              : "bg-blue-100 text-blue-800"
+                          }`}
                         >
                           {assignee.name}
                         </span>
@@ -322,7 +440,11 @@ const CollaborativeTasks: React.FC = () => {
 
                 {/* Due Date */}
                 {task.dueDate && (
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                  <div
+                    className={`flex items-center space-x-2 text-sm ${
+                      isDarkMode ? "text-gray-300" : "text-gray-600"
+                    }`}
+                  >
                     <Calendar className="w-4 h-4" />
                     <span>
                       Due: {new Date(task.dueDate).toLocaleDateString()}
@@ -333,14 +455,22 @@ const CollaborativeTasks: React.FC = () => {
                 {/* Tags */}
                 {task.tags.length > 0 && (
                   <div>
-                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                    <label
+                      className={`text-xs font-medium ${
+                        isDarkMode ? "text-gray-400" : "text-gray-500"
+                      } uppercase tracking-wide`}
+                    >
                       Tags
                     </label>
                     <div className="flex flex-wrap gap-1 mt-1">
                       {task.tags.map((tag, index) => (
                         <span
                           key={index}
-                          className="inline-block px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded"
+                          className={`inline-block px-2 py-1 text-xs ${
+                            isDarkMode
+                              ? "bg-gray-700 text-gray-300"
+                              : "bg-gray-100 text-gray-700"
+                          } rounded`}
                         >
                           {tag}
                         </span>
@@ -350,7 +480,11 @@ const CollaborativeTasks: React.FC = () => {
                 )}
 
                 {/* Status and Actions */}
-                <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                <div
+                  className={`flex items-center justify-between pt-2 border-t ${
+                    isDarkMode ? "border-gray-700" : "border-gray-100"
+                  }`}
+                >
                   <span
                     className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${statusInfo.bgClass} ${statusInfo.textClass} border`}
                   >
@@ -363,7 +497,11 @@ const CollaborativeTasks: React.FC = () => {
                     onChange={(e) =>
                       handleUpdateTaskStatus(task._id, e.target.value as any)
                     }
-                    className="text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className={`text-xs border ${
+                      isDarkMode
+                        ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500"
+                        : "border-gray-300 focus:ring-blue-500"
+                    } rounded px-2 py-1 focus:outline-none focus:ring-1`}
                   >
                     <option value="To Do">To Do</option>
                     <option value="In Progress">In Progress</option>
@@ -377,9 +515,19 @@ const CollaborativeTasks: React.FC = () => {
       </div>
 
       {tasks.length === 0 && (
-        <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
-          <FileText className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-          <p className="text-gray-600">
+        <div
+          className={`text-center py-12 ${
+            isDarkMode
+              ? "bg-gray-800 border-gray-700"
+              : "bg-gray-50 border-gray-200"
+          } rounded-lg border`}
+        >
+          <FileText
+            className={`w-16 h-16 mx-auto ${
+              isDarkMode ? "text-gray-600" : "text-gray-300"
+            } mb-4`}
+          />
+          <p className={`${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
             No tasks found. Create your first task to get started!
           </p>
         </div>
@@ -391,6 +539,7 @@ const CollaborativeTasks: React.FC = () => {
           teams={teams}
           onClose={() => setShowCreateModal(false)}
           onSubmit={handleCreateTask}
+          isDarkMode={isDarkMode}
         />
       )}
     </div>
@@ -402,7 +551,8 @@ const CreateTaskModal: React.FC<{
   teams: Team[];
   onClose: () => void;
   onSubmit: (data: any) => void;
-}> = ({ teams, onClose, onSubmit }) => {
+  isDarkMode: boolean;
+}> = ({ teams, onClose, onSubmit, isDarkMode }) => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -457,13 +607,27 @@ const CreateTaskModal: React.FC<{
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto">
-      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-screen overflow-y-auto">
-        <h2 className="text-xl font-semibold mb-4">Create New Task</h2>
+      <div
+        className={`${
+          isDarkMode ? "bg-gray-800" : "bg-white"
+        } rounded-lg p-6 w-full max-w-2xl max-h-screen overflow-y-auto`}
+      >
+        <h2
+          className={`text-xl font-semibold mb-4 ${
+            isDarkMode ? "text-white" : ""
+          }`}
+        >
+          Create New Task
+        </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                className={`block text-sm font-medium ${
+                  isDarkMode ? "text-gray-300" : "text-gray-700"
+                } mb-1`}
+              >
                 Task Title *
               </label>
               <input
@@ -472,14 +636,22 @@ const CreateTaskModal: React.FC<{
                 onChange={(e) =>
                   setFormData({ ...formData, title: e.target.value })
                 }
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full ${
+                  isDarkMode
+                    ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500"
+                    : "border-gray-300 focus:ring-blue-500"
+                } border rounded-lg px-3 py-2 focus:outline-none focus:ring-2`}
                 placeholder="Enter task title"
                 required
               />
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                className={`block text-sm font-medium ${
+                  isDarkMode ? "text-gray-300" : "text-gray-700"
+                } mb-1`}
+              >
                 Description
               </label>
               <textarea
@@ -487,14 +659,22 @@ const CreateTaskModal: React.FC<{
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
                 }
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full ${
+                  isDarkMode
+                    ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500"
+                    : "border-gray-300 focus:ring-blue-500"
+                } border rounded-lg px-3 py-2 focus:outline-none focus:ring-2`}
                 placeholder="Enter task description"
                 rows={3}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                className={`block text-sm font-medium ${
+                  isDarkMode ? "text-gray-300" : "text-gray-700"
+                } mb-1`}
+              >
                 Team
               </label>
               <select
@@ -506,7 +686,11 @@ const CreateTaskModal: React.FC<{
                     assignedTo: [],
                   })
                 }
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full ${
+                  isDarkMode
+                    ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500"
+                    : "border-gray-300 focus:ring-blue-500"
+                } border rounded-lg px-3 py-2 focus:outline-none focus:ring-2`}
               >
                 <option value="">Personal Task</option>
                 {teams.map((team) => (
@@ -518,7 +702,11 @@ const CreateTaskModal: React.FC<{
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                className={`block text-sm font-medium ${
+                  isDarkMode ? "text-gray-300" : "text-gray-700"
+                } mb-1`}
+              >
                 Priority
               </label>
               <select
@@ -526,7 +714,11 @@ const CreateTaskModal: React.FC<{
                 onChange={(e) =>
                   setFormData({ ...formData, priority: e.target.value as any })
                 }
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full ${
+                  isDarkMode
+                    ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500"
+                    : "border-gray-300 focus:ring-blue-500"
+                } border rounded-lg px-3 py-2 focus:outline-none focus:ring-2`}
               >
                 <option value="Low">Low</option>
                 <option value="Medium">Medium</option>
@@ -535,7 +727,11 @@ const CreateTaskModal: React.FC<{
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                className={`block text-sm font-medium ${
+                  isDarkMode ? "text-gray-300" : "text-gray-700"
+                } mb-1`}
+              >
                 Due Date
               </label>
               <input
@@ -544,12 +740,20 @@ const CreateTaskModal: React.FC<{
                 onChange={(e) =>
                   setFormData({ ...formData, dueDate: e.target.value })
                 }
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full ${
+                  isDarkMode
+                    ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500"
+                    : "border-gray-300 focus:ring-blue-500"
+                } border rounded-lg px-3 py-2 focus:outline-none focus:ring-2`}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                className={`block text-sm font-medium ${
+                  isDarkMode ? "text-gray-300" : "text-gray-700"
+                } mb-1`}
+              >
                 Estimated Hours
               </label>
               <input
@@ -558,7 +762,11 @@ const CreateTaskModal: React.FC<{
                 onChange={(e) =>
                   setFormData({ ...formData, estimatedHours: e.target.value })
                 }
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full ${
+                  isDarkMode
+                    ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500"
+                    : "border-gray-300 focus:ring-blue-500"
+                } border rounded-lg px-3 py-2 focus:outline-none focus:ring-2`}
                 placeholder="Enter estimated hours"
                 min="0"
                 step="0.5"
@@ -569,10 +777,18 @@ const CreateTaskModal: React.FC<{
           {/* Assign to team members */}
           {selectedTeam && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                className={`block text-sm font-medium ${
+                  isDarkMode ? "text-gray-300" : "text-gray-700"
+                } mb-1`}
+              >
                 Assign to Team Members
               </label>
-              <div className="space-y-2 max-h-32 overflow-y-auto border border-gray-200 rounded-lg p-2">
+              <div
+                className={`space-y-2 max-h-32 overflow-y-auto border ${
+                  isDarkMode ? "border-gray-600" : "border-gray-200"
+                } rounded-lg p-2`}
+              >
                 {selectedTeam.members.map((member) => (
                   <label
                     key={member.userId._id}
@@ -599,9 +815,17 @@ const CreateTaskModal: React.FC<{
                           });
                         }
                       }}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className={`rounded ${
+                        isDarkMode
+                          ? "border-gray-600 bg-gray-700"
+                          : "border-gray-300"
+                      } text-blue-600 focus:ring-blue-500`}
                     />
-                    <span className="text-sm">{member.userId.name}</span>
+                    <span
+                      className={`text-sm ${isDarkMode ? "text-gray-300" : ""}`}
+                    >
+                      {member.userId.name}
+                    </span>
                   </label>
                 ))}
               </div>
@@ -610,7 +834,11 @@ const CreateTaskModal: React.FC<{
 
           {/* Tags */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              className={`block text-sm font-medium ${
+                isDarkMode ? "text-gray-300" : "text-gray-700"
+              } mb-1`}
+            >
               Tags
             </label>
             <div className="flex space-x-2 mb-2">
@@ -621,13 +849,21 @@ const CreateTaskModal: React.FC<{
                 onKeyPress={(e) =>
                   e.key === "Enter" && (e.preventDefault(), addTag())
                 }
-                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`flex-1 ${
+                  isDarkMode
+                    ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500"
+                    : "border-gray-300 focus:ring-blue-500"
+                } border rounded-lg px-3 py-2 focus:outline-none focus:ring-2`}
                 placeholder="Add a tag"
               />
               <button
                 type="button"
                 onClick={addTag}
-                className="bg-gray-200 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-300"
+                className={`${
+                  isDarkMode
+                    ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                } px-3 py-2 rounded-lg`}
               >
                 Add
               </button>
@@ -636,7 +872,11 @@ const CreateTaskModal: React.FC<{
               {formData.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="inline-flex items-center px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded cursor-pointer"
+                  className={`inline-flex items-center px-2 py-1 text-xs ${
+                    isDarkMode
+                      ? "bg-blue-900/50 text-blue-300"
+                      : "bg-blue-100 text-blue-800"
+                  } rounded cursor-pointer`}
                   onClick={() => removeTag(tag)}
                 >
                   {tag} ×
@@ -649,13 +889,21 @@ const CreateTaskModal: React.FC<{
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 bg-gray-200 text-gray-800 py-2 rounded-lg hover:bg-gray-300"
+              className={`flex-1 ${
+                isDarkMode
+                  ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                  : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+              } py-2 rounded-lg`}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
+              className={`flex-1 ${
+                isDarkMode
+                  ? "bg-blue-600 text-white hover:bg-blue-700"
+                  : "bg-blue-600 text-white hover:bg-blue-700"
+              } py-2 rounded-lg`}
             >
               Create Task
             </button>

@@ -1,4 +1,4 @@
-const User = require("../modals/user.modal");
+const User = require("../models/user.model");
 const ErrorResponse = require("../utils/ErrorResponse");
 const asyncHandler = require("../utils/asyncHandler");
 const { sendTokenResponse } = require("../utils/jwt");

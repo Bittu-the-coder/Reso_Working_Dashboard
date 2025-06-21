@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Calendar, Plus, CalendarCheck } from "lucide-react";
+import { useTheme } from "../contexts/useTheme";
 
 interface Event {
   id: number;
@@ -56,6 +57,7 @@ const Events: React.FC<EventsProps> = ({
   setNewEvent,
   handleAddEvent,
 }) => {
+  const { isDarkMode } = useTheme();
   return (
     <motion.div
       className="space-y-6"
@@ -63,26 +65,50 @@ const Events: React.FC<EventsProps> = ({
       animate="visible"
       variants={containerVariants}
     >
+      {" "}
       <motion.div
-        className="bg-white/80 backdrop-blur-lg p-6 rounded-2xl shadow-lg border border-blue-100 relative overflow-hidden"
+        className={`${
+          isDarkMode
+            ? "bg-gray-800/80 border-gray-700"
+            : "bg-white/80 border-blue-100"
+        } backdrop-blur-lg p-6 rounded-2xl shadow-lg border relative overflow-hidden`}
         variants={itemVariants}
         whileHover={{
-          boxShadow: "0 8px 30px rgba(59, 130, 246, 0.15)",
+          boxShadow: `0 8px 30px ${
+            isDarkMode ? "rgba(59, 130, 246, 0.2)" : "rgba(59, 130, 246, 0.15)"
+          }`,
         }}
       >
         <div className="flex items-center gap-3 mb-6 z-10 relative">
-          <div className="p-2 bg-purple-100 rounded-lg">
-            <Plus className="w-5 h-5 text-purple-600" />
+          <div
+            className={`p-2 ${
+              isDarkMode ? "bg-purple-900" : "bg-purple-100"
+            } rounded-lg`}
+          >
+            <Plus
+              className={`w-5 h-5 ${
+                isDarkMode ? "text-purple-400" : "text-purple-600"
+              }`}
+            />
           </div>
-          <h3 className="text-xl font-bold text-purple-900">Add New Event</h3>
+          <h3
+            className={`text-xl font-bold ${
+              isDarkMode ? "text-purple-300" : "text-purple-900"
+            }`}
+          >
+            Add New Event
+          </h3>
         </div>
 
         <form onSubmit={handleAddEvent} className="space-y-4 z-10 relative">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
+              {" "}
               <label
                 htmlFor="event-title"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className={`block text-sm font-medium ${
+                  isDarkMode ? "text-gray-300" : "text-gray-700"
+                } mb-2`}
               >
                 Event Title
               </label>
@@ -101,7 +127,9 @@ const Events: React.FC<EventsProps> = ({
             <div>
               <label
                 htmlFor="event-date"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className={`block text-sm font-medium ${
+                  isDarkMode ? "text-gray-300" : "text-gray-700"
+                } mb-2`}
               >
                 Date
               </label>
@@ -120,7 +148,9 @@ const Events: React.FC<EventsProps> = ({
           <div>
             <label
               htmlFor="event-description"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className={`block text-sm font-medium ${
+                isDarkMode ? "text-gray-300" : "text-gray-700"
+              } mb-2`}
             >
               Description
             </label>
@@ -162,7 +192,6 @@ const Events: React.FC<EventsProps> = ({
         <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-purple-200 rounded-full opacity-20" />
         <div className="absolute top-10 right-20 w-16 h-16 bg-indigo-200 rounded-full opacity-30" />
       </motion.div>
-
       <motion.div
         className="bg-white/80 backdrop-blur-lg p-6 rounded-2xl shadow-lg border border-blue-100 relative overflow-hidden"
         variants={itemVariants}

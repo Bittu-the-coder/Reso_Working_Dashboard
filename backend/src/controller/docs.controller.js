@@ -1,5 +1,5 @@
 // Ensure correct case sensitivity for file paths (important for Linux-based hosting)
-const Docs = require("../modals/docs.modal.js");
+const Docs = require("../models/docs.model.js");
 const asyncHandler = require("../utils/asyncHandler.js");
 const ErrorResponse = require("../utils/ErrorResponse.js");
 

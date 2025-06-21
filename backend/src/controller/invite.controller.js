@@ -1,6 +1,6 @@
-const Invite = require("../modals/invite.modal");
-const Team = require("../modals/team.modal");
-const User = require("../modals/user.modal");
+const Invite = require("../models/invite.model");
+const Team = require("../models/team.model");
+const User = require("../models/user.model");
 const ErrorResponse = require("../utils/ErrorResponse");
 const asyncHandler = require("../utils/asyncHandler");
 

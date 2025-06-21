@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Info, CheckCircle, ChevronRight, Mail, Sparkles } from "lucide-react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import { useTheme } from "../contexts/useTheme";
 
 // Animation variants
 const containerVariants = {
@@ -41,6 +42,8 @@ const rotatingAnimation = {
 };
 
 const LearnMorePage: React.FC = () => {
+  const { isDarkMode } = useTheme();
+
   // Background Decorative Elements
   const BackgroundElements = () => (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -50,7 +53,11 @@ const LearnMorePage: React.FC = () => {
         animate="animate"
         className="absolute -top-20 -left-20 hidden md:block"
       >
-        <div className="w-32 h-32 bg-blue-400 opacity-5 rounded-md transform rotate-45" />
+        <div
+          className={`w-32 h-32 ${
+            isDarkMode ? "bg-blue-600 opacity-10" : "bg-blue-400 opacity-5"
+          } rounded-md transform rotate-45`}
+        />
       </motion.div>
 
       <motion.div
@@ -70,7 +77,13 @@ const LearnMorePage: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-pink-50 flex flex-col overflow-hidden">
+    <div
+      className={`min-h-screen ${
+        isDarkMode
+          ? "bg-gradient-to-br from-gray-900 via-gray-800 to-indigo-950"
+          : "bg-gradient-to-br from-blue-50 via-white to-pink-50"
+      } flex flex-col overflow-hidden`}
+    >
       <BackgroundElements />
       <Header />
 

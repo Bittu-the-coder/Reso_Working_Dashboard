@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { FileText, ExternalLink, ChevronRight, Sparkles } from "lucide-react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import { useTheme } from "../contexts/useTheme";
 
 // Animation variants
 const containerVariants = {
@@ -51,6 +52,7 @@ const rotatingAnimation = {
 };
 
 const HomePage: React.FC = () => {
+  const { isDarkMode } = useTheme();
   // Background Decorative Elements
   const BackgroundElements = () => (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -60,35 +62,61 @@ const HomePage: React.FC = () => {
         animate="animate"
         className="absolute -top-20 -left-20 hidden md:block"
       >
-        <div className="w-32 h-32 bg-blue-400 opacity-5 rounded-md transform rotate-45" />
-      </motion.div>
-
+        <div
+          className={`w-32 h-32 ${
+            isDarkMode ? "bg-blue-600 opacity-10" : "bg-blue-400 opacity-5"
+          } rounded-md transform rotate-45`}
+        />
+      </motion.div>{" "}
       <motion.div
         variants={rotatingAnimation}
         animate="animate"
         className="absolute top-1/4 right-10 hidden lg:block"
       >
-        <div className="w-24 h-24 bg-purple-500 opacity-5 rounded-md transform rotate-45" />
+        <div
+          className={`w-24 h-24 ${
+            isDarkMode ? "bg-purple-700 opacity-10" : "bg-purple-500 opacity-5"
+          } rounded-md transform rotate-45`}
+        />
       </motion.div>
-
       {/* Background Circles */}
-      <div className="fixed -bottom-40 -right-20 w-96 h-96 bg-red-400 rounded-full opacity-5 hidden md:block" />
-
+      <div
+        className={`fixed -bottom-40 -right-20 w-96 h-96 ${
+          isDarkMode ? "bg-red-600 opacity-10" : "bg-red-400 opacity-5"
+        } rounded-full hidden md:block`}
+      />{" "}
       <motion.div
         variants={rotatingAnimation}
         animate="animate"
         className="fixed top-14 -left-10 md:right-40"
       >
-        <div className="w-32 h-32 border-4 border-blue-200 rounded-full opacity-10" />
+        <div
+          className={`w-32 h-32 border-4 ${
+            isDarkMode
+              ? "border-blue-600 opacity-15"
+              : "border-blue-200 opacity-10"
+          } rounded-full`}
+        />
       </motion.div>
-
       {/* Pattern overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-white/0 to-purple-50/50 opacity-80" />
+      <div
+        className={`absolute inset-0 ${
+          isDarkMode
+            ? "bg-gradient-to-br from-blue-950/30 via-transparent to-purple-950/30"
+            : "bg-gradient-to-br from-blue-50/50 via-white/0 to-purple-50/50"
+        } opacity-80`}
+      />
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-pink-50 flex flex-col overflow-hidden">
+    <div
+      className={`min-h-screen ${
+        isDarkMode
+          ? "bg-gradient-to-br from-gray-900 via-gray-800 to-indigo-950"
+          : "bg-gradient-to-br from-blue-50 via-white to-pink-50"
+      } flex flex-col overflow-hidden`}
+    >
       <BackgroundElements />
       <Header />
 
@@ -146,7 +174,11 @@ const HomePage: React.FC = () => {
             variants={itemVariants}
           >
             <motion.div
-              className="bg-white/80 backdrop-blur-lg rounded-2xl p-8 border border-blue-100 shadow-lg relative overflow-hidden"
+              className={`${
+                isDarkMode
+                  ? "bg-gray-800/80 border-gray-700"
+                  : "bg-white/80 border-blue-100"
+              } backdrop-blur-lg rounded-2xl p-8 border shadow-lg relative overflow-hidden`}
               whileHover={{
                 boxShadow: "0 8px 30px rgba(59, 130, 246, 0.15)",
               }}
@@ -157,19 +189,24 @@ const HomePage: React.FC = () => {
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 className="p-3 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full w-fit mb-6"
               >
-                <Sparkles className="w-6 h-6 text-blue-600" />
+                <Sparkles
+                  className={`w-6 h-6 ${
+                    isDarkMode ? "text-blue-400" : "text-blue-600"
+                  }`}
+                />
               </motion.div>
-
               <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-6">
                 Welcome to RESO Dashboard
-              </h2>
-
-              <p className="text-gray-700 text-lg mb-6">
+              </h2>{" "}
+              <p
+                className={`text-lg mb-6 ${
+                  isDarkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                 Access all our resources, events, and project information in one
                 place. Collaborate effectively with team members and track
                 progress.
               </p>
-
               <div className="flex flex-wrap gap-4">
                 <motion.div
                   whileHover={{ scale: 1.05 }}
@@ -190,14 +227,17 @@ const HomePage: React.FC = () => {
                 >
                   <Link
                     to="/learn-more"
-                    className="flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-900 px-5 py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200"
+                    className={`flex items-center gap-2 ${
+                      isDarkMode
+                        ? "bg-gray-700 hover:bg-gray-600 text-white border-gray-600"
+                        : "bg-white hover:bg-gray-50 text-gray-900 border-gray-200"
+                    } px-5 py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border`}
                   >
                     Learn More
                     <ChevronRight className="w-5 h-5" />
                   </Link>
                 </motion.div>
               </div>
-
               {/* Decorative Elements */}
               <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-purple-200 rounded-full opacity-20" />
               <div className="absolute top-10 right-20 w-16 h-16 bg-blue-200 rounded-full opacity-30" />
@@ -207,22 +247,38 @@ const HomePage: React.FC = () => {
 
         {/* Featured Resources Section */}
         <motion.div className="mt-12" variants={itemVariants}>
+          {" "}
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-indigo-100 rounded-lg">
-              <FileText className="w-6 h-6 text-indigo-600" />
+            <div
+              className={`p-2 ${
+                isDarkMode ? "bg-indigo-900" : "bg-indigo-100"
+              } rounded-lg`}
+            >
+              <FileText
+                className={`w-6 h-6 ${
+                  isDarkMode ? "text-indigo-400" : "text-indigo-600"
+                }`}
+              />
             </div>
-            <h3 className="text-2xl font-bold text-indigo-900">
+            <h3
+              className={`text-2xl font-bold ${
+                isDarkMode ? "text-indigo-300" : "text-indigo-900"
+              }`}
+            >
               Featured Resources
             </h3>
           </div>
-
           <motion.div
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
             variants={containerVariants}
           >
             {/* Resource Card 1 */}
             <motion.div
-              className="bg-white/80 backdrop-blur-lg border border-blue-100 rounded-xl overflow-hidden shadow-lg relative"
+              className={`${
+                isDarkMode
+                  ? "bg-gray-800/80 border-gray-700"
+                  : "bg-white/80 border-blue-100"
+              } backdrop-blur-lg border rounded-xl overflow-hidden shadow-lg relative`}
               variants={itemVariants}
               whileHover={{
                 y: -5,
@@ -232,14 +288,28 @@ const HomePage: React.FC = () => {
             >
               <div className="p-6 relative z-10">
                 <div className="flex items-center mb-4">
-                  <div className="p-2 rounded-full bg-blue-100 text-blue-600 mr-3">
+                  <div
+                    className={`p-2 rounded-full ${
+                      isDarkMode
+                        ? "bg-blue-900 text-blue-400"
+                        : "bg-blue-100 text-blue-600"
+                    } mr-3`}
+                  >
                     <FileText size={24} />
                   </div>
-                  <h4 className="text-xl font-semibold text-blue-900">
+                  <h4
+                    className={`text-xl font-semibold ${
+                      isDarkMode ? "text-blue-300" : "text-blue-900"
+                    }`}
+                  >
                     Research Papers
                   </h4>
                 </div>
-                <p className="text-gray-600 mb-6">
+                <p
+                  className={` mb-6 ${
+                    isDarkMode ? "text-gray-300" : "text-gray-600"
+                  }`}
+                >
                   Access our collection of research papers and publications from
                   team members.
                 </p>
@@ -258,7 +328,11 @@ const HomePage: React.FC = () => {
 
             {/* Resource Card 2 */}
             <motion.div
-              className="bg-white/80 backdrop-blur-lg border border-purple-100 rounded-xl overflow-hidden shadow-lg relative"
+              className={`${
+                isDarkMode
+                  ? "bg-gray-800/80 border-gray-700"
+                  : "bg-white/80 border-purple-100"
+              } backdrop-blur-lg border rounded-xl overflow-hidden shadow-lg relative`}
               variants={itemVariants}
               whileHover={{
                 y: -5,
@@ -266,35 +340,65 @@ const HomePage: React.FC = () => {
               }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
+              {" "}
               <div className="p-6 relative z-10">
                 <div className="flex items-center mb-4">
-                  <div className="p-2 rounded-full bg-purple-100 text-purple-600 mr-3">
+                  <div
+                    className={`p-2 rounded-full ${
+                      isDarkMode
+                        ? "bg-purple-900 text-purple-400"
+                        : "bg-purple-100 text-purple-600"
+                    } mr-3`}
+                  >
                     <FileText size={24} />
                   </div>
-                  <h4 className="text-xl font-semibold text-purple-900">
+                  <h4
+                    className={`text-xl font-semibold ${
+                      isDarkMode ? "text-purple-300" : "text-purple-900"
+                    }`}
+                  >
                     Project Repository
                   </h4>
                 </div>
-                <p className="text-gray-600 mb-6">
+                <p
+                  className={`mb-6 ${
+                    isDarkMode ? "text-gray-300" : "text-gray-600"
+                  }`}
+                >
                   Explore our GitHub repositories and contribute to ongoing
                   projects.
-                </p>
+                </p>{" "}
                 <Link
                   to="/dashboard?tab=projects"
-                  className="flex items-center text-purple-600 hover:text-purple-800 font-medium"
+                  className={`flex items-center font-medium ${
+                    isDarkMode
+                      ? "text-purple-400 hover:text-purple-300"
+                      : "text-purple-600 hover:text-purple-800"
+                  }`}
                 >
                   View Projects <ExternalLink className="ml-2 w-4 h-4" />
                 </Link>
               </div>
-
-              {/* Decorative corner elements */}
-              <div className="absolute -top-4 -left-4 w-8 h-8 border-t-2 border-l-2 border-purple-400 rounded-tl-lg" />
-              <div className="absolute -bottom-4 -right-4 w-8 h-8 border-b-2 border-r-2 border-purple-400 rounded-br-lg" />
+              {/* Decorative corner elements */}{" "}
+              <div
+                className={`absolute -top-4 -left-4 w-8 h-8 border-t-2 border-l-2 ${
+                  isDarkMode ? "border-purple-600" : "border-purple-400"
+                } rounded-tl-lg`}
+              />
+              <div
+                className={`absolute -bottom-4 -right-4 w-8 h-8 border-b-2 border-r-2 ${
+                  isDarkMode ? "border-purple-600" : "border-purple-400"
+                } rounded-br-lg`}
+              />
             </motion.div>
 
             {/* Resource Card 3 */}
             <motion.div
-              className="bg-white/80 backdrop-blur-lg border border-indigo-100 rounded-xl overflow-hidden shadow-lg relative"
+              className={`${
+                isDarkMode
+                  ? "bg-gray-800/80 border-gray-700"
+                  : "bg-white/80 border-indigo-100"
+              } backdrop-blur-lg border rounded-xl overflow-hidden shadow-lg relative`}
               variants={itemVariants}
               whileHover={{
                 y: -5,
@@ -302,30 +406,56 @@ const HomePage: React.FC = () => {
               }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
+              {" "}
               <div className="p-6 relative z-10">
                 <div className="flex items-center mb-4">
-                  <div className="p-2 rounded-full bg-indigo-100 text-indigo-600 mr-3">
+                  <div
+                    className={`p-2 rounded-full ${
+                      isDarkMode
+                        ? "bg-indigo-900 text-indigo-400"
+                        : "bg-indigo-100 text-indigo-600"
+                    } mr-3`}
+                  >
                     <FileText size={24} />
                   </div>
-                  <h4 className="text-xl font-semibold text-indigo-900">
+                  <h4
+                    className={`text-xl font-semibold ${
+                      isDarkMode ? "text-indigo-300" : "text-indigo-900"
+                    }`}
+                  >
                     Educational Materials
                   </h4>
                 </div>
-                <p className="text-gray-600 mb-6">
+                <p
+                  className={`mb-6 ${
+                    isDarkMode ? "text-gray-300" : "text-gray-600"
+                  }`}
+                >
                   Access tutorials, guides, and educational content created by
                   our team.
-                </p>
+                </p>{" "}
                 <Link
                   to="/dashboard?tab=docs"
-                  className="flex items-center text-indigo-600 hover:text-indigo-800 font-medium"
+                  className={`flex items-center font-medium ${
+                    isDarkMode
+                      ? "text-indigo-400 hover:text-indigo-300"
+                      : "text-indigo-600 hover:text-indigo-800"
+                  }`}
                 >
                   View Materials <ExternalLink className="ml-2 w-4 h-4" />
                 </Link>
               </div>
-
-              {/* Decorative corner elements */}
-              <div className="absolute -top-4 -left-4 w-8 h-8 border-t-2 border-l-2 border-indigo-400 rounded-tl-lg" />
-              <div className="absolute -bottom-4 -right-4 w-8 h-8 border-b-2 border-r-2 border-indigo-400 rounded-br-lg" />
+              {/* Decorative corner elements */}{" "}
+              <div
+                className={`absolute -top-4 -left-4 w-8 h-8 border-t-2 border-l-2 ${
+                  isDarkMode ? "border-indigo-600" : "border-indigo-400"
+                } rounded-tl-lg`}
+              />
+              <div
+                className={`absolute -bottom-4 -right-4 w-8 h-8 border-b-2 border-r-2 ${
+                  isDarkMode ? "border-indigo-600" : "border-indigo-400"
+                } rounded-br-lg`}
+              />
             </motion.div>
           </motion.div>
         </motion.div>

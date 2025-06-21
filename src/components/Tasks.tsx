@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { FileText, Plus, CheckCircle, Clock, AlertCircle } from "lucide-react";
+import { useTheme } from "../contexts/useTheme";
 
 interface Task {
   id: number;
@@ -59,28 +60,53 @@ const Tasks: React.FC<TasksProps> = ({
   setNewTask,
   handleAddTask,
 }) => {
+  const { isDarkMode } = useTheme();
   const getStatusInfo = (status: string) => {
     switch (status) {
       case "completed":
         return {
-          bgClass: "bg-green-50 border-green-100",
-          textClass: "text-green-800",
-          icon: <CheckCircle className="w-4 h-4 text-green-600" />,
+          bgClass: isDarkMode
+            ? "bg-green-900/30 border-green-800"
+            : "bg-green-50 border-green-100",
+          textClass: isDarkMode ? "text-green-300" : "text-green-800",
+          icon: (
+            <CheckCircle
+              className={`w-4 h-4 ${
+                isDarkMode ? "text-green-400" : "text-green-600"
+              }`}
+            />
+          ),
           label: "Completed",
         };
       case "in-progress":
         return {
-          bgClass: "bg-blue-50 border-blue-100",
-          textClass: "text-blue-800",
-          icon: <Clock className="w-4 h-4 text-blue-600" />,
+          bgClass: isDarkMode
+            ? "bg-blue-900/30 border-blue-800"
+            : "bg-blue-50 border-blue-100",
+          textClass: isDarkMode ? "text-blue-300" : "text-blue-800",
+          icon: (
+            <Clock
+              className={`w-4 h-4 ${
+                isDarkMode ? "text-blue-400" : "text-blue-600"
+              }`}
+            />
+          ),
           label: "In Progress",
         };
       case "pending":
       default:
         return {
-          bgClass: "bg-amber-50 border-amber-100",
-          textClass: "text-amber-800",
-          icon: <AlertCircle className="w-4 h-4 text-amber-600" />,
+          bgClass: isDarkMode
+            ? "bg-amber-900/30 border-amber-800"
+            : "bg-amber-50 border-amber-100",
+          textClass: isDarkMode ? "text-amber-300" : "text-amber-800",
+          icon: (
+            <AlertCircle
+              className={`w-4 h-4 ${
+                isDarkMode ? "text-amber-400" : "text-amber-600"
+              }`}
+            />
+          ),
           label: "Pending",
         };
     }
@@ -210,26 +236,56 @@ const Tasks: React.FC<TasksProps> = ({
         {/* Decorative Elements */}
         <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-blue-200 rounded-full opacity-20" />
         <div className="absolute top-10 right-20 w-16 h-16 bg-indigo-200 rounded-full opacity-30" />
-      </motion.div>
-
+      </motion.div>{" "}
       <motion.div
-        className="bg-white/80 backdrop-blur-lg p-6 rounded-2xl shadow-lg border border-blue-100 relative overflow-hidden"
+        className={`${
+          isDarkMode
+            ? "bg-gray-800/80 border-gray-700"
+            : "bg-white/80 border-blue-100"
+        } backdrop-blur-lg p-6 rounded-2xl shadow-lg border relative overflow-hidden`}
         variants={itemVariants}
         whileHover={{
-          boxShadow: "0 8px 30px rgba(59, 130, 246, 0.15)",
+          boxShadow: `0 8px 30px ${
+            isDarkMode ? "rgba(59, 130, 246, 0.2)" : "rgba(59, 130, 246, 0.15)"
+          }`,
         }}
       >
         <div className="flex items-center gap-3 mb-6 z-10 relative">
-          <div className="p-2 bg-indigo-100 rounded-lg">
-            <FileText className="w-5 h-5 text-indigo-600" />
+          <div
+            className={`p-2 ${
+              isDarkMode ? "bg-indigo-900" : "bg-indigo-100"
+            } rounded-lg`}
+          >
+            <FileText
+              className={`w-5 h-5 ${
+                isDarkMode ? "text-indigo-400" : "text-indigo-600"
+              }`}
+            />
           </div>
-          <h3 className="text-xl font-bold text-indigo-900">Task List</h3>
+          <h3
+            className={`text-xl font-bold ${
+              isDarkMode ? "text-indigo-300" : "text-indigo-900"
+            }`}
+          >
+            Task List
+          </h3>
         </div>
 
         {tasks.length > 0 ? (
           <div className="overflow-x-auto relative z-10">
-            <table className="min-w-full divide-y divide-gray-200 rounded-xl overflow-hidden">
-              <thead className="bg-gradient-to-r from-blue-50 to-indigo-50">
+            {" "}
+            <table
+              className={`min-w-full divide-y ${
+                isDarkMode ? "divide-gray-700" : "divide-gray-200"
+              } rounded-xl overflow-hidden`}
+            >
+              <thead
+                className={`${
+                  isDarkMode
+                    ? "bg-gradient-to-r from-blue-900/30 to-indigo-900/30"
+                    : "bg-gradient-to-r from-blue-50 to-indigo-50"
+                }`}
+              >
                 <tr>
                   <th
                     scope="col"
@@ -257,7 +313,13 @@ const Tasks: React.FC<TasksProps> = ({
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody
+                className={`${
+                  isDarkMode
+                    ? "bg-gray-800 divide-y divide-gray-700"
+                    : "bg-white divide-y divide-gray-200"
+                }`}
+              >
                 {tasks.map((task) => {
                   const statusInfo = getStatusInfo(task.status);
 
