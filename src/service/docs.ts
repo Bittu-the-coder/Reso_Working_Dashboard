@@ -4,11 +4,12 @@ const baseUrl = (
   import.meta.env.VITE_API_BASE_URL || "http://localhost:3030"
 ).replace(/\/+$/, "");
 
-export interface DocInput {
+export type DocInput = {
   title: string;
   url: string;
   department: string;
-}
+  addedOn: string; // Add this line
+};
 
 export interface Doc {
   id: string;
