@@ -4,13 +4,13 @@ const asyncHandler = require("../utils/asyncHandler.js");
 const ErrorResponse = require("../utils/ErrorResponse.js");
 
 const addDocs = asyncHandler(async (req, res) => {
-  const { title, url } = req.body;
+  const { title, url, department } = req.body;
 
-  if (!title || !url) {
-    throw new ErrorResponse("Please provide title and URL", 400);
+  if (!title || !url || !department) {
+    throw new ErrorResponse("Please provide title, URL and department", 400);
   }
 
-  // Validate URL format - we don't want path-to-regexp to try to parse this as a route
+  // Validate URL format
   try {
     new URL(url);
   } catch (error) {
@@ -28,7 +28,8 @@ const addDocs = asyncHandler(async (req, res) => {
 
   const newDoc = await Docs.create({
     title,
-    url
+    url,
+    department
   });
 
   res.status(201).json({
@@ -37,20 +38,27 @@ const addDocs = asyncHandler(async (req, res) => {
       id: newDoc._id,
       title: newDoc.title,
       url: newDoc.url,
+      department: newDoc.department,
       addedOn: newDoc.addedOn
     }
   });
 });
 
-
 const getDocs = asyncHandler(async (req, res) => {
-  const docs = await Docs.find({}).select('title url addedOn _id').lean();
+  const { department } = req.query;
 
-  // Transform the MongoDB _id to id for frontend compatibility
+  let query = {};
+  if (department) {
+    query.department = department;
+  }
+
+  const docs = await Docs.find(query).select('title url department addedOn _id').lean();
+
   const formattedDocs = docs.map(doc => ({
     id: doc._id.toString(),
     title: doc.title,
     url: doc.url,
+    department: doc.department,
     addedOn: doc.addedOn
   }));
 
@@ -63,19 +71,19 @@ const getDocs = asyncHandler(async (req, res) => {
 
 const updateDocs = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { title, url } = req.body;
+  const { title, url, department } = req.body;
 
   if (!id) {
     throw new ErrorResponse("Document ID is required", 400);
   }
 
-  if (!title || !url) {
-    throw new ErrorResponse("Please provide title and URL", 400);
+  if (!title || !url || !department) {
+    throw new ErrorResponse("Please provide title, URL and department", 400);
   }
 
   const updatedDoc = await Docs.findByIdAndUpdate(
     id,
-    { title, url },
+    { title, url, department },
     { new: true, runValidators: true }
   );
 
@@ -89,6 +97,7 @@ const updateDocs = asyncHandler(async (req, res) => {
       id: updatedDoc._id.toString(),
       title: updatedDoc.title,
       url: updatedDoc.url,
+      department: updatedDoc.department,
       addedOn: updatedDoc.addedOn
     }
   });

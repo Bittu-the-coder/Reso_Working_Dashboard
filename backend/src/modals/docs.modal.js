@@ -6,7 +6,8 @@ const docsSchema = new mongoose.Schema({
     required: [true, 'Please add a title'],
     trim: true,
     maxlength: [200, 'Title cannot be more than 200 characters']
-  }, url: {
+  },
+  url: {
     type: String,
     required: [true, 'Please add a URL'],
     unique: true,
@@ -22,6 +23,12 @@ const docsSchema = new mongoose.Schema({
       },
       message: props => `${props.value} is not a valid URL!`
     }
+  },
+  department: {
+    type: String,
+    required: [true, 'Please select a department'],
+    enum: ['dev', 'marketing', 'outreach', 'social media', 'other'],
+    default: 'other'
   },
   addedOn: {
     type: String,

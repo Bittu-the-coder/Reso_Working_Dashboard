@@ -7,15 +7,13 @@ import {
   Edit,
   Plus,
   Calendar,
-  FileEdit,
-  PlusCircle,
-  List,
 } from "lucide-react";
 
-export interface GoogleDoc {
+interface GoogleDoc {
   id: string;
   title: string;
   url: string;
+  department: string;
   addedOn: string;
 }
 
@@ -24,9 +22,10 @@ interface GoogleDocsProps {
   newDoc: {
     title: string;
     url: string;
+    department: string;
   };
   setNewDoc: React.Dispatch<
-    React.SetStateAction<{ title: string; url: string }>
+    React.SetStateAction<{ title: string; url: string; department: string }>
   >;
   handleAddDoc: (e: React.FormEvent) => Promise<void>;
   handleUpdateDoc: (
@@ -74,21 +73,23 @@ const GoogleDocs: React.FC<GoogleDocsProps> = ({
   handleDeleteDoc,
   loading,
 }) => {
-  const [editingDoc, setEditingDoc] = useState<GoogleDoc | null>(null);
-  const [editFormData, setEditFormData] = useState({
-    title: "",
-    url: "",
-  });
+  const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
+  const [showAddForm, setShowAddForm] = useState<boolean>(false);
 
-  // Group documents by date
+  // Filter docs by selected department
+  const filteredDocs =
+    selectedDepartment === "all"
+      ? docs
+      : docs.filter((doc) => doc.department === selectedDepartment);
+
+  // Group documents by date (using filteredDocs instead of docs)
   const groupDocsByDate = () => {
     const grouped: { [key: string]: GoogleDoc[] } = {};
-    // Sort docs by date (newest first)
-    const sortedDocs = [...docs].sort(
+    const sortedDocs = [...filteredDocs].sort(
       (a, b) => new Date(b.addedOn).getTime() - new Date(a.addedOn).getTime()
     );
     sortedDocs.forEach((doc) => {
-      const date = doc.addedOn.split("T")[0]; // Extract just the date part
+      const date = doc.addedOn.split("T")[0];
       if (!grouped[date]) {
         grouped[date] = [];
       }
@@ -97,33 +98,6 @@ const GoogleDocs: React.FC<GoogleDocsProps> = ({
     return grouped;
   };
   const groupedDocs = groupDocsByDate();
-
-  const startEditing = (doc: GoogleDoc) => {
-    setEditingDoc(doc);
-    setEditFormData({
-      title: doc.title,
-      url: doc.url,
-    });
-  };
-
-  const cancelEditing = () => {
-    setEditingDoc(null);
-  };
-
-  const handleEditSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingDoc) return;
-
-    try {
-      await handleUpdateDoc(editingDoc.id, {
-        title: editFormData.title,
-        url: editFormData.url,
-      });
-      setEditingDoc(null);
-    } catch (error) {
-      console.error("Error updating document:", error);
-    }
-  };
 
   // Format date to be more readable (e.g., "June 17, 2023")
   const formatDate = (dateString: string) => {
@@ -136,67 +110,149 @@ const GoogleDocs: React.FC<GoogleDocsProps> = ({
   };
   return (
     <motion.div
-      className="space-y-4 sm:space-y-6"
+      className="space-y-6"
       initial="hidden"
       animate="visible"
       variants={containerVariants}
     >
+      {" "}
+      {/* Header and Filter Section */}
       <motion.div
-        className="bg-white/80 backdrop-blur-lg p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-lg border border-blue-100 relative overflow-hidden"
+        className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-blue-100 shadow-lg relative overflow-hidden"
         variants={itemVariants}
+        whileHover={{ boxShadow: "0 8px 30px rgba(59, 130, 246, 0.15)" }}
       >
-        <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6 z-10 relative">
-          <div className="p-1.5 sm:p-2 bg-blue-100 rounded-lg">
-            {editingDoc ? (
-              <FileEdit className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
-            ) : (
-              <PlusCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
-            )}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-indigo-100 rounded-lg">
+              <FileText className="w-5 h-5 text-indigo-600" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-800">Team Documents</h1>
           </div>
-          <h3 className="text-lg sm:text-xl font-bold text-indigo-900 truncate">
-            {editingDoc ? "Edit Document" : "Add Google Document"}
-          </h3>
+
+          <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+            <select
+              value={selectedDepartment}
+              onChange={(e) => setSelectedDepartment(e.target.value)}
+              className="bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+            >
+              <option value="all">All Departments</option>
+              <option value="dev">Development</option>
+              <option value="marketing">Marketing</option>
+              <option value="outreach">Outreach</option>
+              <option value="social media">Social Media</option>
+              <option value="other">Other</option>
+            </select>
+
+            <motion.button
+              onClick={() => setShowAddForm(!showAddForm)}
+              className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 justify-center"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Plus className="w-4 h-4" />
+              {showAddForm ? "Cancel" : "Add Document"}
+            </motion.button>
+          </div>
         </div>
 
-        {editingDoc ? (
-          <form onSubmit={handleEditSubmit} className="space-y-4 z-10 relative">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Department Quick Filters */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {["all", "dev", "marketing", "outreach", "social media", "other"].map(
+            (dept) => (
+              <motion.button
+                key={dept}
+                onClick={() => setSelectedDepartment(dept)}
+                className={`px-3 py-1 rounded-full text-xs font-medium ${
+                  selectedDepartment === dept
+                    ? "bg-indigo-600 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {dept === "all"
+                  ? "All"
+                  : dept.charAt(0).toUpperCase() + dept.slice(1)}
+              </motion.button>
+            )
+          )}
+        </div>
+      </motion.div>{" "}
+      {/* Add Document Form */}
+      {showAddForm && (
+        <motion.div
+          className="bg-white/80 backdrop-blur-lg rounded-xl shadow-sm border border-blue-100 p-6 relative overflow-hidden"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.2 }}
+        >
+          {/* Decorative corner elements */}
+          <div className="absolute -top-3 -left-3 w-6 h-6 border-t-2 border-l-2 border-blue-200 rounded-tl-lg" />
+          <div className="absolute -bottom-3 -right-3 w-6 h-6 border-b-2 border-r-2 border-blue-200 rounded-br-lg" />
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">
+            Add New Document
+          </h2>
+          <form onSubmit={handleAddDoc} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-blue-800 mb-2">
-                  Document Title
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Title
                 </label>
                 <input
                   type="text"
-                  className="w-full bg-white border border-blue-200 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-blue-900 placeholder-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
-                  value={editFormData.title}
+                  className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  placeholder="Document title"
+                  value={newDoc.title}
                   onChange={(e) =>
-                    setEditFormData({ ...editFormData, title: e.target.value })
+                    setNewDoc({ ...newDoc, title: e.target.value })
                   }
                   required
-                  disabled={loading.updatingDoc}
                 />
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-blue-800 mb-2">
-                  Google Docs URL
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  URL
                 </label>
                 <input
                   type="url"
-                  className="w-full bg-white border border-blue-200 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-blue-900 placeholder-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
-                  value={editFormData.url}
+                  className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  placeholder="https://docs.google.com/document/d/..."
+                  value={newDoc.url}
                   onChange={(e) =>
-                    setEditFormData({ ...editFormData, url: e.target.value })
+                    setNewDoc({ ...newDoc, url: e.target.value })
                   }
                   required
-                  disabled={loading.updatingDoc}
                 />
               </div>
-            </div>
-            <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Department
+                </label>
+                <select
+                  className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  value={newDoc.department}
+                  onChange={(e) =>
+                    setNewDoc({ ...newDoc, department: e.target.value })
+                  }
+                  required
+                >
+                  <option value="dev">Development</option>
+                  <option value="marketing">Marketing</option>
+                  <option value="outreach">Outreach</option>
+                  <option value="social media">Social Media</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>{" "}
+            <div className="flex flex-wrap justify-end gap-3 pt-2">
               <motion.button
                 type="button"
-                onClick={cancelEditing}
-                className="bg-gray-100 border border-blue-200 text-blue-800 hover:bg-gray-200 transition-colors py-2 sm:py-3 px-4 sm:px-6 rounded-lg font-semibold text-sm sm:text-base w-full sm:w-auto"
+                onClick={() => setShowAddForm(false)}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium text-sm"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -204,198 +260,191 @@ const GoogleDocs: React.FC<GoogleDocsProps> = ({
               </motion.button>
               <motion.button
                 type="submit"
-                className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600 transition-colors py-2 sm:py-3 px-4 sm:px-6 rounded-lg font-semibold shadow-md disabled:opacity-50 text-sm sm:text-base w-full sm:w-auto"
-                disabled={loading.updatingDoc}
-                whileHover={{
-                  scale: 1.02,
-                  boxShadow: "0 4px 15px rgba(59, 130, 246, 0.4)",
-                }}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium text-sm flex items-center gap-2"
+                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-              >
-                {loading.updatingDoc ? "Updating..." : "Update Document"}
-              </motion.button>
-            </div>
-          </form>
-        ) : (
-          <form onSubmit={handleAddDoc} className="space-y-4 z-10 relative">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-blue-800 mb-2">
-                  Document Title
-                </label>
-                <input
-                  type="text"
-                  className="w-full bg-white border border-blue-200 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-blue-900 placeholder-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
-                  placeholder="Meeting Notes"
-                  value={newDoc.title}
-                  onChange={(e) =>
-                    setNewDoc({ ...newDoc, title: e.target.value })
-                  }
-                  required
-                  disabled={loading.addingDoc}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-blue-800 mb-2">
-                  Google Docs URL
-                </label>
-                <input
-                  type="url"
-                  className="w-full bg-white border border-blue-200 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-blue-900 placeholder-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
-                  placeholder="https://docs.google.com/document/d/..."
-                  value={newDoc.url}
-                  onChange={(e) =>
-                    setNewDoc({ ...newDoc, url: e.target.value })
-                  }
-                  required
-                  disabled={loading.addingDoc}
-                />
-              </div>
-            </div>
-            <div className="flex justify-end">
-              <motion.button
-                type="submit"
-                className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600 transition-colors py-2 sm:py-3 px-4 sm:px-6 rounded-lg font-semibold shadow-md disabled:opacity-50 flex items-center gap-2 text-sm sm:text-base w-full sm:w-auto"
                 disabled={loading.addingDoc}
-                whileHover={{
-                  scale: 1.02,
-                  boxShadow: "0 4px 15px rgba(59, 130, 246, 0.4)",
-                }}
-                whileTap={{ scale: 0.98 }}
               >
-                <Plus className="w-4 h-4" />
-                {loading.addingDoc ? "Adding..." : "Add Document"}
+                {loading.addingDoc ? (
+                  <span className="flex items-center gap-2">
+                    <svg
+                      className="animate-spin h-4 w-4 text-white"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Adding...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    <Plus className="w-4 h-4" />
+                    Add Document
+                  </span>
+                )}
               </motion.button>
             </div>
           </form>
-        )}
-
-        {/* Decorative corner elements */}
-        <div className="absolute -top-3 -left-3 w-6 h-6 border-t-2 border-l-2 border-blue-200 rounded-tl-lg" />
-        <div className="absolute -top-3 -right-3 w-6 h-6 border-t-2 border-r-2 border-blue-200 rounded-tr-lg" />
-        <div className="absolute -bottom-3 -left-3 w-6 h-6 border-b-2 border-l-2 border-blue-200 rounded-bl-lg" />
-        <div className="absolute -bottom-3 -right-3 w-6 h-6 border-b-2 border-r-2 border-blue-200 rounded-br-lg" />
-
-        {/* Decorative Elements */}
-        <div className="absolute -bottom-4 -right-4 w-20 h-20 bg-gradient-to-r from-blue-100/50 to-indigo-100/50 rounded-full opacity-50" />
-      </motion.div>{" "}
+        </motion.div>
+      )}
+      {/* Documents List */}
       <motion.div
-        className="bg-white/80 backdrop-blur-lg p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-lg border border-blue-100 relative overflow-hidden"
+        className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
         variants={itemVariants}
       >
-        <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6 z-10 relative">
-          <div className="p-1.5 sm:p-2 bg-indigo-100 rounded-lg">
-            <List className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
-          </div>
-          <h3 className="text-lg sm:text-xl font-bold text-indigo-900">
-            Google Documents
-          </h3>
-        </div>
-
-        {docs.length > 0 ? (
-          <motion.div
-            className="space-y-6 z-10 relative"
-            variants={containerVariants}
-          >
+        {filteredDocs.length > 0 ? (
+          <div className="divide-y divide-gray-200">
             {Object.entries(groupedDocs).map(([date, docsForDate]) => (
-              <div key={date} className="space-y-3">
-                <h4 className="text-blue-900 font-medium border-b border-blue-100 pb-2 flex items-center gap-2 flex-wrap text-sm sm:text-base">
-                  <Calendar className="w-4 h-4 shrink-0" />
-                  <span className="truncate">{formatDate(date)}</span>
-                </h4>
+              <div key={date} className="p-4 sm:p-6">
+                {" "}
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4">
+                  <Calendar className="w-5 h-5 text-gray-500" />
+                  <h3 className="text-lg font-medium text-gray-800">
+                    {formatDate(date)}
+                  </h3>
+                  <span className="text-sm text-gray-500 ml-auto">
+                    {docsForDate.length} document
+                    {docsForDate.length !== 1 ? "s" : ""}
+                  </span>
+                </div>
                 <div className="grid grid-cols-1 gap-3">
                   {docsForDate.map((doc) => (
                     <motion.div
                       key={doc.id}
-                      className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
-                      variants={itemVariants}
-                      whileHover={{
-                        scale: 1.01,
-                        boxShadow: "0 4px 12px rgba(59, 130, 246, 0.1)",
-                      }}
+                      className="p-3 sm:p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
+                      whileHover={{ y: -2 }}
                     >
-                      <div className="flex items-start sm:items-center w-full">
-                        <div className="p-2 rounded-full bg-blue-100 text-blue-600 mr-3 shrink-0">
-                          <FileText size={20} />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <h4 className="text-blue-900 font-medium truncate">
-                            {doc.title}
-                          </h4>
-                          <p className="text-blue-700 text-sm flex items-center gap-1 flex-wrap">
-                            <Calendar className="w-3 h-3 shrink-0" />
-                            <span className="truncate">
-                              Added on {new Date(doc.addedOn).toLocaleString()}
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                            <div
+                              className={`p-1.5 rounded-md ${
+                                doc.department === "dev"
+                                  ? "bg-blue-100 text-blue-800"
+                                  : doc.department === "marketing"
+                                  ? "bg-purple-100 text-purple-800"
+                                  : doc.department === "outreach"
+                                  ? "bg-green-100 text-green-800"
+                                  : doc.department === "social media"
+                                  ? "bg-pink-100 text-pink-800"
+                                  : "bg-gray-100 text-gray-800"
+                              }`}
+                            >
+                              <span className="text-xs font-medium">
+                                {doc.department.charAt(0).toUpperCase() +
+                                  doc.department.slice(1)}
+                              </span>
+                            </div>
+                            <h4 className="text-base font-medium text-gray-800 truncate max-w-full sm:max-w-xs md:max-w-sm">
+                              {doc.title}
+                            </h4>
+                          </div>{" "}
+                          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-500">
+                            <span>
+                              Added on{" "}
+                              {new Date(doc.addedOn).toLocaleDateString()}
                             </span>
-                          </p>
+                            <span className="hidden sm:inline">•</span>
+                            <a
+                              href={doc.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-indigo-600 hover:underline flex items-center gap-1"
+                              aria-label={`Open document: ${doc.title}`}
+                            >
+                              <ExternalLink className="w-3 h-3" />
+                              Open document
+                            </a>
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex space-x-3 self-end sm:self-center mt-2 sm:mt-0">
-                        <motion.button
-                          onClick={() => startEditing(doc)}
-                          className="text-blue-600 hover:text-blue-800 transition-colors p-2 disabled:opacity-50 bg-blue-50 rounded-lg"
-                          disabled={loading.updatingDoc || loading.deletingDoc}
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          title="Edit"
-                          aria-label="Edit document"
-                        >
-                          <Edit size={18} />
-                        </motion.button>
-                        <motion.a
-                          href={doc.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-indigo-600 hover:text-indigo-800 transition-colors p-2 bg-indigo-50 rounded-lg"
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          title="Open in new tab"
-                          aria-label="Open document in new tab"
-                        >
-                          <ExternalLink size={18} />
-                        </motion.a>
-                        <motion.button
-                          onClick={() => handleDeleteDoc(doc.id)}
-                          className="text-red-500 hover:text-red-700 transition-colors p-2 disabled:opacity-50 bg-red-50 rounded-lg"
-                          disabled={loading.deletingDoc}
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          title="Delete"
-                          aria-label="Delete document"
-                        >
-                          <Trash2 size={18} />
-                        </motion.button>
+
+                        <div className="flex gap-2 sm:ml-auto">
+                          {" "}
+                          <motion.button
+                            onClick={() =>
+                              handleUpdateDoc(doc.id, { title: doc.title })
+                            }
+                            className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg"
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            title="Edit"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </motion.button>
+                          <motion.button
+                            onClick={() => handleDeleteDoc(doc.id)}
+                            className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            title="Delete"
+                            disabled={loading.deletingDoc}
+                          >
+                            {loading.deletingDoc ? (
+                              <svg
+                                className="animate-spin h-4 w-4 text-red-600"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                ></circle>
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                ></path>
+                              </svg>
+                            ) : (
+                              <Trash2 className="w-4 h-4" />
+                            )}
+                          </motion.button>
+                        </div>
                       </div>
                     </motion.div>
                   ))}
                 </div>
               </div>
             ))}
-          </motion.div>
+          </div>
         ) : (
-          <div className="bg-blue-50/50 rounded-xl p-4 sm:p-8 text-center border border-blue-100">
-            <div className="flex justify-center mb-4">
-              <div className="p-2 sm:p-3 bg-blue-100 rounded-full">
-                <FileText className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500" />
-              </div>
+          <div className="p-8 text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 mb-4">
+              <FileText className="h-5 w-5 text-gray-500" />
             </div>
-            <p className="text-blue-700 mb-2 text-sm sm:text-base">
-              No documents added yet.
+            <h3 className="text-lg font-medium text-gray-900 mb-1">
+              No documents found
+            </h3>
+            <p className="text-gray-500 mb-6">
+              {selectedDepartment === "all"
+                ? "You haven't added any documents yet."
+                : `No documents found for ${selectedDepartment} department.`}
             </p>
-            <p className="text-blue-600 text-xs sm:text-sm">
-              Add your first Google document above.
-            </p>
+            <motion.button
+              onClick={() => setShowAddForm(true)}
+              className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Plus className="-ml-0.5 mr-1.5 h-4 w-4" />
+              Add Document
+            </motion.button>
           </div>
         )}
-
-        {/* Decorative corner elements */}
-        <div className="absolute -top-3 -left-3 w-6 h-6 border-t-2 border-l-2 border-indigo-200 rounded-tl-lg" />
-        <div className="absolute -top-3 -right-3 w-6 h-6 border-t-2 border-r-2 border-indigo-200 rounded-tr-lg" />
-        <div className="absolute -bottom-3 -left-3 w-6 h-6 border-b-2 border-l-2 border-indigo-200 rounded-bl-lg" />
-        <div className="absolute -bottom-3 -right-3 w-6 h-6 border-b-2 border-r-2 border-indigo-200 rounded-br-lg" />
-
-        {/* Decorative Elements */}
-        <div className="absolute -bottom-4 -right-4 w-20 h-20 bg-gradient-to-r from-indigo-100/50 to-purple-100/50 rounded-full opacity-50" />
       </motion.div>
     </motion.div>
   );

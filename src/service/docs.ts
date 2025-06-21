@@ -21,9 +21,26 @@ interface ApiErrorResponse {
   message: string;
 }
 
-export const getAllDocs = async (): Promise<Doc[]> => {
+export interface DocInput {
+  title: string;
+  url: string;
+  department: string;
+}
+
+export interface Doc {
+  id: string;
+  title: string;
+  url: string;
+  department: string;
+  addedOn: string;
+}
+
+export const getAllDocs = async (department?: string): Promise<Doc[]> => {
   try {
-    const response = await axios.get(`${baseUrl}/api/docs`);
+    const url = department
+      ? `${baseUrl}/api/docs?department=${encodeURIComponent(department)}`
+      : `${baseUrl}/api/docs`;
+    const response = await axios.get(url);
     return response.data.data;
   } catch (error: unknown) {
     console.error("Error fetching documents:", error);
