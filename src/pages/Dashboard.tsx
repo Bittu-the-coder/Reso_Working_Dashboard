@@ -100,7 +100,7 @@ const Dashboard: React.FC = () => {
   ];
 
   // Task state
-  const [tasks, setTasks] = useState<Task[]>([
+  const tasks: Task[] = [
     {
       id: 1,
       title: "Design homepage mockup",
@@ -122,7 +122,7 @@ const Dashboard: React.FC = () => {
       deadline: "2023-11-15",
       status: "completed",
     },
-  ]);
+  ];
 
   // const [newTask, setNewTask] = useState({
   //   title: "",
