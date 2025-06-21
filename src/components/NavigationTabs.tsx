@@ -8,6 +8,7 @@ import {
   FileText,
   Settings,
   NotebookPen,
+  Users,
 } from "lucide-react";
 
 interface NavigationTabsProps {
@@ -31,9 +32,9 @@ const NavigationTabs: React.FC<NavigationTabsProps> = ({
     setActiveTab(tab);
     navigate(`/dashboard?tab=${tab}`);
   };
-
   const tabs: TabItem[] = [
     { id: "overview", label: "Overview", icon: <BarChart3 size={18} /> },
+    { id: "teams", label: "Teams", icon: <Users size={18} /> },
     { id: "events", label: "Events", icon: <CalendarClock size={18} /> },
     { id: "projects", label: "Projects", icon: <Code size={18} /> },
     { id: "tasks", label: "Tasks", icon: <FileText size={18} /> },

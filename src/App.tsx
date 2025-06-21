@@ -1,13 +1,14 @@
 import { Routes, Route } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import LearnMorePage from "./pages/LearnMorePage";
-import Dashboard from "./pages/Dashboard";
+import DashboardWithAuth from "./pages/DashboardWithAuth";
+import { AuthProvider } from "./components/Auth";
 import { Toaster } from "react-hot-toast";
 import { AnimatePresence } from "framer-motion";
 
 const App = () => {
   return (
-    <>
+    <AuthProvider>
       <Toaster
         position="top-right"
         toastOptions={{
@@ -37,11 +38,11 @@ const App = () => {
       <AnimatePresence mode="wait">
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard" element={<DashboardWithAuth />} />
           <Route path="/learn-more" element={<LearnMorePage />} />
         </Routes>
       </AnimatePresence>
-    </>
+    </AuthProvider>
   );
 };
 
