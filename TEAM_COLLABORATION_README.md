@@ -119,7 +119,6 @@ I have successfully implemented a comprehensive **Team Collaboration System** fo
 - `Teams.tsx` - Team management interface
 - `CollaborativeTasks.tsx` - Enhanced task management
 - `Auth.tsx` - Authentication system (login/register)
-- `DashboardWithAuth.tsx` - Protected dashboard wrapper
 
 #### **API Integration:**
 

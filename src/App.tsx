@@ -8,8 +8,9 @@ import { useTheme } from "./contexts/useTheme";
 import { LoginPage } from "./pages/auth/Login";
 import { SignUpPage } from "./pages/auth/SignUp";
 import Dashboard from "./pages/Dashboard";
+import type { ReactElement } from "react";
 
-const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
+const ProtectedRoute = ({ children }: { children: ReactElement }) => {
   const { isAuthenticated, loading } = useAuth();
   const { isDarkMode } = useTheme();
 
