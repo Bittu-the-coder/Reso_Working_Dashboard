@@ -7,32 +7,20 @@ const baseUrl = (
 export interface DocInput {
   title: string;
   url: string;
+  department: string;
 }
 
 export interface Doc {
   id: string;
   title: string;
   url: string;
+  department: string;
   addedOn: string;
 }
 
 interface ApiErrorResponse {
   success: boolean;
   message: string;
-}
-
-export interface DocInput {
-  title: string;
-  url: string;
-  department: string;
-}
-
-export interface Doc {
-  id: string;
-  title: string;
-  url: string;
-  department: string;
-  addedOn: string;
 }
 
 export const getAllDocs = async (department?: string): Promise<Doc[]> => {

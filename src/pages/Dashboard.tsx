@@ -6,9 +6,10 @@ import NavigationTabs from "../components/NavigationTabs";
 import Overview from "../components/Overview";
 import Events from "../components/Events";
 import Projects from "../components/Projects";
-import Tasks from "../components/Tasks";
 import GoogleDocs from "../components/GoogleDocs";
 import Settings from "../components/Settings";
+import Teams from "../components/Teams";
+import CollaborativeTasks from "../components/CollaborativeTasks";
 import { getAllDocs, addDoc, updateDoc, deleteDoc } from "../service/docs";
 import type { DocInput } from "../service/docs";
 import { toast } from "react-hot-toast";
@@ -17,6 +18,7 @@ interface GoogleDoc {
   id: string;
   title: string;
   url: string;
+  department: string;
   addedOn: string;
 }
 
@@ -126,12 +128,12 @@ const Dashboard: React.FC = () => {
     deadline: "",
     status: "pending",
   });
-
   // Google Docs state
   const [docs, setDocs] = useState<GoogleDoc[]>([]);
   const [newDoc, setNewDoc] = useState({
     title: "",
     url: "",
+    department: "",
   });
   const [loading, setLoading] = useState({
     docs: false,
@@ -180,28 +182,6 @@ const Dashboard: React.FC = () => {
       description: "",
     });
   };
-
-  const handleAddTask = (e: React.FormEvent) => {
-    e.preventDefault();
-    const newId =
-      tasks.length > 0 ? Math.max(...tasks.map((task) => task.id)) + 1 : 1;
-
-    setTasks([
-      ...tasks,
-      {
-        ...newTask,
-        id: newId,
-      },
-    ]);
-
-    setNewTask({
-      title: "",
-      assignee: "",
-      deadline: "",
-      status: "pending",
-    });
-  };
-
   const handleAddDoc = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -211,7 +191,7 @@ const Dashboard: React.FC = () => {
       const addedDoc = await addDoc(docToAdd);
 
       setDocs([...docs, addedDoc]);
-      setNewDoc({ title: "", url: "" });
+      setNewDoc({ title: "", url: "", department: "" });
       toast.success("Document added successfully");
     } catch (error: unknown) {
       console.error("Error adding doc:", error);
@@ -268,11 +248,12 @@ const Dashboard: React.FC = () => {
       setLoading((prev) => ({ ...prev, deletingDoc: false }));
     }
   };
-
   const renderTabContent = () => {
     switch (activeTab) {
       case "overview":
         return <Overview events={events} projects={projects} tasks={tasks} />;
+      case "teams":
+        return <Teams />;
       case "events":
         return (
           <Events
@@ -285,14 +266,7 @@ const Dashboard: React.FC = () => {
       case "projects":
         return <Projects projects={projects} />;
       case "tasks":
-        return (
-          <Tasks
-            tasks={tasks}
-            newTask={newTask}
-            setNewTask={setNewTask}
-            handleAddTask={handleAddTask}
-          />
-        );
+        return <CollaborativeTasks />;
       case "docs":
         return (
           <GoogleDocs
