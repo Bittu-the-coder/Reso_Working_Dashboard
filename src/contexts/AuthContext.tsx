@@ -2,6 +2,7 @@ import React, { useState, createContext, useContext, useEffect } from "react";
 import { authAPI, type User } from "../service/teams";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 interface AuthContextType {
   user: User | null;
@@ -27,6 +28,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const token = Cookies.get("token");
@@ -56,6 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       Cookies.set("token", token, { expires: 30 });
       setUser(userData);
+      navigate("/dashboard");
       toast.success("Login successful!");
     } catch (error: any) {
       throw new Error(error.response?.data?.message || "Login failed");
@@ -69,6 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       Cookies.set("token", token, { expires: 30 });
       setUser(userData);
+      navigate("/dashboard");
       toast.success("Registration successful!");
     } catch (error: any) {
       throw new Error(error.response?.data?.message || "Registration failed");
@@ -78,6 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const logout = () => {
     Cookies.remove("token");
     setUser(null);
+    navigate("/");
     toast.success("Logged out successfully");
   };
 
@@ -89,48 +94,5 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     logout,
     loading,
   };
-
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
-
-export const AuthHeader: React.FC = () => {
-  const { user, logout } = useAuth();
-  const [showMenu, setShowMenu] = useState(false);
-
-  if (!user) return null;
-
-  return (
-    <div className="relative">
-      <button
-        onClick={() => setShowMenu(!showMenu)}
-        className="flex items-center space-x-2 bg-gray-100 rounded-lg px-3 py-2 hover:bg-gray-200"
-      >
-        <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-          <span className="text-white font-medium text-sm">
-            {user.name.charAt(0).toUpperCase()}
-          </span>
-        </div>
-        <span className="text-gray-700 font-medium">{user.name}</span>
-      </button>
-
-      {showMenu && (
-        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50 border">
-          <div className="py-1">
-            <div className="px-4 py-2 text-sm text-gray-600 border-b">
-              {user.email}
-            </div>
-            <button
-              onClick={() => {
-                logout();
-                setShowMenu(false);
-              }}
-              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-            >
-              Sign out
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
 };

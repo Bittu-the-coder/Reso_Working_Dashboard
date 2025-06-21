@@ -1,11 +1,40 @@
 import { Routes, Route } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import LearnMorePage from "./pages/LearnMorePage";
-import DashboardWithAuth from "./pages/DashboardWithAuth";
-import { AuthProvider } from "./contexts/AuthContext";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { Toaster } from "react-hot-toast";
 import { AnimatePresence } from "framer-motion";
 import { useTheme } from "./contexts/useTheme";
+import { LoginPage } from "./pages/auth/Login";
+import { SignUpPage } from "./pages/auth/SignUp";
+import Dashboard from "./pages/Dashboard";
+
+const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
+  const { isAuthenticated, loading } = useAuth();
+  const { isDarkMode } = useTheme();
+
+  if (loading) {
+    return (
+      <div
+        className={`min-h-screen flex items-center justify-center ${
+          isDarkMode ? "bg-gray-900" : "bg-white"
+        }`}
+      >
+        <div
+          className={`animate-spin rounded-full h-8 w-8 border-b-2 ${
+            isDarkMode ? "border-blue-400" : "border-blue-600"
+          }`}
+        ></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <LoginPage />;
+  }
+
+  return children;
+};
 
 const App = () => {
   const { isDarkMode } = useTheme();
@@ -43,7 +72,16 @@ const App = () => {
       <AnimatePresence mode="wait">
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/dashboard" element={<DashboardWithAuth />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignUpPage />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/learn-more" element={<LearnMorePage />} />
         </Routes>
       </AnimatePresence>

@@ -1,8 +1,8 @@
 import axios from "axios";
 import Cookies from "js-cookie";
+import { baseUrl } from "./api";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:3030/api";
+const API_BASE_URL = baseUrl;
 
 // Create axios instance
 const apiClient = axios.create({
@@ -27,7 +27,7 @@ apiClient.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       Cookies.remove("token");
-      window.location.href = "/login";
+      window.location.href = "/api/login";
     }
     return Promise.reject(error);
   }
@@ -105,25 +105,28 @@ export interface Task {
 export const teamAPI = {
   // Get all teams for user
   getTeams: () =>
-    apiClient.get<{ success: boolean; count: number; data: Team[] }>("/teams"),
+    apiClient.get<{ success: boolean; count: number; data: Team[] }>(
+      "/api/teams"
+    ),
 
   // Get single team
   getTeam: (id: string) =>
-    apiClient.get<{ success: boolean; data: Team }>(`/teams/${id}`),
+    apiClient.get<{ success: boolean; data: Team }>(`/api/teams/${id}`),
 
   // Create team
   createTeam: (data: { name: string; description?: string; settings?: any }) =>
-    apiClient.post<{ success: boolean; data: Team }>("/teams", data),
+    apiClient.post<{ success: boolean; data: Team }>("/api/teams", data),
 
   // Update team
   updateTeam: (
     id: string,
     data: { name?: string; description?: string; settings?: any }
-  ) => apiClient.put<{ success: boolean; data: Team }>(`/teams/${id}`, data),
+  ) =>
+    apiClient.put<{ success: boolean; data: Team }>(`/api/teams/${id}`, data),
 
   // Delete team
   deleteTeam: (id: string) =>
-    apiClient.delete<{ success: boolean; message: string }>(`/teams/${id}`),
+    apiClient.delete<{ success: boolean; message: string }>(`/api/teams/${id}`),
 
   // Invite user to team
   inviteUser: (
@@ -131,14 +134,14 @@ export const teamAPI = {
     data: { email: string; role?: "admin" | "member"; message?: string }
   ) =>
     apiClient.post<{ success: boolean; data: Invite }>(
-      `/teams/${teamId}/invite`,
+      `/api/teams/${teamId}/invite`,
       data
     ),
 
   // Remove member from team
   removeMember: (teamId: string, userId: string) =>
     apiClient.delete<{ success: boolean; message: string }>(
-      `/teams/${teamId}/members/${userId}`
+      `/api/teams/${teamId}/members/${userId}`
     ),
 
   // Update member role
@@ -148,7 +151,7 @@ export const teamAPI = {
     role: "admin" | "member"
   ) =>
     apiClient.put<{ success: boolean; message: string }>(
-      `/teams/${teamId}/members/${userId}/role`,
+      `/api/teams/${teamId}/members/${userId}/role`,
       { role }
     ),
 
@@ -158,7 +161,7 @@ export const teamAPI = {
     params?: { status?: string; assignedTo?: string; priority?: string }
   ) =>
     apiClient.get<{ success: boolean; count: number; data: Task[] }>(
-      `/teams/${teamId}/tasks`,
+      `/api/teams/${teamId}/tasks`,
       { params }
     ),
 
@@ -177,14 +180,14 @@ export const teamAPI = {
     }
   ) =>
     apiClient.post<{ success: boolean; data: Task }>(
-      `/teams/${teamId}/tasks`,
+      `/api/teams/${teamId}/tasks`,
       data
     ),
 
   // Get team invites
   getTeamInvites: (teamId: string, status?: string) =>
     apiClient.get<{ success: boolean; count: number; data: Invite[] }>(
-      `/teams/${teamId}/invites`,
+      `/api/teams/${teamId}/invites`,
       {
         params: status ? { status } : {},
       }
@@ -196,7 +199,7 @@ export const inviteAPI = {
   // Get user invites
   getUserInvites: (status = "pending") =>
     apiClient.get<{ success: boolean; count: number; data: Invite[] }>(
-      "/invites",
+      `/api/invites`,
       {
         params: { status },
       }
@@ -204,7 +207,7 @@ export const inviteAPI = {
 
   // Get single invite
   getInvite: (id: string) =>
-    apiClient.get<{ success: boolean; data: Invite }>(`/invites/${id}`),
+    apiClient.get<{ success: boolean; data: Invite }>(`/api/invites/${id}`),
 
   // Accept invite
   acceptInvite: (id: string) =>
@@ -212,31 +215,36 @@ export const inviteAPI = {
       success: boolean;
       message: string;
       data: { invite: Invite; team: Team };
-    }>(`/invites/${id}/accept`),
+    }>(`/api/invites/${id}/accept`),
 
   // Reject invite
   rejectInvite: (id: string) =>
     apiClient.post<{ success: boolean; message: string; data: Invite }>(
-      `/invites/${id}/reject`
+      `/api/invites/${id}/reject`
     ),
 
   // Cancel invite
   cancelInvite: (id: string) =>
-    apiClient.delete<{ success: boolean; message: string }>(`/invites/${id}`),
+    apiClient.delete<{ success: boolean; message: string }>(
+      `/api/invites/${id}`
+    ),
 };
 
 // User API functions
 export const userAPI = {
   // Search users
   getUsers: (params?: { search?: string; limit?: number }) =>
-    apiClient.get<{ success: boolean; count: number; data: User[] }>("/users", {
-      params,
-    }),
+    apiClient.get<{ success: boolean; count: number; data: User[] }>(
+      "/api/users",
+      {
+        params,
+      }
+    ),
 
   // Search users by email
   searchUsersByEmail: (email: string) =>
     apiClient.get<{ success: boolean; count: number; data: User[] }>(
-      "/users/search",
+      "/api/users/search",
       {
         params: { email },
       }
@@ -244,7 +252,7 @@ export const userAPI = {
 
   // Get user by ID
   getUser: (id: string) =>
-    apiClient.get<{ success: boolean; data: User }>(`/users/${id}`),
+    apiClient.get<{ success: boolean; data: User }>(`/api/users/${id}`),
 };
 
 // Auth API functions
@@ -252,35 +260,35 @@ export const authAPI = {
   // Register
   register: (data: { name: string; email: string; password: string }) =>
     apiClient.post<{ success: boolean; token: string; user: User }>(
-      "/auth/register",
+      "/api/auth/register",
       data
     ),
 
   // Login
   login: (data: { email: string; password: string }) =>
     apiClient.post<{ success: boolean; token: string; user: User }>(
-      "/auth/login",
+      "/api/auth/login",
       data
     ),
 
   // Logout
   logout: () =>
-    apiClient.get<{ success: boolean; data: string }>("/auth/logout"),
+    apiClient.get<{ success: boolean; data: string }>("/api/auth/logout"),
 
   // Get current user
-  getMe: () => apiClient.get<{ success: boolean; data: User }>("/auth/me"),
+  getMe: () => apiClient.get<{ success: boolean; data: User }>("/api/auth/me"),
 
   // Update user details
   updateDetails: (data: { name?: string; email?: string }) =>
     apiClient.put<{ success: boolean; data: User }>(
-      "/auth/updatedetails",
+      "/api/auth/updatedetails",
       data
     ),
 
   // Update password
   updatePassword: (data: { currentPassword: string; newPassword: string }) =>
     apiClient.put<{ success: boolean; token: string; user: User }>(
-      "/auth/updatepassword",
+      "/api/auth/updatepassword",
       data
     ),
 };
@@ -294,13 +302,16 @@ export const taskAPI = {
     priority?: string;
     assignedTo?: string;
   }) =>
-    apiClient.get<{ success: boolean; count: number; data: Task[] }>("/tasks", {
-      params,
-    }),
+    apiClient.get<{ success: boolean; count: number; data: Task[] }>(
+      "/api/tasks",
+      {
+        params,
+      }
+    ),
 
   // Get single task
   getTask: (id: string) =>
-    apiClient.get<{ success: boolean; data: Task }>(`/tasks/${id}`),
+    apiClient.get<{ success: boolean; data: Task }>(`/api/tasks/${id}`),
 
   // Create task
   createTask: (data: {
@@ -313,15 +324,15 @@ export const taskAPI = {
     assignedTo?: string[];
     tags?: string[];
     estimatedHours?: number;
-  }) => apiClient.post<{ success: boolean; data: Task }>("/tasks", data),
+  }) => apiClient.post<{ success: boolean; data: Task }>("/api/tasks", data),
 
   // Update task
   updateTask: (id: string, data: Partial<Task>) =>
-    apiClient.put<{ success: boolean; data: Task }>(`/tasks/${id}`, data),
+    apiClient.put<{ success: boolean; data: Task }>(`/api/tasks/${id}`, data),
 
   // Delete task
   deleteTask: (id: string) =>
-    apiClient.delete<{ success: boolean; message: string }>(`/tasks/${id}`),
+    apiClient.delete<{ success: boolean; message: string }>(`/api/tasks/${id}`),
 };
 
 export default apiClient;
