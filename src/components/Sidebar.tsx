@@ -30,12 +30,10 @@ const Sidebar: React.FC<SidebarProps> = ({ navigationItems }) => {
   const { logout } = useAuth();
   const location = useLocation();
   const { user } = useAuth();
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
 
   // Handle responsive state
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 1024);
       // Auto-collapse sidebar on medium screens
       if (window.innerWidth < 1280 && window.innerWidth >= 1024) {
         setIsCollapsed(true);
