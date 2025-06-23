@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { Routes, Route } from "react-router-dom";
-import Overview from "../components/Overview";
-import Events from "../components/Events";
-import Projects from "../components/Projects";
-import GoogleDocs from "../components/GoogleDocs";
-import Settings from "../components/Settings";
-import Teams from "../components/Teams";
-import CollaborativeTasks from "../components/CollaborativeTasks";
+import {
+  Home,
+  Users,
+  Calendar,
+  FileText,
+  Settings,
+  Activity,
+  Briefcase,
+} from "lucide-react";
+import { useTheme } from "../contexts/useTheme";
+import Footer from "../components/Footer";
+import Sidebar from "../components/Sidebar";
+import DashboardRoutes from "./DashboardRoutes";
 import { getAllDocs, addDoc, updateDoc, deleteDoc } from "../service/docs";
 import { toast } from "react-hot-toast";
-import { useTheme } from "../contexts/useTheme";
 
 interface GoogleDoc {
   id: string;
@@ -41,9 +45,7 @@ interface Event {
   description: string;
 }
 
-//Removed unused UpdateDoc interface
-
-const Dashboard: React.FC = () => {
+const DashboardLayout: React.FC = () => {
   const { isDarkMode } = useTheme();
 
   // Event state
@@ -71,7 +73,7 @@ const Dashboard: React.FC = () => {
   });
 
   // Project state
-  const projects: Project[] = [
+  const [projects] = useState<Project[]>([
     {
       id: 1,
       name: "RESO Website Redesign",
@@ -90,10 +92,10 @@ const Dashboard: React.FC = () => {
       progress: 60,
       members: 5,
     },
-  ];
+  ]);
 
   // Task state
-  const tasks: Task[] = [
+  const [tasks] = useState<Task[]>([
     {
       id: 1,
       title: "Design homepage mockup",
@@ -115,14 +117,8 @@ const Dashboard: React.FC = () => {
       deadline: "2023-11-15",
       status: "completed",
     },
-  ];
+  ]);
 
-  // const [newTask, setNewTask] = useState({
-  //   title: "",
-  //   assignee: "",
-  //   deadline: "",
-  //   status: "pending",
-  // });
   // Google Docs state
   const [docs, setDocs] = useState<GoogleDoc[]>([]);
   const [newDoc, setNewDoc] = useState({
@@ -173,6 +169,7 @@ const Dashboard: React.FC = () => {
       description: "",
     });
   };
+
   const handleAddDoc = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -181,7 +178,7 @@ const Dashboard: React.FC = () => {
       const docToAdd = {
         title: newDoc.title,
         url: newDoc.url,
-        department: newDoc.department, // Make sure this is included
+        department: newDoc.department,
         addedOn: currentDate,
       };
       const addedDoc = await addDoc(docToAdd);
@@ -202,6 +199,7 @@ const Dashboard: React.FC = () => {
       setLoading((prev) => ({ ...prev, addingDoc: false }));
     }
   };
+
   const handleUpdateDoc = async (
     id: string,
     updatedData: Partial<GoogleDoc>
@@ -242,132 +240,153 @@ const Dashboard: React.FC = () => {
       await deleteDoc(id);
       setDocs(docs.filter((doc) => doc.id !== id));
       toast.success("Document deleted successfully");
-    } catch (error) {
-      console.error("Error deleting doc:", error);
-      toast.error("Failed to delete document");
     } finally {
       setLoading((prev) => ({ ...prev, deletingDoc: false }));
     }
-  }; // We're now using Routes instead of a switch statement
-  // This helps with direct linking and browser history
+  };
+  const navigationItems = [
+    {
+      name: "Dashboard",
+      icon: <Home />,
+      path: "/dashboard",
+    },
+    {
+      name: "Projects",
+      icon: <Briefcase />,
+      path: "/dashboard/projects",
+    },
+    {
+      name: "Teams",
+      icon: <Users />,
+      path: "/dashboard/teams",
+    },
+    {
+      name: "Events",
+      icon: <Calendar />,
+      path: "/dashboard/events",
+    },
+    {
+      name: "Documents",
+      icon: <FileText />,
+      path: "/dashboard/documents",
+    },
+    {
+      name: "Tasks",
+      icon: <Activity />,
+      path: "/dashboard/tasks",
+    },
+    {
+      name: "Settings",
+      icon: <Settings />,
+      path: "/dashboard/settings",
+    },
+  ];
 
   return (
-    <div className="space-y-6">
-      {/* Decorative background elements */}
-      <div className="absolute top-20 left-0 w-72 h-72 bg-gradient-to-br from-blue-200/30 to-purple-300/30 rounded-full blur-3xl -z-10" />
-      <div className="absolute bottom-20 right-0 w-96 h-96 bg-gradient-to-br from-indigo-200/30 to-pink-300/30 rounded-full blur-3xl -z-10" />
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-lg max-h-lg bg-gradient-to-br from-purple-200/20 to-pink-200/20 rounded-full blur-3xl -z-10" />
+    <div
+      className={`min-h-screen flex ${
+        isDarkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"
+      }`}
+    >
+      {/* Sidebar Component */}
+      <Sidebar navigationItems={navigationItems} />
 
-      <div
-        className={`${
-          isDarkMode
-            ? "bg-gray-800/80 border-gray-700"
-            : "bg-white/80 border-blue-100"
-        } backdrop-blur-lg p-6 rounded-2xl border shadow-lg relative`}
-      >
-        {/* Decorative corner elements */}
-        <div
-          className={`absolute -top-4 -left-4 w-8 h-8 border-t-2 border-l-2 ${
-            isDarkMode ? "border-blue-600" : "border-blue-200"
-          } rounded-tl-lg`}
-        />
-        <div
-          className={`absolute -top-4 -right-4 w-8 h-8 border-t-2 border-r-2 ${
-            isDarkMode ? "border-blue-600" : "border-blue-200"
-          } rounded-tr-lg`}
-        />
-        <div
-          className={`absolute -bottom-4 -left-4 w-8 h-8 border-b-2 border-l-2 ${
-            isDarkMode ? "border-blue-600" : "border-blue-200"
-          } rounded-bl-lg`}
-        />
-        <div
-          className={`absolute -bottom-4 -right-4 w-8 h-8 border-b-2 border-r-2 ${
-            isDarkMode ? "border-blue-600" : "border-blue-200"
-          } rounded-br-lg`}
-        />
-        <div className="flex items-center gap-3 mb-6">
-          <div
-            className={`p-2 ${
-              isDarkMode
-                ? "bg-gradient-to-r from-blue-900 to-indigo-900"
-                : "bg-gradient-to-r from-blue-100 to-indigo-200"
-            } rounded-lg`}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className={`w-6 h-6 ${
-                isDarkMode ? "text-indigo-400" : "text-indigo-600"
-              }`}
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        <main className="flex-1 p-4 lg:p-8">
+          <div className="space-y-6">
+            {/* Decorative background elements */}
+            <div className="absolute top-20 left-0 w-72 h-72 bg-gradient-to-br from-blue-200/30 to-purple-300/30 rounded-full blur-3xl -z-10" />
+            <div className="absolute bottom-20 right-0 w-96 h-96 bg-gradient-to-br from-indigo-200/30 to-pink-300/30 rounded-full blur-3xl -z-10" />
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-lg max-h-lg bg-gradient-to-br from-purple-200/20 to-pink-200/20 rounded-full blur-3xl -z-10" />
+
+            <div
+              className={`${
+                isDarkMode
+                  ? "bg-gray-800/80 border-gray-700"
+                  : "bg-white/80 border-blue-100"
+              } backdrop-blur-lg p-6 rounded-2xl border shadow-lg relative`}
             >
-              <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-              <line x1="16" x2="16" y1="2" y2="6" />
-              <line x1="8" x2="8" y1="2" y2="6" />
-              <line x1="3" x2="21" y1="10" y2="10" />
-            </svg>
-          </div>
-          <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600">
-            Dashboard
-          </h2>
-        </div>
+              {/* Decorative corner elements */}
+              <div
+                className={`absolute -top-4 -left-4 w-8 h-8 border-t-2 border-l-2 ${
+                  isDarkMode ? "border-blue-600" : "border-blue-200"
+                } rounded-tl-lg`}
+              />
+              <div
+                className={`absolute -top-4 -right-4 w-8 h-8 border-t-2 border-r-2 ${
+                  isDarkMode ? "border-blue-600" : "border-blue-200"
+                } rounded-tr-lg`}
+              />
+              <div
+                className={`absolute -bottom-4 -left-4 w-8 h-8 border-b-2 border-l-2 ${
+                  isDarkMode ? "border-blue-600" : "border-blue-200"
+                } rounded-bl-lg`}
+              />
+              <div
+                className={`absolute -bottom-4 -right-4 w-8 h-8 border-b-2 border-r-2 ${
+                  isDarkMode ? "border-blue-600" : "border-blue-200"
+                } rounded-br-lg`}
+              />
+              <div className="flex items-center gap-3 mb-6">
+                <div
+                  className={`p-2 ${
+                    isDarkMode
+                      ? "bg-gradient-to-r from-blue-900 to-indigo-900"
+                      : "bg-gradient-to-r from-blue-100 to-indigo-200"
+                  } rounded-lg`}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className={`w-6 h-6 ${
+                      isDarkMode ? "text-indigo-400" : "text-indigo-600"
+                    }`}
+                  >
+                    <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                    <line x1="16" x2="16" y1="2" y2="6" />
+                    <line x1="8" x2="8" y1="2" y2="6" />
+                    <line x1="3" x2="21" y1="10" y2="10" />
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600">
+                  Dashboard
+                </h2>
+              </div>
 
-        {/* Remove the NavigationTabs component */}
-
-        <div className="mt-6">
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <Overview events={events} projects={projects} tasks={tasks} />
-              }
-            />
-            <Route path="/teams" element={<Teams />} />
-            <Route
-              path="/events"
-              element={
-                <Events
+              <div className="mt-6">
+                <DashboardRoutes
                   events={events}
                   newEvent={newEvent}
                   setNewEvent={setNewEvent}
-                  handleAddEvent={handleAddEvent}
-                />
-              }
-            />
-            <Route
-              path="/projects"
-              element={<Projects projects={projects} />}
-            />
-            <Route path="/tasks" element={<CollaborativeTasks />} />
-            <Route
-              path="/docs"
-              element={
-                <GoogleDocs
+                  projects={projects}
+                  tasks={tasks}
                   docs={docs}
                   newDoc={newDoc}
                   setNewDoc={setNewDoc}
-                  handleAddDoc={handleAddDoc}
-                  handleDeleteDoc={handleDeleteDoc}
-                  handleUpdateDoc={handleUpdateDoc}
                   loading={{
                     addingDoc: loading.addingDoc,
                     updatingDoc: loading.updatingDoc,
                     deletingDoc: loading.deletingDoc,
                   }}
+                  handleAddEvent={handleAddEvent}
+                  handleAddDoc={handleAddDoc}
+                  handleUpdateDoc={handleUpdateDoc}
+                  handleDeleteDoc={handleDeleteDoc}
                 />
-              }
-            />
-            <Route path="/settings" element={<Settings />} />
-          </Routes>
-        </div>
+              </div>
+            </div>
+          </div>
+        </main>
+        <Footer />
       </div>
     </div>
   );
 };
 
-export default Dashboard;
+export default DashboardLayout;

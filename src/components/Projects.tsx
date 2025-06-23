@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Code, ChevronRight, Users, Edit } from "lucide-react";
+import { Code, ChevronRight, Users } from "lucide-react";
+import { useTheme } from "../contexts/useTheme";
 
 interface Project {
   id: number;
@@ -38,6 +39,8 @@ const itemVariants = {
 };
 
 const Projects: React.FC<ProjectsProps> = ({ projects }) => {
+  const { isDarkMode } = useTheme();
+
   const progressColorClass = (progress: number) => {
     if (progress < 30) return "from-red-500 to-red-600";
     if (progress < 70) return "from-yellow-500 to-orange-500";
@@ -52,17 +55,37 @@ const Projects: React.FC<ProjectsProps> = ({ projects }) => {
       variants={containerVariants}
     >
       <motion.div
-        className="bg-white/80 backdrop-blur-lg p-6 rounded-2xl shadow-lg border border-blue-100 relative overflow-hidden"
+        className={`${
+          isDarkMode
+            ? "bg-gray-800/80 border-gray-700"
+            : "bg-white/80 border-blue-100"
+        } backdrop-blur-lg p-6 rounded-2xl shadow-lg border relative overflow-hidden`}
         variants={itemVariants}
         whileHover={{
-          boxShadow: "0 8px 30px rgba(59, 130, 246, 0.15)",
+          boxShadow: `0 8px 30px ${
+            isDarkMode ? "rgba(59, 130, 246, 0.2)" : "rgba(59, 130, 246, 0.15)"
+          }`,
         }}
       >
         <div className="flex items-center gap-3 mb-6 z-10 relative">
-          <div className="p-2 bg-blue-100 rounded-lg">
-            <Code className="w-5 h-5 text-blue-600" />
+          <div
+            className={`p-2 ${
+              isDarkMode ? "bg-blue-900" : "bg-blue-100"
+            } rounded-lg`}
+          >
+            <Code
+              className={`w-5 h-5 ${
+                isDarkMode ? "text-blue-400" : "text-blue-600"
+              }`}
+            />
           </div>
-          <h3 className="text-xl font-bold text-blue-900">Active Projects</h3>
+          <h3
+            className={`text-xl font-bold ${
+              isDarkMode ? "text-blue-300" : "text-blue-900"
+            }`}
+          >
+            Active Projects
+          </h3>
         </div>
 
         {projects.length > 0 ? (
@@ -73,27 +96,53 @@ const Projects: React.FC<ProjectsProps> = ({ projects }) => {
             {projects.map((project) => (
               <motion.div
                 key={project.id}
-                className="border border-blue-100 rounded-xl p-5 bg-gradient-to-r from-blue-50/80 to-indigo-50/80 shadow-sm relative overflow-hidden"
+                className={`border rounded-xl p-5 shadow-sm relative overflow-hidden ${
+                  isDarkMode
+                    ? "border-gray-600 bg-gradient-to-r from-gray-700/80 to-gray-800/80"
+                    : "border-blue-100 bg-gradient-to-r from-blue-50/80 to-indigo-50/80"
+                }`}
                 variants={itemVariants}
                 whileHover={{
                   y: -5,
-                  boxShadow: "0 8px 30px rgba(59, 130, 246, 0.15)",
+                  boxShadow: `0 8px 30px ${
+                    isDarkMode
+                      ? "rgba(59, 130, 246, 0.2)"
+                      : "rgba(59, 130, 246, 0.15)"
+                  }`,
                   transition: { type: "spring", stiffness: 300, damping: 20 },
                 }}
               >
                 <div className="flex justify-between items-start">
-                  <h4 className="text-lg font-bold text-blue-900">
+                  <h4
+                    className={`text-lg font-bold ${
+                      isDarkMode ? "text-blue-300" : "text-blue-900"
+                    }`}
+                  >
                     {project.name}
                   </h4>
                 </div>
                 <div className="mt-4">
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-blue-700 font-medium">Progress</span>
-                    <span className="text-blue-900 font-bold">
+                    <span
+                      className={`${
+                        isDarkMode ? "text-blue-400" : "text-blue-700"
+                      } font-medium`}
+                    >
+                      Progress
+                    </span>
+                    <span
+                      className={`${
+                        isDarkMode ? "text-blue-300" : "text-blue-900"
+                      } font-bold`}
+                    >
                       {project.progress}%
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                  <div
+                    className={`w-full ${
+                      isDarkMode ? "bg-gray-700" : "bg-gray-200"
+                    } rounded-full h-2.5`}
+                  >
                     <motion.div
                       className={`h-2.5 rounded-full bg-gradient-to-r ${progressColorClass(
                         project.progress
@@ -108,56 +157,67 @@ const Projects: React.FC<ProjectsProps> = ({ projects }) => {
                     ></motion.div>
                   </div>
                 </div>
-                <div className="mt-4 text-sm text-blue-700 flex items-center">
-                  <Users className="w-4 h-4 mr-1" />
-                  <span>{project.members} team members</span>
-                </div>
-                <div className="mt-4 flex space-x-3">
-                  <motion.button
-                    className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 font-medium"
-                    whileHover={{ x: 2 }}
+                <div className="flex items-center mt-3 pt-3">
+                  <div
+                    className={`p-1.5 ${
+                      isDarkMode ? "bg-gray-600" : "bg-blue-100"
+                    } rounded mr-2`}
                   >
-                    View Details <ChevronRight className="w-4 h-4" />
-                  </motion.button>
-                  <motion.button
-                    className="flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-800 font-medium"
-                    whileHover={{ x: 2 }}
+                    <Users
+                      className={`w-3 h-3 ${
+                        isDarkMode ? "text-blue-300" : "text-blue-600"
+                      }`}
+                    />
+                  </div>
+                  <span
+                    className={`text-xs ${
+                      isDarkMode ? "text-gray-300" : "text-gray-600"
+                    }`}
                   >
-                    Edit <Edit className="w-4 h-4" />
-                  </motion.button>
-                </div>
+                    {project.members} team members
+                  </span>
 
-                {/* Decorative corner elements */}
-                <div className="absolute -top-2 -right-2 w-6 h-6 border-t-2 border-r-2 border-blue-300 rounded-tr-lg" />
-                <div className="absolute -bottom-2 -left-2 w-6 h-6 border-b-2 border-l-2 border-blue-300 rounded-bl-lg" />
+                  <motion.button
+                    className={`ml-auto flex items-center gap-1 text-xs ${
+                      isDarkMode
+                        ? "text-blue-400 hover:text-blue-300"
+                        : "text-blue-600 hover:text-blue-800"
+                    }`}
+                    whileHover={{ x: 3 }}
+                  >
+                    View Details <ChevronRight className="w-3 h-3" />
+                  </motion.button>
+                </div>
               </motion.div>
             ))}
           </motion.div>
         ) : (
-          <motion.div
-            className="text-center py-12 bg-blue-50/50 rounded-xl border border-blue-100"
-            variants={itemVariants}
+          <div
+            className={`text-center p-8 rounded-lg border ${
+              isDarkMode
+                ? "border-gray-700 bg-gray-800/40 text-gray-400"
+                : "border-blue-100 bg-blue-50/40 text-gray-500"
+            }`}
           >
-            <Code className="w-16 h-16 mx-auto text-blue-300 mb-4" />
-            <p className="text-blue-700">No projects found.</p>
-            <motion.button
-              className="mt-4 flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2 rounded-lg mx-auto"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Add Your First Project
-            </motion.button>
-          </motion.div>
+            <p>No active projects found.</p>
+          </div>
         )}
 
-        {/* Decorative corner elements */}
-        <div className="absolute -top-4 -left-4 w-8 h-8 border-t-2 border-l-2 border-blue-400 rounded-tl-lg" />
-        <div className="absolute -top-4 -right-4 w-8 h-8 border-t-2 border-r-2 border-blue-400 rounded-tr-lg" />
-        <div className="absolute -bottom-4 -left-4 w-8 h-8 border-b-2 border-l-2 border-blue-400 rounded-bl-lg" />
-        <div className="absolute -bottom-4 -right-4 w-8 h-8 border-b-2 border-r-2 border-blue-400 rounded-br-lg" />
-
-        {/* Decorative Elements */}
-        <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-blue-200 rounded-full opacity-10" />
+        <div
+          className={`mt-6 text-right ${
+            isDarkMode ? "text-blue-400" : "text-blue-600"
+          }`}
+        >
+          <motion.button
+            className={`inline-flex items-center gap-1 ${
+              isDarkMode ? "hover:text-blue-300" : "hover:text-blue-800"
+            }`}
+            whileHover={{ x: 3 }}
+          >
+            <span>View All Projects</span>
+            <ChevronRight className="w-4 h-4" />
+          </motion.button>
+        </div>
       </motion.div>
     </motion.div>
   );

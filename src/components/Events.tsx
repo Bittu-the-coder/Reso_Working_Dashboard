@@ -115,7 +115,11 @@ const Events: React.FC<EventsProps> = ({
               <input
                 type="text"
                 id="event-title"
-                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-shadow"
+                className={`w-full ${
+                  isDarkMode
+                    ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                    : "bg-white border-gray-200 text-gray-800 placeholder-gray-400"
+                } border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-shadow`}
                 value={newEvent.title}
                 onChange={(e) =>
                   setNewEvent({ ...newEvent, title: e.target.value })
@@ -136,7 +140,11 @@ const Events: React.FC<EventsProps> = ({
               <input
                 type="date"
                 id="event-date"
-                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-shadow"
+                className={`w-full ${
+                  isDarkMode
+                    ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                    : "bg-white border-gray-200 text-gray-800 placeholder-gray-400"
+                } border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-shadow`}
                 value={newEvent.date}
                 onChange={(e) =>
                   setNewEvent({ ...newEvent, date: e.target.value })
@@ -157,7 +165,11 @@ const Events: React.FC<EventsProps> = ({
             <textarea
               id="event-description"
               rows={3}
-              className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-shadow"
+              className={`w-full ${
+                isDarkMode
+                  ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                  : "bg-white border-gray-200 text-gray-800 placeholder-gray-400"
+              } border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-shadow`}
               value={newEvent.description}
               onChange={(e) =>
                 setNewEvent({
@@ -183,27 +195,71 @@ const Events: React.FC<EventsProps> = ({
         </form>
 
         {/* Decorative corner elements */}
-        <div className="absolute -top-4 -left-4 w-8 h-8 border-t-2 border-l-2 border-purple-400 rounded-tl-lg" />
-        <div className="absolute -top-4 -right-4 w-8 h-8 border-t-2 border-r-2 border-purple-400 rounded-tr-lg" />
-        <div className="absolute -bottom-4 -left-4 w-8 h-8 border-b-2 border-l-2 border-purple-400 rounded-bl-lg" />
-        <div className="absolute -bottom-4 -right-4 w-8 h-8 border-b-2 border-r-2 border-purple-400 rounded-br-lg" />
+        <div
+          className={`absolute -top-4 -left-4 w-8 h-8 border-t-2 border-l-2 ${
+            isDarkMode ? "border-purple-600" : "border-purple-400"
+          } rounded-tl-lg`}
+        />
+        <div
+          className={`absolute -top-4 -right-4 w-8 h-8 border-t-2 border-r-2 ${
+            isDarkMode ? "border-purple-600" : "border-purple-400"
+          } rounded-tr-lg`}
+        />
+        <div
+          className={`absolute -bottom-4 -left-4 w-8 h-8 border-b-2 border-l-2 ${
+            isDarkMode ? "border-purple-600" : "border-purple-400"
+          } rounded-bl-lg`}
+        />
+        <div
+          className={`absolute -bottom-4 -right-4 w-8 h-8 border-b-2 border-r-2 ${
+            isDarkMode ? "border-purple-600" : "border-purple-400"
+          } rounded-br-lg`}
+        />
 
         {/* Decorative Elements */}
-        <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-purple-200 rounded-full opacity-20" />
-        <div className="absolute top-10 right-20 w-16 h-16 bg-indigo-200 rounded-full opacity-30" />
+        <div
+          className={`absolute -bottom-6 -right-6 w-32 h-32 ${
+            isDarkMode ? "bg-purple-800" : "bg-purple-200"
+          } rounded-full opacity-20`}
+        />
+        <div
+          className={`absolute top-10 right-20 w-16 h-16 ${
+            isDarkMode ? "bg-indigo-800" : "bg-indigo-200"
+          } rounded-full opacity-30`}
+        />
       </motion.div>
       <motion.div
-        className="bg-white/80 backdrop-blur-lg p-6 rounded-2xl shadow-lg border border-blue-100 relative overflow-hidden"
+        className={`${
+          isDarkMode
+            ? "bg-gray-800/80 border-gray-700"
+            : "bg-white/80 border-blue-100"
+        } backdrop-blur-lg p-6 rounded-2xl shadow-lg border relative overflow-hidden`}
         variants={itemVariants}
         whileHover={{
-          boxShadow: "0 8px 30px rgba(59, 130, 246, 0.15)",
+          boxShadow: `0 8px 30px ${
+            isDarkMode ? "rgba(79, 70, 229, 0.2)" : "rgba(59, 130, 246, 0.15)"
+          }`,
         }}
       >
         <div className="flex items-center gap-3 mb-6 z-10 relative">
-          <div className="p-2 bg-indigo-100 rounded-lg">
-            <CalendarCheck className="w-5 h-5 text-indigo-600" />
+          <div
+            className={`p-2 ${
+              isDarkMode ? "bg-indigo-900" : "bg-indigo-100"
+            } rounded-lg`}
+          >
+            <CalendarCheck
+              className={`w-5 h-5 ${
+                isDarkMode ? "text-indigo-400" : "text-indigo-600"
+              }`}
+            />
           </div>
-          <h3 className="text-xl font-bold text-indigo-900">Upcoming Events</h3>
+          <h3
+            className={`text-xl font-bold ${
+              isDarkMode ? "text-indigo-300" : "text-indigo-900"
+            }`}
+          >
+            Upcoming Events
+          </h3>
         </div>
 
         <motion.div
@@ -217,48 +273,108 @@ const Events: React.FC<EventsProps> = ({
             .map((event) => (
               <motion.div
                 key={event.id}
-                className="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100 p-4 rounded-xl shadow-sm"
+                className={`${
+                  isDarkMode
+                    ? "bg-gradient-to-r from-gray-700 to-gray-750 border-gray-600"
+                    : "bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-100"
+                } border p-4 rounded-xl shadow-sm`}
                 variants={itemVariants}
                 whileHover={{
                   y: -5,
-                  boxShadow: "0 4px 20px rgba(79, 70, 229, 0.15)",
+                  boxShadow: `0 4px 20px ${
+                    isDarkMode
+                      ? "rgba(79, 70, 229, 0.2)"
+                      : "rgba(79, 70, 229, 0.15)"
+                  }`,
                   transition: { type: "spring", stiffness: 300, damping: 20 },
                 }}
               >
                 <div className="flex flex-wrap justify-between items-start mb-2">
-                  <h4 className="font-bold text-indigo-900">{event.title}</h4>
-                  <div className="flex items-center gap-1 px-3 py-1 bg-white/50 backdrop-blur-sm rounded-full border border-indigo-100 shadow-sm">
-                    <Calendar className="w-4 h-4 text-indigo-600" />
-                    <span className="text-xs font-medium text-indigo-800">
+                  <h4
+                    className={`font-bold ${
+                      isDarkMode ? "text-indigo-300" : "text-indigo-900"
+                    }`}
+                  >
+                    {event.title}
+                  </h4>
+                  <div
+                    className={`flex items-center gap-1 px-3 py-1 ${
+                      isDarkMode
+                        ? "bg-gray-600/50 border-gray-500"
+                        : "bg-white/50 border-indigo-100"
+                    } backdrop-blur-sm rounded-full border shadow-sm`}
+                  >
+                    <Calendar
+                      className={`w-4 h-4 ${
+                        isDarkMode ? "text-indigo-400" : "text-indigo-600"
+                      }`}
+                    />
+                    <span
+                      className={`text-xs font-medium ${
+                        isDarkMode ? "text-indigo-300" : "text-indigo-800"
+                      }`}
+                    >
                       {event.date}
                     </span>
                   </div>
                 </div>
-                <p className="text-indigo-800">{event.description}</p>
+                <p
+                  className={`${
+                    isDarkMode ? "text-gray-300" : "text-indigo-800"
+                  }`}
+                >
+                  {event.description}
+                </p>
               </motion.div>
             ))}
 
           {events.length === 0 && (
             <motion.div
-              className="text-center py-8 text-gray-500"
+              className={`text-center py-8 ${
+                isDarkMode ? "text-gray-400" : "text-gray-500"
+              }`}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
             >
-              <Calendar className="w-10 h-10 mx-auto mb-2 text-gray-400" />
+              <Calendar
+                className={`w-10 h-10 mx-auto mb-2 ${
+                  isDarkMode ? "text-gray-500" : "text-gray-400"
+                }`}
+              />
               <p>No events scheduled yet. Add your first event above!</p>
             </motion.div>
           )}
         </motion.div>
 
         {/* Decorative corner elements */}
-        <div className="absolute -top-4 -left-4 w-8 h-8 border-t-2 border-l-2 border-indigo-400 rounded-tl-lg" />
-        <div className="absolute -top-4 -right-4 w-8 h-8 border-t-2 border-r-2 border-indigo-400 rounded-tr-lg" />
-        <div className="absolute -bottom-4 -left-4 w-8 h-8 border-b-2 border-l-2 border-indigo-400 rounded-bl-lg" />
-        <div className="absolute -bottom-4 -right-4 w-8 h-8 border-b-2 border-r-2 border-indigo-400 rounded-br-lg" />
+        <div
+          className={`absolute -top-4 -left-4 w-8 h-8 border-t-2 border-l-2 ${
+            isDarkMode ? "border-indigo-600" : "border-indigo-400"
+          } rounded-tl-lg`}
+        />
+        <div
+          className={`absolute -top-4 -right-4 w-8 h-8 border-t-2 border-r-2 ${
+            isDarkMode ? "border-indigo-600" : "border-indigo-400"
+          } rounded-tr-lg`}
+        />
+        <div
+          className={`absolute -bottom-4 -left-4 w-8 h-8 border-b-2 border-l-2 ${
+            isDarkMode ? "border-indigo-600" : "border-indigo-400"
+          } rounded-bl-lg`}
+        />
+        <div
+          className={`absolute -bottom-4 -right-4 w-8 h-8 border-b-2 border-r-2 ${
+            isDarkMode ? "border-indigo-600" : "border-indigo-400"
+          } rounded-br-lg`}
+        />
 
         {/* Decorative Elements */}
-        <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-indigo-200 rounded-full opacity-20" />
+        <div
+          className={`absolute -bottom-6 -right-6 w-32 h-32 ${
+            isDarkMode ? "bg-indigo-800" : "bg-indigo-200"
+          } rounded-full opacity-20`}
+        />
       </motion.div>
     </motion.div>
   );

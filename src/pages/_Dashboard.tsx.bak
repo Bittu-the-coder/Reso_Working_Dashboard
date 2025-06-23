@@ -1,3 +1,10 @@
+// THIS IS A BACKUP OF THE OLD DASHBOARD.TSX THAT IS NO LONGER USED
+// KEEPING FOR REFERENCE IN CASE ANY FUNCTIONALITY NEEDS TO BE RECOVERED
+// THE FUNCTIONALITY HAS BEEN MOVED TO:
+// - src/layouts/DashboardLayout.tsx (state and handlers)
+// - src/layouts/DashboardRoutes.tsx (routing)
+// - src/components/Sidebar.tsx (navigation)
+
 import React, { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import Overview from "../components/Overview";

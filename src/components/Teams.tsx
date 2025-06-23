@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Users, Plus, Settings, Mail, Crown, Shield, User } from "lucide-react";
 import { teamAPI, inviteAPI, type Team, type Invite } from "../service/teams";
 import toast from "react-hot-toast";
+import { useTheme } from "../contexts/useTheme";
 
 const Teams: React.FC = () => {
+  const { isDarkMode } = useTheme();
   const [teams, setTeams] = useState<Team[]>([]);
   const [invites, setInvites] = useState<Invite[]>([]);
   const [loading, setLoading] = useState(true);
@@ -93,11 +95,14 @@ const Teams: React.FC = () => {
         return <User className="w-4 h-4 text-gray-500" />;
     }
   };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div
+          className={`animate-spin rounded-full h-8 w-8 border-b-2 ${
+            isDarkMode ? "border-blue-400" : "border-blue-600"
+          }`}
+        ></div>
       </div>
     );
   }
@@ -107,12 +112,26 @@ const Teams: React.FC = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div className="flex items-center space-x-2">
-          <Users className="w-6 h-6 text-blue-600" />
-          <h1 className="text-2xl font-bold text-gray-900">Teams</h1>
+          <Users
+            className={`w-6 h-6 ${
+              isDarkMode ? "text-blue-400" : "text-blue-600"
+            }`}
+          />
+          <h1
+            className={`text-2xl font-bold ${
+              isDarkMode ? "text-gray-200" : "text-gray-900"
+            }`}
+          >
+            Teams
+          </h1>
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+          className={`${
+            isDarkMode
+              ? "bg-blue-700 hover:bg-blue-800"
+              : "bg-blue-600 hover:bg-blue-700"
+          } text-white px-4 py-2 rounded-lg flex items-center space-x-2`}
         >
           <Plus className="w-4 h-4" />
           <span>Create Team</span>
@@ -121,25 +140,51 @@ const Teams: React.FC = () => {
 
       {/* Pending Invites */}
       {invites.length > 0 && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <h2 className="text-lg font-semibold text-gray-900 mb-3">
+        <div
+          className={`${
+            isDarkMode
+              ? "bg-yellow-900/30 border-yellow-800"
+              : "bg-yellow-50 border-yellow-200"
+          } border rounded-lg p-4`}
+        >
+          <h2
+            className={`text-lg font-semibold ${
+              isDarkMode ? "text-yellow-300" : "text-gray-900"
+            } mb-3`}
+          >
             Pending Invitations
           </h2>
           <div className="space-y-3">
             {invites.map((invite) => (
               <div
                 key={invite._id}
-                className="bg-white border border-yellow-200 rounded-lg p-4 flex items-center justify-between"
+                className={`${
+                  isDarkMode
+                    ? "bg-gray-800 border-yellow-800"
+                    : "bg-white border-yellow-200"
+                } border rounded-lg p-4 flex items-center justify-between`}
               >
                 <div>
-                  <h3 className="font-semibold text-gray-900">
+                  <h3
+                    className={`font-semibold ${
+                      isDarkMode ? "text-gray-200" : "text-gray-900"
+                    }`}
+                  >
                     {invite.teamId.name}
                   </h3>
-                  <p className="text-sm text-gray-600">
+                  <p
+                    className={`text-sm ${
+                      isDarkMode ? "text-gray-400" : "text-gray-600"
+                    }`}
+                  >
                     Invited by {invite.invitedBy.name} as {invite.role}
                   </p>
                   {invite.message && (
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p
+                      className={`text-sm ${
+                        isDarkMode ? "text-gray-500" : "text-gray-500"
+                      } mt-1`}
+                    >
                       "{invite.message}"
                     </p>
                   )}
@@ -169,15 +214,27 @@ const Teams: React.FC = () => {
         {teams.map((team) => (
           <div
             key={team._id}
-            className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow"
+            className={`${
+              isDarkMode
+                ? "bg-gray-800 border-gray-700 hover:bg-gray-750"
+                : "bg-white border-gray-200 hover:shadow-lg"
+            } border rounded-lg p-6 transition-all`}
           >
             <div className="flex items-start justify-between mb-4">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">
+                <h3
+                  className={`text-lg font-semibold ${
+                    isDarkMode ? "text-gray-200" : "text-gray-900"
+                  }`}
+                >
                   {team.name}
                 </h3>
                 {team.description && (
-                  <p className="text-sm text-gray-600 mt-1">
+                  <p
+                    className={`text-sm ${
+                      isDarkMode ? "text-gray-400" : "text-gray-600"
+                    } mt-1`}
+                  >
                     {team.description}
                   </p>
                 )}
@@ -187,7 +244,11 @@ const Teams: React.FC = () => {
                   setSelectedTeam(team);
                   setShowInviteModal(true);
                 }}
-                className="text-gray-400 hover:text-gray-600"
+                className={`${
+                  isDarkMode
+                    ? "text-gray-500 hover:text-gray-300"
+                    : "text-gray-400 hover:text-gray-600"
+                }`}
               >
                 <Settings className="w-5 h-5" />
               </button>
@@ -195,8 +256,18 @@ const Teams: React.FC = () => {
 
             <div className="space-y-3">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600">Members</span>
-                <span className="font-medium">{team.members.length}</span>
+                <span
+                  className={`${
+                    isDarkMode ? "text-gray-400" : "text-gray-600"
+                  }`}
+                >
+                  Members
+                </span>
+                <span
+                  className={`font-medium ${isDarkMode ? "text-white" : ""}`}
+                >
+                  {team.members.length}
+                </span>
               </div>
 
               <div className="space-y-2">
@@ -205,19 +276,35 @@ const Teams: React.FC = () => {
                     key={member.userId._id}
                     className="flex items-center space-x-2"
                   >
-                    <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
-                      <span className="text-xs font-medium text-gray-700">
+                    <div
+                      className={`w-6 h-6 ${
+                        isDarkMode ? "bg-gray-700" : "bg-gray-300"
+                      } rounded-full flex items-center justify-center`}
+                    >
+                      <span
+                        className={`text-xs font-medium ${
+                          isDarkMode ? "text-gray-300" : "text-gray-700"
+                        }`}
+                      >
                         {member.userId.name.charAt(0).toUpperCase()}
                       </span>
                     </div>
-                    <span className="text-sm text-gray-700">
+                    <span
+                      className={`text-sm ${
+                        isDarkMode ? "text-gray-300" : "text-gray-700"
+                      }`}
+                    >
                       {member.userId.name}
                     </span>
                     {getRoleIcon(member.role)}
                   </div>
                 ))}
                 {team.members.length > 3 && (
-                  <div className="text-xs text-gray-500">
+                  <div
+                    className={`text-xs ${
+                      isDarkMode ? "text-gray-400" : "text-gray-500"
+                    }`}
+                  >
                     +{team.members.length - 3} more members
                   </div>
                 )}
@@ -228,7 +315,11 @@ const Teams: React.FC = () => {
                   setSelectedTeam(team);
                   setShowInviteModal(true);
                 }}
-                className="w-full bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200 flex items-center justify-center space-x-2 text-sm"
+                className={`w-full ${
+                  isDarkMode
+                    ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                } py-2 rounded-lg flex items-center justify-center space-x-2 text-sm`}
               >
                 <Mail className="w-4 h-4" />
                 <span>Invite Members</span>

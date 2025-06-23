@@ -29,10 +29,14 @@ const NavigationTabs: React.FC<NavigationTabsProps> = ({
 }) => {
   const navigate = useNavigate();
   const { isDarkMode } = useTheme();
-
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
-    navigate(`/dashboard?tab=${tab}`);
+    // Use proper routing instead of query parameters
+    if (tab === "overview") {
+      navigate(`/dashboard`);
+    } else {
+      navigate(`/dashboard/${tab}`);
+    }
   };
   const tabs: TabItem[] = [
     { id: "overview", label: "Overview", icon: <BarChart3 size={18} /> },

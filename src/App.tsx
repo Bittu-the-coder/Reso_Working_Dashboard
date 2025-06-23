@@ -7,10 +7,10 @@ import { AnimatePresence } from "framer-motion";
 import { useTheme } from "./contexts/useTheme";
 import { LoginPage } from "./pages/auth/Login";
 import { SignUpPage } from "./pages/auth/SignUp";
-import Dashboard from "./pages/Dashboard";
-import type { ReactElement } from "react";
+import DashboardLayout from "./layouts/DashboardLayout";
+import PublicLayout from "./layouts/PublicLayout";
 
-const ProtectedRoute = ({ children }: { children: ReactElement }) => {
+const ProtectedRoute = () => {
   const { isAuthenticated, loading } = useAuth();
   const { isDarkMode } = useTheme();
 
@@ -34,7 +34,7 @@ const ProtectedRoute = ({ children }: { children: ReactElement }) => {
     return <LoginPage />;
   }
 
-  return children;
+  return <DashboardLayout />;
 };
 
 const App = () => {
@@ -72,18 +72,28 @@ const App = () => {
       />
       <AnimatePresence mode="wait">
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignUpPage />} />
+          {/* Public Routes */}
           <Route
-            path="/dashboard"
+            path="/"
             element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
+              <PublicLayout>
+                <HomePage />
+              </PublicLayout>
             }
           />
-          <Route path="/learn-more" element={<LearnMorePage />} />
+          <Route
+            path="/learn-more"
+            element={
+              <PublicLayout>
+                <LearnMorePage />
+              </PublicLayout>
+            }
+          />
+          {/* Auth Routes */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignUpPage />} />{" "}
+          {/* Protected Routes */}
+          <Route path="/dashboard/*" element={<ProtectedRoute />} />
         </Routes>
       </AnimatePresence>
     </AuthProvider>
