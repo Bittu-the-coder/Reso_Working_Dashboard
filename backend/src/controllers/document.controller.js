@@ -1,0 +1,114 @@
+const connect = require("../db/db");
+const Document = require("../models/Document.model");
+const User = require("../models/User.model");
+const asyncHandler = require("../utils/asyncHandler");
+const { ErrorResponse, sendSuccess } = require("../utils/sendResponse");
+
+const createDocument = asyncHandler(async (req, res, next) => {
+  const { title, link, department } = req.body;
+  const teamId = req.params.teamId;
+  try {
+    const existingDocument = await Document.findOne({
+      title: title
+    })
+    if (existingDocument) {
+      return next(new ErrorResponse("Document already exists", 400));
+    }
+    const document = await Document.create({
+      teamId: teamId,
+      title: title,
+      link: link,
+      department: department,
+      uploadedBy: req.user._id
+    });
+    sendSuccess(res, document, "Document created successfully", 201);
+  } catch (error) {
+    console.log("Error while creating document:", error);
+    return next(new ErrorResponse('Server Error', 500));
+  }
+})
+
+const getAllDocument = asyncHandler(async (req, res, next) => {
+  const teamId = req.params.teamId;
+  try {
+
+    const documents = await Document.find({ teamId: teamId });
+    sendSuccess(res, { documents }, "Documents fetched successfully");
+  } catch (error) {
+    console.error("Error while fetching documents:", error);
+    return next(new ErrorResponse("Server error", 500));
+  }
+});
+
+const getDocumentById = asyncHandler(async (req, res, next) => {
+  const documentId = req.params.documentId;
+  try {
+
+    const document = await Document.findById(documentId);
+    if (!document) {
+      return next(new ErrorResponse("Document not found", 404));
+    }
+    sendSuccess(res, { document }, "Document fetched successfully", 200);
+  } catch (error) {
+    console.error("Error while fetching document:", error);
+    return next(new ErrorResponse("Server error", 500));
+  }
+});
+
+const removeDocument = asyncHandler(async (req, res, next) => {
+  const docId = req.params.documentId;
+  if (!docId) {
+    return next(new ErrorResponse("Document ID is required", 400));
+  }
+  try {
+    const document = await Document.findById(docId);
+    if (!document) {
+      return next(new ErrorResponse("Document not found", 404));
+    }
+    await document.deleteOne();
+    sendSuccess(res, docId, "Document removed successfully", 204);
+  } catch (error) {
+    console.log("Error While removing a doc", error);
+    return next(new ErrorResponse("Server Error", 500));
+  }
+})
+
+const updateDocument = asyncHandler(async (req, res, next) => {
+  const docId = req.params.documentId;
+  const { title, link, department, teamId } = req.body;
+  try {
+    const document = await Document.findByIdAndUpdate(
+      docId,
+      { title, link, department, teamId },
+      { new: true }
+    );
+    if (!document) {
+      return next(new ErrorResponse("Document not found", 404));
+    }
+    sendSuccess(res, document, "Document updated successfully");
+  } catch (error) {
+    console.error("Error while updating document:", error);
+    return next(new ErrorResponse("Server error", 500));
+  }
+});
+
+const getAllDocsIrrespectiveOfTeam = asyncHandler(async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id).populate("teams");
+    const documents = await Document.find({ teamId: { $in: user.teams.map(team => team._id) } });
+    sendSuccess(res, { documents }, "Documents fetched successfully");
+  } catch (error) {
+    console.error("Error while fetching documents:", error);
+    return next(new ErrorResponse("Server error", 500));
+  }
+});
+
+
+module.exports = {
+  createDocument,
+  getAllDocument,
+  getDocumentById,
+  removeDocument,
+  updateDocument,
+  getAllDocsIrrespectiveOfTeam,
+}

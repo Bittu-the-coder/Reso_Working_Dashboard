@@ -10,8 +10,9 @@ import {
   Sun,
   ChevronDown,
 } from "lucide-react";
-import { useTheme } from "../contexts/useTheme";
-import { useAuth } from "../contexts/AuthContext";
+import { useTheme } from "../contexts/ThemeContext";
+import { useAuthStore } from "../store/useAuthStore";
+import type { RegisterUserData } from "../types";
 
 interface SidebarProps {
   navigationItems: {
@@ -27,9 +28,8 @@ const Sidebar: React.FC<SidebarProps> = ({ navigationItems }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const { isDarkMode, toggleTheme } = useTheme();
-  const { logout } = useAuth();
+  const { logout, user } = useAuthStore();
   const location = useLocation();
-  const { user } = useAuth();
 
   // Handle responsive state
   useEffect(() => {
@@ -118,8 +118,8 @@ const Sidebar: React.FC<SidebarProps> = ({ navigationItems }) => {
           }
           items-center justify-center text-white font-bold`}
         >
-          {user?.name
-            ? user.name
+          {user?.fullName
+            ? user.fullName
                 .split(" ")
                 .map((name) => name.charAt(0))
                 .join("")
@@ -220,29 +220,34 @@ const Sidebar: React.FC<SidebarProps> = ({ navigationItems }) => {
                           : "from-blue-600 to-purple-600"
                       } flex items-center justify-center text-white font-bold`}
                     >
-                      {user?.name
-                        ? user.name
+                      {user?.fullName
+                        ? user.fullName
                             .split(" ")
                             .map((name) => name.charAt(0))
                             .join("")
                         : "U"}
                     </div>
-                    <div className="flex-1">
-                      <p
-                        className={`font-semibold ${
-                          isDarkMode ? "text-white" : "text-gray-900"
-                        }`}
-                      >
-                        {user?.name || "User Name"}
-                      </p>
-                      <p
-                        className={`text-sm ${
-                          isDarkMode ? "text-gray-300" : "text-gray-500"
-                        }`}
-                      >
-                        {user?.email || "user@example.com"}
-                      </p>
-                    </div>
+                    <Link
+                      to="/dashboard/profile"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <div className="flex-1">
+                        <p
+                          className={`font-semibold ${
+                            isDarkMode ? "text-white" : "text-gray-900"
+                          }`}
+                        >
+                          {user?.fullName || "User Name"}
+                        </p>
+                        <p
+                          className={`text-sm ${
+                            isDarkMode ? "text-gray-300" : "text-gray-500"
+                          }`}
+                        >
+                          {user?.email || "user@example.com"}
+                        </p>
+                      </div>
+                    </Link>
                   </div>
                 </div>{" "}
                 <nav className="space-y-0.5 pt-2">
@@ -303,24 +308,45 @@ const Sidebar: React.FC<SidebarProps> = ({ navigationItems }) => {
                           )}
                         </div>
                       ) : (
-                        <Link
-                          to={item.path}
-                          className={`flex items-center gap-3.5 px-4 py-4 rounded-lg touch-manipulation ${
-                            location.pathname === item.path ||
-                            (item.path === "/dashboard" &&
-                              location.pathname === "/dashboard/")
-                              ? isDarkMode
-                                ? "bg-blue-900/40 text-blue-300"
-                                : "bg-blue-50 text-blue-700"
-                              : isDarkMode
-                              ? "text-gray-200 hover:bg-gray-700 active:bg-gray-600"
-                              : "text-gray-700 hover:bg-gray-100 active:bg-gray-200"
-                          } transition-all duration-150`}
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          <span className="w-6 h-6">{item.icon}</span>
-                          <span className="font-medium">{item.name}</span>
-                        </Link>
+                        <>
+                          {item.path === "/dashboard/teams" ? (
+                            <Link
+                              to={item.path}
+                              className={`flex items-center gap-3.5 px-4 py-4 rounded-lg touch-manipulation ${
+                                location.pathname === item.path
+                                  ? isDarkMode
+                                    ? "bg-blue-900/40 text-blue-300"
+                                    : "bg-blue-50 text-blue-700"
+                                  : isDarkMode
+                                  ? "text-gray-200 hover:bg-gray-700 active:bg-gray-600"
+                                  : "text-gray-700 hover:bg-gray-100 active:bg-gray-200"
+                              } transition-all duration-150`}
+                              onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                              <span className="w-6 h-6">{item.icon}</span>
+                              <span className="font-medium">{item.name}</span>
+                            </Link>
+                          ) : (
+                            <Link
+                              to={item.path}
+                              className={`flex items-center gap-3.5 px-4 py-4 rounded-lg touch-manipulation ${
+                                location.pathname === item.path ||
+                                (item.path === "/dashboard" &&
+                                  location.pathname === "/dashboard/")
+                                  ? isDarkMode
+                                    ? "bg-blue-900/40 text-blue-300"
+                                    : "bg-blue-50 text-blue-700"
+                                  : isDarkMode
+                                  ? "text-gray-200 hover:bg-gray-700 active:bg-gray-600"
+                                  : "text-gray-700 hover:bg-gray-100 active:bg-gray-200"
+                              } transition-all duration-150`}
+                              onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                              <span className="w-6 h-6">{item.icon}</span>
+                              <span className="font-medium">{item.name}</span>
+                            </Link>
+                          )}
+                        </>
                       )}
                     </div>
                   ))}{" "}
@@ -406,8 +432,8 @@ const Sidebar: React.FC<SidebarProps> = ({ navigationItems }) => {
                 } flex items-center justify-center text-white font-bold`}
                 title={user?.name || "User"}
               >
-                {user?.name
-                  ? user.name
+                {user?.fullName
+                  ? user.fullName
                       .split(" ")
                       .map((name) => name.charAt(0))
                       .join("")
@@ -429,29 +455,31 @@ const Sidebar: React.FC<SidebarProps> = ({ navigationItems }) => {
                         : "from-blue-600 to-purple-600"
                     } flex items-center justify-center text-white font-bold`}
                   >
-                    {user?.name
-                      ? user.name
+                    {user?.fullName
+                      ? user.fullName
                           .split(" ")
                           .map((name) => name.charAt(0))
                           .join("")
                       : "U"}
                   </div>
-                  <div className="flex-1">
-                    <p
-                      className={`font-semibold ${
-                        isDarkMode ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      {user?.name || "User Name"}
-                    </p>
-                    <p
-                      className={`text-sm ${
-                        isDarkMode ? "text-gray-300" : "text-gray-500"
-                      }`}
-                    >
-                      {user?.email || "user@example.com"}
-                    </p>
-                  </div>
+                  <Link to={"/dashboard/profile"}>
+                    <div className="flex-1">
+                      <p
+                        className={`font-semibold ${
+                          isDarkMode ? "text-white" : "text-gray-900"
+                        }`}
+                      >
+                        {user?.fullName || "User Name"}
+                      </p>
+                      <p
+                        className={`text-sm ${
+                          isDarkMode ? "text-gray-300" : "text-gray-500"
+                        }`}
+                      >
+                        {user?.email || "user@example.com"}
+                      </p>
+                    </div>
+                  </Link>
                 </div>
               </div>
             </div>

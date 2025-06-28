@@ -1,71 +1,80 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-const taskSchema = new mongoose.Schema(
-  {
-    title: {
-      type: String,
-      required: [true, "Please add a task title"],
-      trim: true,
-      maxlength: [100, "Task title cannot be more than 100 characters"],
-    },
-    description: {
-      type: String,
-      trim: true,
-    },
-    dueDate: {
-      type: Date,
-    },
-    status: {
-      type: String,
-      enum: ["To Do", "In Progress", "Done"],
-      default: "To Do",
-    },
-    priority: {
-      type: String,
-      enum: ["Low", "Medium", "High"],
-      default: "Medium",
-    },
-    projectId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Project",
-    },
-    teamId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Team",
-    },
-    createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-    assignedTo: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
-    tags: [
-      {
-        type: String,
-        trim: true,
-      },
-    ],
-    estimatedHours: {
-      type: Number,
-      min: 0,
-    },
-    actualHours: {
-      type: Number,
-      min: 0,
-      default: 0,
-    },
-    addedOn: {
-      type: String,
-      default: () => new Date().toISOString().split("T")[0],
-    },
+const StepSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: [true, 'Please add a step title'],
   },
-  {
-    timestamps: true,
-  }
-);
+  isCompleted: {
+    type: Boolean,
+    default: false
+  },
+  reportedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  reportedAt: Date
+});
 
-module.exports = mongoose.model("Task", taskSchema);
+const ChatSchema = new mongoose.Schema({
+  sender: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  message: String,
+  timestamp: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+const TaskSchema = new mongoose.Schema({
+  teamId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Team'
+  },
+  title: {
+    type: String,
+    required: [true, 'Please add a task title'],
+  },
+  description: {
+    type: String,
+  },
+  uploads: [{
+    type: String,
+  }],
+  dueDate: {
+    type: Date,
+  },
+  priority: {
+    type: String,
+    enum: ['low', 'medium', 'high'],
+    default: 'low'
+  },
+  assignedTo: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  status: {
+    type: String, enum: ['todo', 'in_progress', 'done'],
+    default: 'todo'
+  },
+  steps: [StepSchema],
+  messages: [ChatSchema],
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+const Task = mongoose.model('Task', TaskSchema);
+
+module.exports = Task

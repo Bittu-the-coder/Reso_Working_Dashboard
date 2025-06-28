@@ -1,7 +1,7 @@
 import React from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import { useTheme } from "../contexts/useTheme";
+import { useTheme } from "../contexts/ThemeContext";
 import { motion } from "framer-motion";
 
 interface PublicLayoutProps {

@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Info, CheckCircle, ChevronRight, Mail, Sparkles } from "lucide-react";
-import { useTheme } from "../contexts/useTheme";
+import { useTheme } from "../contexts/ThemeContext";
 
 // Animation variants
 const containerVariants = {

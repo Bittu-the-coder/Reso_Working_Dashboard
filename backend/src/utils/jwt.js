@@ -2,7 +2,6 @@ const jwt = require("jsonwebtoken");
 
 // Get token from model, create cookie and send response
 const sendTokenResponse = (user, statusCode, res) => {
-  // Create token
   const token = user.getSignedJwtToken();
 
   const options = {
@@ -10,25 +9,23 @@ const sendTokenResponse = (user, statusCode, res) => {
       Date.now() + (process.env.JWT_COOKIE_EXPIRE || 30) * 24 * 60 * 60 * 1000
     ),
     httpOnly: true,
+    sameSite: 'strict',
+    secure: process.env.NODE_ENV === "production"
   };
-
-  if (process.env.NODE_ENV === "production") {
-    options.secure = true;
-  }
 
   res
     .status(statusCode)
     .cookie("token", token, options)
     .json({
       success: true,
-      token,
-      user: {
+      token, // Still send token in response for frontend storage if needed
+      data: {
         id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
-        avatar: user.avatar,
-      },
+        teamId: user.teamId?.toString()
+      }
     });
 };
 

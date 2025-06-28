@@ -23,5 +23,14 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src"]
+  "include": [
+    "src",
+    "backend/backup/unused/Dashboard.tsx",
+    "backend/backup/unused/Events.tsx",
+    "backend/backup/unused/GoogleDocs.tsx",
+    "backend/backup/unused/Overview.tsx",
+    "backend/backup/unused/Projects.tsx",
+    "backend/backup/unused/Tasks.tsx",
+    "backend/backup/unused/TeamDetail.tsx"
+  ]
 }

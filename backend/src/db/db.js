@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 // Cache the database connection
 let cachedConnection = null;
 
-const connection = async () => {
+const connect = async () => {
   if (cachedConnection) {
     console.log("Using cached database connection");
     return cachedConnection;
@@ -29,4 +29,4 @@ const connection = async () => {
   }
 }
 
-module.exports = connection;
+module.exports = connect;

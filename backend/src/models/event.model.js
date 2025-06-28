@@ -1,29 +1,109 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-const eventSchema = new mongoose.Schema({
+const AttendeeSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  status: {
+    type: String,
+    enum: ['invited', 'accepted', 'declined', 'maybe'],
+    default: 'invited'
+  },
+  respondedAt: Date
+});
+
+const EventSchema = new mongoose.Schema({
+  teamId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Team',
+    required: [true, 'Team ID is required']
+  },
   title: {
     type: String,
     required: [true, 'Please add a title'],
-    trim: true,
-    maxlength: [200, 'Title cannot be more than 200 characters']
+    trim: true
   },
   description: {
     type: String,
-    trim: true
+    required: [true, 'Please add a description'],
   },
-  startDate: {
+  location: {
+    type: String,
+    required: [true, 'Please add a location'],
+  },
+  eventDate: {
     type: Date,
-    required: [true, 'Please add a start date']
+    required: [true, 'Please add an event date'],
   },
   endDate: {
-    type: Date
+    type: Date,
   },
-  addedOn: {
+  priority: {
     type: String,
-    default: () => new Date().toISOString().split('T')[0]
+    enum: ['low', 'medium', 'high'],
+    default: 'medium'
+  },
+  status: {
+    type: String,
+    enum: ['upcoming', 'ongoing', 'completed', 'cancelled'],
+    default: 'upcoming'
+  },
+  attendees: [AttendeeSchema],
+  uploads: [{
+    type: String,
+  }],
+  reminders: [{
+    time: {
+      type: Number, // minutes before event
+      default: 30
+    },
+    sent: {
+      type: Boolean,
+      default: false
+    }
+  }],
+  isPublic: {
+    type: Boolean,
+    default: false
+  },
+  maxAttendees: {
+    type: Number,
+    default: null
+  },
+  tags: [String],
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
   }
-}, {
-  timestamps: true
 });
 
-module.exports = mongoose.model('Event', eventSchema);
+// Pre-save middleware to update updatedAt
+EventSchema.pre('save', function (next) {
+  this.updatedAt = new Date();
+  next();
+});
+
+// Virtual for event duration
+EventSchema.virtual('duration').get(function () {
+  if (this.endDate) {
+    return this.endDate - this.eventDate;
+  }
+  return null;
+});
+
+// Index for efficient queries
+EventSchema.index({ teamId: 1, eventDate: 1 });
+EventSchema.index({ createdBy: 1 });
+
+module.exports = mongoose.model('Event', EventSchema);

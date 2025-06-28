@@ -1,16 +1,15 @@
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
-const docsRoutes = require("./routes/docs.routes.js");
-const eventRoutes = require("./routes/event.routes.js");
-const projectRoutes = require("./routes/project.routes.js");
-const taskRoutes = require("./routes/task.routes.js");
-const authRoutes = require("./routes/auth.routes.js");
-const teamRoutes = require("./routes/team.routes.js");
-const inviteRoutes = require("./routes/invite.routes.js");
-const userRoutes = require("./routes/user.routes.js");
-const connection = require("./db/db.js");
-const errorHandler = require("./middleware/error.middleware.js");
+const cookieParser = require("cookie-parser");
+const documentsRoutes = require("./routes/document.route.js");
+const eventRoutes = require("./routes/event.route.js");
+const projectRoutes = require("./routes/project.route.js");
+const taskRoutes = require("./routes/task.route.js");
+const userRoutes = require("./routes/user.route.js");
+const teamRoutes = require("./routes/team.route.js");
+const connect = require('./db/db.js')
+const errorHandler = require("./middlewares/error.middleware.js");
 require("dotenv").config();
 
 const app = express();
@@ -36,6 +35,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 app.use(express.static("public"));
 
 // Handle OPTIONS preflight requests directly to prevent redirect issues
@@ -51,7 +51,7 @@ app.use((req, res, next) => {
 // This prevents multiple connection attempts in serverless environment
 if (mongoose.connection.readyState !== 1) {
   // Handle connection asynchronously but don't block app startup
-  connection().catch((err) => {
+  connect().catch((err) => {
     console.error("Initial database connection failed:", err.message);
     // Don't exit the process in serverless environment
   });
@@ -60,11 +60,10 @@ if (mongoose.connection.readyState !== 1) {
 app.get("/", (req, res) => {
   res.send("Welcome to the Reso Working Dashboard API");
 });
-app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+// User routes are now merged with auth routes
 app.use("/api/teams", teamRoutes);
-app.use("/api/invites", inviteRoutes);
-app.use("/api/docs", docsRoutes);
+app.use("/api/documents", documentsRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/tasks", taskRoutes);

@@ -12,7 +12,7 @@ import {
   Mail,
   Database,
 } from "lucide-react";
-import { useTheme } from "../contexts/useTheme";
+import { useTheme } from "../contexts/ThemeContext";
 
 const containerVariants = {
   hidden: { opacity: 0 },

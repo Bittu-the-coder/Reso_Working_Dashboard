@@ -1,141 +1,28 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import Overview from "../components/Overview";
-import Events from "../components/Events";
-import Projects from "../components/Projects";
-import GoogleDocs from "../components/GoogleDocs";
-import Settings from "../components/Settings";
-import Teams from "../components/Teams";
-import CollaborativeTasks from "../components/CollaborativeTasks";
+import OverviewPage from "../pages/dashboard/OverviewPage";
+import TeamsPage from "../pages/dashboard/TeamsPage";
+import TeamManagementPage from "../pages/dashboard/TeamManagementPage";
+import EventsPage from "../pages/dashboard/EventsPage";
+import ProjectsPage from "../pages/dashboard/ProjectsPage";
+import TasksPage from "../pages/dashboard/TasksPage";
+import SettingsPage from "../pages/dashboard/SettingsPage";
+import DocumentsPage from "../pages/dashboard/DocumentsPage";
+import ProfilePage from "../pages/dashboard/ProfilePage";
 
-interface DashboardRoutesProps {
-  // State props
-  events: {
-    id: number;
-    title: string;
-    date: string;
-    description: string;
-  }[];
-  newEvent: {
-    title: string;
-    date: string;
-    description: string;
-  };
-  projects: {
-    id: number;
-    name: string;
-    progress: number;
-    members: number;
-  }[];
-  tasks: {
-    id: number;
-    title: string;
-    assignee: string;
-    deadline: string;
-    status: string;
-  }[];
-  docs: {
-    id: string;
-    title: string;
-    url: string;
-    department: string;
-    addedOn: string;
-  }[];
-  newDoc: {
-    title: string;
-    url: string;
-    department: string;
-  };
-  loading: {
-    addingDoc: boolean;
-    updatingDoc: boolean;
-    deletingDoc: boolean;
-  };
-
-  // Handler props
-  setNewEvent: React.Dispatch<
-    React.SetStateAction<{
-      title: string;
-      date: string;
-      description: string;
-    }>
-  >;
-  handleAddEvent: (e: React.FormEvent) => void;
-  setNewDoc: React.Dispatch<
-    React.SetStateAction<{
-      title: string;
-      url: string;
-      department: string;
-    }>
-  >;
-  handleAddDoc: (e: React.FormEvent) => Promise<void>;
-  handleUpdateDoc: (
-    id: string,
-    updatedData: Partial<{
-      id: string;
-      title: string;
-      url: string;
-      department: string;
-      addedOn: string;
-    }>
-  ) => Promise<void>;
-  handleDeleteDoc: (id: string) => Promise<void>;
-}
-
-const DashboardRoutes: React.FC<DashboardRoutesProps> = ({
-  events,
-  newEvent,
-  setNewEvent,
-  projects,
-  tasks,
-  docs,
-  newDoc,
-  setNewDoc,
-  loading,
-  handleAddEvent,
-  handleAddDoc,
-  handleUpdateDoc,
-  handleDeleteDoc,
-}) => {
+// No need for props as each page component manages its own state
+const DashboardRoutes: React.FC = () => {
   return (
     <Routes>
-      <Route
-        path="/"
-        element={<Overview events={events} projects={projects} tasks={tasks} />}
-      />
-      <Route path="/teams" element={<Teams />} />
-      <Route
-        path="/events"
-        element={
-          <Events
-            events={events}
-            newEvent={newEvent}
-            setNewEvent={setNewEvent}
-            handleAddEvent={handleAddEvent}
-          />
-        }
-      />
-      <Route path="/projects" element={<Projects projects={projects} />} />
-      <Route path="/tasks" element={<CollaborativeTasks />} />
-      <Route
-        path="/documents"
-        element={
-          <GoogleDocs
-            docs={docs}
-            newDoc={newDoc}
-            setNewDoc={setNewDoc}
-            handleAddDoc={handleAddDoc}
-            handleDeleteDoc={handleDeleteDoc}
-            handleUpdateDoc={handleUpdateDoc}
-            loading={{
-              addingDoc: loading.addingDoc,
-              updatingDoc: loading.updatingDoc,
-              deletingDoc: loading.deletingDoc,
-            }}
-          />
-        }
-      />
-      <Route path="/settings" element={<Settings />} />
+      <Route path="/" element={<OverviewPage />} />
+      <Route path="/teams" element={<TeamsPage />} />
+      <Route path="/teams/:teamId" element={<TeamManagementPage />} />
+      <Route path="/events" element={<EventsPage />} />
+      <Route path="/projects" element={<ProjectsPage />} />
+      <Route path="/tasks" element={<TasksPage />} />
+      <Route path="/documents" element={<DocumentsPage />} />
+      <Route path="/settings" element={<SettingsPage />} />
+      <Route path="/profile" element={<ProfilePage />} />
     </Routes>
   );
 };

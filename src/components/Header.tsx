@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Home, Sparkles } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
-import { useTheme } from "../contexts/useTheme.ts";
+import { useTheme } from "../contexts/ThemeContext";
 
 const Header: React.FC = () => {
   const location = useLocation();

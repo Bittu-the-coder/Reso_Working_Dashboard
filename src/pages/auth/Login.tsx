@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useAuth } from "../../contexts/AuthContext";
 import toast from "react-hot-toast";
-import { useTheme } from "../../contexts/useTheme";
+import { useTheme } from "../../contexts/ThemeContext";
 import { Eye, EyeOff } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuthStore } from "../../store/useAuthStore";
 
 export const LoginPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -12,21 +12,43 @@ export const LoginPage: React.FC = () => {
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
   const { isDarkMode } = useTheme();
+  const navigate = useNavigate();
+
+  // Use Zustand store
+  const {
+    login,
+    user,
+    loading: authLoading,
+    error: authError,
+  } = useAuthStore();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (user) {
+      navigate("/dashboard");
+    }
+  }, [user, navigate]);
+
+  // Handle auth errors
+  useEffect(() => {
+    if (authError) {
+      toast.error(authError);
+    }
+  }, [authError]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-
     try {
-      await login(formData.email, formData.password);
-      toast.success("Login successful!");
+      const result = await login(formData);
+      if (result?.success) {
+        toast.success("Login successful!");
+        navigate("/dashboard");
+      }
     } catch (error) {
-      console.error(error);
-      toast.error("Invalid email or password");
-    } finally {
-      setLoading(false);
+      console.error("Login error:", error);
+      const errorMsg = error instanceof Error ? error.message : "Login failed";
+      toast.error(errorMsg);
     }
   };
 
@@ -65,7 +87,8 @@ export const LoginPage: React.FC = () => {
             ? "rgba(17, 24, 39, 0.7)"
             : "rgba(255, 255, 255, 0.5)",
         }}
-      ></div>{" "}
+      ></div>
+
       <motion.div
         className={`max-w-md w-full space-y-8 ${
           isDarkMode ? "bg-gray-800/80 text-white" : "bg-white/90"
@@ -99,7 +122,8 @@ export const LoginPage: React.FC = () => {
               Sign up
             </Link>
           </p>
-        </div>{" "}
+        </div>
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
@@ -124,6 +148,7 @@ export const LoginPage: React.FC = () => {
                 } border focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 placeholder="Enter your email"
                 required
+                disabled={authLoading}
               />
             </div>
 
@@ -150,12 +175,14 @@ export const LoginPage: React.FC = () => {
                   } border focus:outline-none focus:ring-2 focus:ring-blue-500`}
                   placeholder="Enter your password"
                   required
+                  disabled={authLoading}
                 />
                 <button
                   type="button"
                   onClick={togglePasswordVisibility}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2"
                   tabIndex={-1}
+                  disabled={authLoading}
                 >
                   {showPassword ? (
                     <EyeOff size={18} className="text-gray-500" />
@@ -165,7 +192,8 @@ export const LoginPage: React.FC = () => {
                 </button>
               </div>
             </div>
-          </div>{" "}
+          </div>
+
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <input
@@ -177,6 +205,7 @@ export const LoginPage: React.FC = () => {
                     ? "border-gray-600 bg-gray-700 checked:bg-blue-600"
                     : "border-gray-300 bg-white checked:bg-blue-600"
                 } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                disabled={authLoading}
               />
               <label
                 htmlFor="remember"
@@ -187,8 +216,8 @@ export const LoginPage: React.FC = () => {
                 Remember me
               </label>
             </div>
-            <a
-              href="#"
+            <Link
+              to="/forgot-password"
               className={`text-sm font-medium ${
                 isDarkMode
                   ? "text-blue-400 hover:text-blue-300"
@@ -196,19 +225,21 @@ export const LoginPage: React.FC = () => {
               }`}
             >
               Forgot password?
-            </a>
+            </Link>
           </div>
+
           <motion.button
             type="submit"
-            disabled={loading}
+            disabled={authLoading}
             className={`w-full py-2.5 px-4 rounded-lg ${
-              loading ? "opacity-70 cursor-not-allowed" : ""
+              authLoading ? "opacity-70 cursor-not-allowed" : ""
             } bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium shadow-md hover:shadow-lg transition-all duration-200`}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={{ scale: authLoading ? 1 : 1.02 }}
+            whileTap={{ scale: authLoading ? 1 : 0.98 }}
           >
-            {loading ? "Logging in..." : "Login"}
+            {authLoading ? "Logging in..." : "Login"}
           </motion.button>
+
           <div className="relative my-6">
             <div
               className={`absolute inset-0 flex items-center`}
@@ -232,22 +263,23 @@ export const LoginPage: React.FC = () => {
               </span>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+
+          <div className="flex justify-center">
             <motion.button
               type="button"
-              className={`py-2.5 px-4 rounded-lg flex justify-center items-center gap-2 ${
+              className={`py-2.5 w-full px-4 rounded-lg border ${
                 isDarkMode
-                  ? "bg-gray-700 hover:bg-gray-600"
-                  : "bg-white hover:bg-gray-50"
-              } border ${
-                isDarkMode ? "border-gray-600" : "border-gray-300"
-              } shadow-sm font-medium ${
-                isDarkMode ? "text-gray-200" : "text-gray-700"
-              }`}
+                  ? "bg-gray-700/60 border-gray-600 hover:bg-gray-700"
+                  : "bg-white border-gray-300 hover:bg-gray-50"
+              } flex items-center justify-center`}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              <svg className="w-5 h-5" viewBox="0 0 24 24">
+              <svg
+                className="w-5 h-5 mr-2"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
                 <path
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                   fill="#4285F4"
@@ -266,28 +298,6 @@ export const LoginPage: React.FC = () => {
                 />
               </svg>
               Google
-            </motion.button>
-            <motion.button
-              type="button"
-              className={`py-2.5 px-4 rounded-lg flex justify-center items-center gap-2 ${
-                isDarkMode
-                  ? "bg-gray-700 hover:bg-gray-600"
-                  : "bg-white hover:bg-gray-50"
-              } border ${
-                isDarkMode ? "border-gray-600" : "border-gray-300"
-              } shadow-sm font-medium ${
-                isDarkMode ? "text-gray-200" : "text-gray-700"
-              }`}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M9.5 1.5C5.35 1.5 2 4.85 2 9.5C2 13.25 4.35 16.4 7.6 17.25V12H5.5V9.5H7.6V7.75C7.6 5.55 8.9 4.35 10.85 4.35C11.8 4.35 12.75 4.5 12.75 4.5V6.5H11.65C10.55 6.5 10.25 7.15 10.25 7.8V9.5H12.65L12.25 12H10.25V17.25C13.5 16.4 15.85 13.25 15.85 9.5C15.85 4.85 12.65 1.5 8.5 1.5H9.5Z"
-                  fill="#1877F2"
-                />
-              </svg>
-              Facebook
             </motion.button>
           </div>
         </form>

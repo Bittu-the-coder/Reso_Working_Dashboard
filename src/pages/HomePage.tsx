@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FileText, ExternalLink, ChevronRight, Sparkles } from "lucide-react";
-import { useTheme } from "../contexts/useTheme";
+import { useTheme } from "../contexts/ThemeContext";
 
 // Animation variants
 const containerVariants = {
@@ -81,11 +81,11 @@ const HomePage: React.FC = () => {
                 Innovative Research & Education
               </span>
             </motion.div>
-            <h1 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">
-              MMMUT RESO
+            <h1 className="text-3xl font-bold text-white shadow-text mb-2">
+              MMMUT RESO Research Organization
             </h1>
-            <p className="text-lg text-white drop-shadow-md">
-              Research, Education, Services, Outreach
+            <p className="text-white text-lg shadow-text">
+              Empowering researchers, educators, and students
             </p>
           </motion.div>
         </motion.div>

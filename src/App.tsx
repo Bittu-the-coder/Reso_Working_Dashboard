@@ -1,18 +1,28 @@
 import { Routes, Route } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import LearnMorePage from "./pages/LearnMorePage";
-import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { Toaster } from "react-hot-toast";
 import { AnimatePresence } from "framer-motion";
-import { useTheme } from "./contexts/useTheme";
+import { useTheme } from "./contexts/ThemeContext";
 import { LoginPage } from "./pages/auth/Login";
 import { SignUpPage } from "./pages/auth/SignUp";
 import DashboardLayout from "./layouts/DashboardLayout";
 import PublicLayout from "./layouts/PublicLayout";
+import { useAuthStore } from "./store/useAuthStore";
+import { useEffect } from "react";
 
 const ProtectedRoute = () => {
-  const { isAuthenticated, loading } = useAuth();
+  const { user, token, loading, getMe } = useAuthStore();
   const { isDarkMode } = useTheme();
+
+  // Check authentication status on mount
+  useEffect(() => {
+    if (token && !user) {
+      getMe();
+    }
+  }, [token, user, getMe]);
+
+  const isAuthenticated = !!token;
 
   if (loading) {
     return (
@@ -40,8 +50,22 @@ const ProtectedRoute = () => {
 const App = () => {
   const { isDarkMode } = useTheme();
 
+  // Initialize token in auth store from localStorage
+  const initAuth = useAuthStore((state) => state.getMe);
+
+  useEffect(() => {
+    // Check for token in localStorage and initialize auth state if exists
+    const token = localStorage.getItem("auth-storage")
+      ? JSON.parse(localStorage.getItem("auth-storage") || "{}")?.state?.token
+      : null;
+
+    if (token) {
+      initAuth();
+    }
+  }, [initAuth]);
+
   return (
-    <AuthProvider>
+    <>
       <Toaster
         position="top-right"
         toastOptions={{
@@ -91,12 +115,12 @@ const App = () => {
           />
           {/* Auth Routes */}
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignUpPage />} />{" "}
+          <Route path="/signup" element={<SignUpPage />} />
           {/* Protected Routes */}
           <Route path="/dashboard/*" element={<ProtectedRoute />} />
         </Routes>
       </AnimatePresence>
-    </AuthProvider>
+    </>
   );
 };
 
