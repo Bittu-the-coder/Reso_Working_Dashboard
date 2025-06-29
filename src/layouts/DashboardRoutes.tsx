@@ -9,6 +9,7 @@ import TasksPage from "../pages/dashboard/TasksPage";
 import SettingsPage from "../pages/dashboard/SettingsPage";
 import DocumentsPage from "../pages/dashboard/DocumentsPage";
 import ProfilePage from "../pages/dashboard/ProfilePage";
+import TaskManagementPage from "../pages/dashboard/TaskManagementPage";
 
 // No need for props as each page component manages its own state
 const DashboardRoutes: React.FC = () => {
@@ -20,6 +21,7 @@ const DashboardRoutes: React.FC = () => {
       <Route path="/events" element={<EventsPage />} />
       <Route path="/projects" element={<ProjectsPage />} />
       <Route path="/tasks" element={<TasksPage />} />
+      <Route path="/tasks/:taskId" element={<TaskManagementPage />} />
       <Route path="/documents" element={<DocumentsPage />} />
       <Route path="/settings" element={<SettingsPage />} />
       <Route path="/profile" element={<ProfilePage />} />

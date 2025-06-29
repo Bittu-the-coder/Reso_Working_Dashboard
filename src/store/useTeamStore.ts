@@ -1,89 +1,20 @@
 // stores/teamStore.ts
 import { create } from "zustand";
 import axios from "axios";
+import type {
+  TeamState,
+  CreateTeamData,
+  UpdateTeamData,
+  AddTeamMemberData,
+  UpdateTeamMemberData,
+  TeamResponseResult,
+  ResponseResult,
+  MembersResponseResult,
+} from "../types";
 import { API_URL } from "../utils/api";
 
-interface TeamMember {
-  userId: string | { _id: string };
-  name: string;
-  email: string;
-  role: string;
-  department?: string;
-  isAcceptedInvite?: boolean;
-}
-
-interface Team {
-  _id: string;
-  name: string;
-  description?: string;
-  department?: string;
-  ownerId: { _id: string; name?: string; email?: string };
-  createdBy: string;
-  members: TeamMember[];
-  invitations?: Array<{
-    userId: string | { _id: string };
-    invitedBy: string;
-    status: string;
-  }>;
-  avatar?: string;
-}
-
-interface TeamStoreState {
-  teams: Team[];
-  currentTeam: Team | null;
-  loading: boolean;
-  error: string | null;
-  getAuthToken: () => string | null;
-  apiCall: (
-    method: "get" | "post" | "put" | "delete",
-    endpoint: string,
-    data?: any
-  ) => Promise<any>;
-
-  // Team CRUD operations
-  createTeam: (teamData: {
-    name: string;
-    description?: string;
-    department?: string;
-  }) => Promise<{ success: boolean; team?: Team; error?: string }>;
-  getMyTeams: () => Promise<{ success: boolean; error?: string }>;
-  getTeam: (
-    teamId: string
-  ) => Promise<{ success: boolean; team?: Team; error?: string }>;
-  updateTeam: (
-    teamId: string,
-    teamData: Partial<Team>
-  ) => Promise<{ success: boolean; error?: string }>;
-  deleteTeam: (teamId: string) => Promise<{ success: boolean; error?: string }>;
-
-  // Member operations
-  getTeamMembers: (
-    teamId: string
-  ) => Promise<{ success: boolean; members?: TeamMember[]; error?: string }>;
-  addTeamMember: (
-    teamId: string,
-    memberData: {
-      email: string;
-      role: string;
-      name: string;
-      department?: string;
-    }
-  ) => Promise<{ success: boolean; error?: string }>;
-  removeTeamMember: (
-    teamId: string,
-    memberId: string
-  ) => Promise<{ success: boolean; error?: string }>;
-  updateTeamMember: (
-    teamId: string,
-    memberId: string,
-    memberData: Partial<TeamMember>
-  ) => Promise<{ success: boolean; error?: string }>;
-
-  // Invitations
-  acceptTeamInvitation: () => Promise<{ success: boolean; error?: string }>;
-
-  // Utility
-  clearCurrentTeam: () => void;
+interface TeamStoreState extends TeamState {
+  auth: { token: string | null };
 }
 
 export const useTeamStore = create<TeamStoreState>((set, get) => ({
@@ -91,41 +22,17 @@ export const useTeamStore = create<TeamStoreState>((set, get) => ({
   currentTeam: null,
   loading: false,
   error: null,
+  auth: { token: null },
 
-  getAuthToken: () => {
-    return localStorage.getItem("authToken");
-  },
-
-  // Helper function for API calls
-  apiCall: async (
-    method: "get" | "post" | "put" | "delete",
-    endpoint: string,
-    data?: any
-  ) => {
-    const token = get().getAuthToken();
-    if (!token) throw new Error("No authentication token found");
-
-    return axios({
-      method,
-      url: `${API_URL}${endpoint}`,
-      data,
-      headers: { Authorization: `Bearer ${token}` },
-    });
-  },
-
-  createTeam: async (teamData) => {
+  // Create team
+  createTeam: async (teamData: CreateTeamData): Promise<TeamResponseResult> => {
     set({ loading: true, error: null });
     try {
-      const token = get().getAuthToken();
+      const token = get().auth.token || localStorage.getItem("authToken");
       if (!token) throw new Error("No authentication token found");
-
       const response = await axios.post(`${API_URL}/teams`, teamData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data", // Important for file uploads
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-
       set((state) => ({
         teams: [...state.teams, response.data.data],
         loading: false,
@@ -138,10 +45,18 @@ export const useTeamStore = create<TeamStoreState>((set, get) => ({
     }
   },
 
-  getMyTeams: async () => {
+  // Get user's teams
+  getMyTeams: async (): Promise<ResponseResult> => {
     set({ loading: true, error: null });
     try {
-      const response = await get().apiCall("get", "/teams");
+      console.log(get());
+      const token = get().auth.token || localStorage.getItem("authToken");
+      if (!token) throw new Error("No authentication token found");
+
+      const response = await axios.get(`${API_URL}/teams`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
       set({ teams: response.data.data.teams, loading: false });
       return { success: true };
     } catch (error: any) {
@@ -151,12 +66,18 @@ export const useTeamStore = create<TeamStoreState>((set, get) => ({
     }
   },
 
-  getTeam: async (teamId) => {
+  // Get single team
+  getTeam: async (teamId: string): Promise<ResponseResult> => {
     set({ loading: true, error: null });
     try {
-      const response = await get().apiCall("get", `/teams/${teamId}`);
+      const token = get().auth.token || localStorage.getItem("authToken");
+      if (!token) throw new Error("No authentication token found");
+      const response = await axios.get(`${API_URL}/teams/${teamId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log("Team details:", response.data.data);
       set({ currentTeam: response.data.data, loading: false });
-      return { success: true, team: response.data.data };
+      return { success: true };
     } catch (error: any) {
       const message = error.response?.data?.message || "Failed to fetch team";
       set({ error: message, loading: false });
@@ -164,10 +85,18 @@ export const useTeamStore = create<TeamStoreState>((set, get) => ({
     }
   },
 
-  updateTeam: async (teamId, teamData) => {
+  // Update team
+  updateTeam: async (
+    teamId: string,
+    teamData: UpdateTeamData
+  ): Promise<ResponseResult> => {
     set({ loading: true, error: null });
     try {
-      const response = await get().apiCall("put", `/teams/${teamId}`, teamData);
+      const token = get().auth.token || localStorage.getItem("authToken");
+      if (!token) throw new Error("No authentication token found");
+      const response = await axios.put(`${API_URL}/teams/${teamId}`, teamData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       set((state) => ({
         teams: state.teams.map((team) =>
           team._id === teamId ? response.data.data : team
@@ -183,10 +112,15 @@ export const useTeamStore = create<TeamStoreState>((set, get) => ({
     }
   },
 
-  deleteTeam: async (teamId) => {
+  // Delete team
+  deleteTeam: async (teamId: string): Promise<ResponseResult> => {
     set({ loading: true, error: null });
     try {
-      await get().apiCall("delete", `/teams/${teamId}`);
+      const token = get().auth.token || localStorage.getItem("authToken");
+      if (!token) throw new Error("No authentication token found");
+      await axios.delete(`${API_URL}/teams/${teamId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       set((state) => ({
         teams: state.teams.filter((team) => team._id !== teamId),
         currentTeam: null,
@@ -200,134 +134,153 @@ export const useTeamStore = create<TeamStoreState>((set, get) => ({
     }
   },
 
-  getTeamMembers: async (teamId) => {
+  // Get team members
+  getTeamMembers: async (teamId: string): Promise<MembersResponseResult> => {
     set({ loading: true, error: null });
     try {
-      const response = await get().apiCall("get", `/teams/${teamId}/members`);
-
-      // Only update if we have a current team
-      if (get().currentTeam) {
-        set((state) => ({
-          currentTeam: state.currentTeam
-            ? {
-                ...state.currentTeam,
-                members: response.data.data.members,
-              }
-            : null,
-          loading: false,
-        }));
-      } else {
-        set({ loading: false });
-      }
-
+      const token = get().auth.token || localStorage.getItem("authToken");
+      if (!token) throw new Error("No authentication token found");
+      const response = await axios.get(`${API_URL}/teams/${teamId}/members`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      set((state) => ({
+        currentTeam: {
+          ...state.currentTeam!,
+          members: response.data.data.members,
+        },
+        loading: false,
+      }));
       return { success: true, members: response.data.data.members };
     } catch (error: any) {
       const message =
-        error.response?.data?.message || "Failed to fetch members";
+        error.response?.data?.message || "Failed to fetch team members";
       set({ error: message, loading: false });
       return { success: false, error: message };
     }
   },
 
-  addTeamMember: async (teamId, memberData) => {
+  // Add team member
+  addTeamMember: async (
+    teamId: string,
+    memberData: AddTeamMemberData
+  ): Promise<ResponseResult> => {
     set({ loading: true, error: null });
     try {
-      const response = await get().apiCall(
-        "post",
-        `/teams/${teamId}/members`,
-        memberData
+      const token = get().auth.token || localStorage.getItem("authToken");
+      if (!token) throw new Error("No authentication token found");
+      const response = await axios.post(
+        `${API_URL}/teams/${teamId}/members`,
+        memberData,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
       set((state) => ({
-        currentTeam: state.currentTeam
-          ? {
-              ...state.currentTeam,
-              members: [...state.currentTeam.members, ...response.data.data],
-              invitations: [
-                ...(state.currentTeam.invitations || []),
-                ...response.data.data,
-              ],
-            }
-          : null,
-        loading: false,
-      }));
-      return { success: true };
-    } catch (error: any) {
-      const message = error.response?.data?.message || "Failed to add member";
-      set({ error: message, loading: false });
-      return { success: false, error: message };
-    }
-  },
-
-  removeTeamMember: async (teamId, memberId) => {
-    set({ loading: true, error: null });
-    try {
-      await get().apiCall("delete", `/teams/${teamId}/members/${memberId}`);
-      set((state) => ({
-        currentTeam: state.currentTeam
-          ? {
-              ...state.currentTeam,
-              members: state.currentTeam.members.filter((m) =>
-                typeof m.userId === "string"
-                  ? m.userId !== memberId
-                  : m.userId._id !== memberId
-              ),
-              invitations:
-                state.currentTeam.invitations?.filter((i) =>
-                  typeof i.userId === "string"
-                    ? i.userId !== memberId
-                    : i.userId._id !== memberId
-                ) || [],
-            }
-          : null,
+        currentTeam: {
+          ...state.currentTeam!,
+          members: [...state.currentTeam!.members, ...response.data.data],
+          invitations: [
+            ...(state.currentTeam!.invitations || []),
+            ...response.data.data,
+          ],
+        },
         loading: false,
       }));
       return { success: true };
     } catch (error: any) {
       const message =
-        error.response?.data?.message || "Failed to remove member";
+        error.response?.data?.message || "Failed to add team member";
       set({ error: message, loading: false });
       return { success: false, error: message };
     }
   },
 
-  updateTeamMember: async (teamId, memberId, memberData) => {
+  // Remove team member
+  removeTeamMember: async (
+    teamId: string,
+    memberId: string
+  ): Promise<ResponseResult> => {
     set({ loading: true, error: null });
     try {
-      const response = await get().apiCall(
-        "put",
-        `/teams/${teamId}/members/${memberId}`,
-        memberData
-      );
+      const token = get().auth.token || localStorage.getItem("authToken");
+      if (!token) throw new Error("No authentication token found");
+      await axios.delete(`${API_URL}/teams/${teamId}/members/${memberId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       set((state) => ({
-        currentTeam: state.currentTeam
-          ? {
-              ...state.currentTeam,
-              members: state.currentTeam.members.map((m) =>
-                (
-                  typeof m.userId === "string"
-                    ? m.userId === memberId
-                    : m.userId._id === memberId
-                )
-                  ? { ...m, ...response.data.data }
-                  : m
-              ),
-            }
-          : null,
+        currentTeam: {
+          ...state.currentTeam!,
+          members: state.currentTeam!.members.filter((m) =>
+            typeof m.userId === "string"
+              ? m.userId !== memberId
+              : m.userId._id !== memberId
+          ),
+          invitations:
+            state.currentTeam!.invitations?.filter((i) =>
+              typeof i.userId === "string"
+                ? i.userId !== memberId
+                : i.userId._id !== memberId
+            ) || [],
+        },
         loading: false,
       }));
       return { success: true };
     } catch (error: any) {
       const message =
-        error.response?.data?.message || "Failed to update member";
+        error.response?.data?.message || "Failed to remove team member";
       set({ error: message, loading: false });
       return { success: false, error: message };
     }
   },
 
-  acceptTeamInvitation: async () => {
+  // Update team member
+  updateTeamMember: async (
+    teamId: string,
+    memberId: string,
+    memberData: UpdateTeamMemberData
+  ): Promise<ResponseResult> => {
     set({ loading: true, error: null });
     try {
-      await get().apiCall("get", "/users/acceptinvitation");
+      const token = get().auth.token || localStorage.getItem("authToken");
+      if (!token) throw new Error("No authentication token found");
+      const response = await axios.put(
+        `${API_URL}/teams/${teamId}/members/${memberId}`,
+        memberData,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      set((state) => ({
+        currentTeam: {
+          ...state.currentTeam!,
+          members: state.currentTeam!.members.map((m) =>
+            (
+              typeof m.userId === "string"
+                ? m.userId === memberId
+                : m.userId._id === memberId
+            )
+              ? { ...m, ...response.data.data }
+              : m
+          ),
+        },
+        loading: false,
+      }));
+      return { success: true };
+    } catch (error: any) {
+      const message =
+        error.response?.data?.message || "Failed to update team member";
+      set({ error: message, loading: false });
+      return { success: false, error: message };
+    }
+  },
+
+  // Accept team invitation
+  acceptTeamInvitation: async (): Promise<ResponseResult> => {
+    set({ loading: true, error: null });
+    try {
+      const token = get().auth.token || localStorage.getItem("authToken");
+      if (!token) throw new Error("No authentication token found");
+      await axios.get(`${API_URL}/users/acceptinvitation`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       set({ loading: false });
       return { success: true };
     } catch (error: any) {
@@ -338,5 +291,6 @@ export const useTeamStore = create<TeamStoreState>((set, get) => ({
     }
   },
 
-  clearCurrentTeam: () => set({ currentTeam: null }),
+  // Clear current team
+  clearCurrentTeam: (): void => set({ currentTeam: null }),
 }));

@@ -1,4 +1,7 @@
 const Team = require("../models/team.model");
+const Document = require("../models/Document.model");
+const Event = require("../models/Event.model");
+const Project = require("../models/Project.model");
 const asyncHandler = require("../utils/asyncHandler");
 const { ErrorResponse, sendSuccess } = require("../utils/sendResponse");
 const User = require("../models/User.model");
@@ -36,7 +39,7 @@ const createTeam = asyncHandler(async (req, res, next) => {
     // Handle file upload if exists
     if (req.file) {
       const upload = await uploadToImageKit(req.file);
-      teamData.avatar = upload;
+      teamData.avatar = upload.url;
     }
 
     // Create team
@@ -104,6 +107,13 @@ const deleteTeam = asyncHandler(async (req, res, next) => {
       console.log(`Deleted ${teamTasks.deletedCount} tasks for team ${teamId}`);
     }
 
+    // delete the events also if exits
+    const teamEvents = await Event.deleteMany({ teamId: teamId });
+    // delete the projects also if exits
+    const teamProjects = await Project.deleteMany({ teamId: teamId });
+    // delete the documents also if exits
+    const documents = await Document.deleteMany({ teamId: teamId })
+
     sendSuccess(res, team, "Team deleted successfully");
   } catch (error) {
     console.error("Error while deleting team:", error);
@@ -122,7 +132,7 @@ const updateTeam = asyncHandler(async (req, res, next) => {
     }
 
     // Only the owner can update the team
-    if (team.ownerId.toString() !== req.user._id.toString()) {
+    if (team.ownerId?._id.toString() !== req.user._id.toString()) {
       return next(new ErrorResponse("You are not authorized to update this team", 403));
     }
 

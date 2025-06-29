@@ -16,7 +16,8 @@ const uploadToImageKit = async (file) => {
       folder: "/task_uploads", // Optional folder organization
       useUniqueFileName: true // Ensure unique filenames
     });
-    return response.url; // Return the URL of the uploaded file
+    console.log("ImageKit upload response:", response);
+    return response; // Return the URL of the uploaded file
   } catch (error) {
     console.error("ImageKit upload error:", error);
     throw new Error("Failed to upload file to ImageKit");
@@ -26,7 +27,9 @@ const uploadToImageKit = async (file) => {
 // Function to delete files (optional)
 const deleteFromImageKit = async (fileId) => {
   try {
-    await imagekit.deleteFile(fileId);
+    console.log("fileid", fileId);
+    const response = await imagekit.deleteFile(fileId);
+    console.log("ImageKit delete response:", response);
   } catch (error) {
     console.error("ImageKit delete error:", error);
     throw new Error("Failed to delete file from ImageKit");

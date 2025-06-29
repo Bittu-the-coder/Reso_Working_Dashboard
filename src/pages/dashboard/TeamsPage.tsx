@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Users, Plus, Mail, Crown, Shield, User } from "lucide-react";
+import { Users, Plus, Mail, Crown, Shield, User, Pencil } from "lucide-react";
 import { useTheme } from "../../contexts/ThemeContext";
 import { toast } from "react-hot-toast";
 import { useTeamStore } from "../../store/useTeamStore";
@@ -119,20 +119,46 @@ const TeamsPage: React.FC = () => {
                 }
               }}
             >
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h3
-                    className={`text-lg font-semibold ${
-                      isDarkMode ? "text-gray-200" : "text-gray-900"
-                    }`}
-                  >
-                    {team.name}
-                  </h3>
+              <div className="flex items-start space-x-4 mb-5">
+                <div className="flex-shrink-0 self-center justify-center">
+                  {team.avatar ? (
+                    <img
+                      src={team.avatar}
+                      alt={`${team.name} logo`}
+                      className="w-14 h-14 rounded-lg object-cover border-2 border-opacity-20 shadow-sm"
+                      style={{
+                        borderColor: isDarkMode ? "#3b82f6" : "#2563eb",
+                      }}
+                    />
+                  ) : (
+                    <div
+                      className={`w-14 h-14 rounded-lg flex items-center justify-center ${
+                        isDarkMode ? "bg-gray-700" : "bg-blue-100"
+                      }`}
+                    >
+                      <Users
+                        className={`w-7 h-7 ${
+                          isDarkMode ? "text-blue-400" : "text-blue-600"
+                        }`}
+                      />
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-center">
+                    <h3
+                      className={`text-lg font-bold truncate ${
+                        isDarkMode ? "text-gray-100" : "text-gray-800"
+                      }`}
+                    >
+                      {team.name}
+                    </h3>
+                  </div>
                   {team.description && (
                     <p
-                      className={`text-sm ${
+                      className={`text-sm mt-1 line-clamp-2 ${
                         isDarkMode ? "text-gray-400" : "text-gray-600"
-                      } mt-1`}
+                      }`}
                     >
                       {team.description}
                     </p>

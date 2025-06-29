@@ -1,9 +1,8 @@
-const connect = require("../db/db");
 const Task = require("../models/Task.model");
 const Team = require("../models/team.model");
 const User = require("../models/User.model");
 const asyncHandler = require("../utils/asyncHandler");
-const { extractImageKitFileId, arraysEqual, notifyAssignedUsers } = require("../utils/helpers");
+const { arraysEqual, notifyAssignedUsers } = require("../utils/helpers");
 const { uploadToImageKit, deleteFromImageKit } = require("../utils/imageKit");
 const { ErrorResponse, sendSuccess } = require("../utils/sendResponse");
 
@@ -11,28 +10,70 @@ const createTasks = asyncHandler(async (req, res, next) => {
   const { title, description, dueDate, priority, assignedTo, steps } = req.body;
   const teamId = req.params.teamId;
 
+  console.log("Creating task with data:", {
+    title,
+    description,
+    dueDate,
+    priority,
+    assignedTo,
+    steps,
+    teamId
+  });
+
   // Validate required fields
   if (!title || !teamId) {
     return next(new ErrorResponse("Title and team ID are required", 400));
   }
 
+  // Parse steps if it's a string
+  let parsedSteps = [];
+  try {
+    parsedSteps = typeof steps === 'string' ? JSON.parse(steps) : steps || [];
+  } catch (error) {
+    console.error('Error parsing steps:', error);
+    return next(new ErrorResponse("Invalid steps format", 400));
+  }
+
+  console.log("Creating task with data:", {
+    title,
+    description,
+    dueDate,
+    priority,
+    assignedTo,
+    steps: parsedSteps,
+    teamId
+  });
   try {
     // Check if task already exists
     const existingTask = await Task.findOne({ title, teamId });
     if (existingTask) {
       return next(new ErrorResponse("Task already exists", 400));
     }
+    const team = await Team.findById(teamId);
 
-    // Process file uploads if any
+    // // check if you are admin or not
+    // const user = await User.findById(req.user._id);
+    // if(user._id !== team.members.userId._id) {
+    //   return next(new ErrorResponse("You are not admin"))
+    // } 
+
     let uploads = [];
+
     if (req.files && req.files.length > 0) {
       uploads = await Promise.all(
         req.files.map(async (file) => {
-          return await uploadToImageKit(file);
+          const response = await uploadToImageKit(file);
+          return {
+            url: response.url,
+            fileId: response.fileId,
+            name: response.name,
+            size: response.size,
+            fileType: response.fileType
+          };
         })
       );
     }
-    const team = await Team.findById(teamId);
+    console.log("Uploads processed:", uploads);
 
     // Check if assigned users exist in the team or not
     if (assignedTo && assignedTo.length > 0) {
@@ -86,7 +127,7 @@ const createTasks = asyncHandler(async (req, res, next) => {
       dueDate,
       priority: priority || 'low',
       assignedTo: assignedTo || [],
-      steps: steps || [],
+      steps: parsedSteps || [],
       uploads,
       status: 'todo', // Default status
       createdBy: req.user._id
@@ -130,10 +171,39 @@ const getAllTeamsTasks = asyncHandler(async (req, res, next) => {
 
 const getTaskById = asyncHandler(async (req, res, next) => {
   const taskId = req.params.taskId;
-  try {
+  const teamId = req.params.teamId;
 
-    const task = await Task.findOne({ _id: taskId });
-    sendSuccess(res, task, "Task is fetched");
+  try {
+    // Validate taskId
+    if (!taskId) {
+      return next(new ErrorResponse("Task ID is required", 400));
+    }
+
+    // Find task and populate necessary fields
+    const task = await Task.findById(taskId)
+      .populate('assignedTo', 'fullName username avatar')
+      .populate('createdBy', 'fullName username avatar')
+      .populate('teamId', 'name');
+
+    if (!task) {
+      return next(new ErrorResponse("Task not found", 404));
+    }
+
+    // Check if user has access to the task
+    const team = await Team.findById(task.teamId);
+    if (!team) {
+      return next(new ErrorResponse("Associated team not found", 404));
+    }
+
+    const isMember = team.members.some(
+      member => member.userId?.toString() === req.user._id.toString()
+    );
+
+    if (!isMember) {
+      return next(new ErrorResponse("You don't have access to this task", 403));
+    }
+
+    sendSuccess(res, task, "Task fetched successfully");
   } catch (error) {
     console.error("Error while fetching task:", error);
     return next(new ErrorResponse("Server error", 500));
@@ -142,90 +212,101 @@ const getTaskById = asyncHandler(async (req, res, next) => {
 
 const updateTask = asyncHandler(async (req, res, next) => {
   const taskId = req.params.taskId;
-  const { title, description, dueDate, priority, assignedTo, steps, removedUploads } = req.body;
 
   try {
+    // Parse the incoming data
+    const {
+      title,
+      description,
+      dueDate,
+      priority,
+      assignedTo = [],
+      steps = [],
+      removedUploads = []
+    } = req.body;
+    console.log("Update task with data:", { title, description, dueDate, priority, assignedTo, steps, removedUploads });
 
     const task = await Task.findById(taskId);
-    const team = await Team.findById(task.teamId);
-
     if (!task) {
       return next(new ErrorResponse("Task not found", 404));
     }
-
-    const originalTask = await Task.findById(taskId);
-    task._original = originalTask;
-
-    // Validate assigned users if being updated
-    if (assignedTo && assignedTo.length > 0) {
-      // First check if users exist
-      const users = await User.find({ _id: { $in: assignedTo } });
-      if (users.length !== assignedTo.length) {
-        return next(new ErrorResponse("Some assigned users do not exist", 400));
-      }
-
-      // Then verify they belong to the team
-      if (!team.members) {
-        return next(new ErrorResponse("Team has no members", 400));
-      }
-
-      const teamMemberIds = team.members.map(member => member.userId?.toString());
-      const invalidUsers = assignedTo.filter(userId =>
-        !teamMemberIds.includes(userId.toString())
+    // Handle new file uploads
+    if (req.files && req.files.length > 0) {
+      const newUploads = await Promise.all(
+        req.files.map(async (file) => {
+          try {
+            const uploadResponse = await uploadToImageKit(file);
+            return {
+              url: uploadResponse.url,
+              fileId: uploadResponse.fileId,
+              name: uploadResponse.name,
+              size: uploadResponse.size,
+              fileType: uploadResponse.fileType
+            };
+          } catch (error) {
+            console.error("Error uploading file:", error);
+            return null;
+          }
+        })
       );
 
-      if (invalidUsers.length > 0) {
-        return next(new ErrorResponse(
-          `These users are not team members: ${invalidUsers.join(', ')}`,
-          400
-        ));
-      }
+      // Filter out failed uploads and add to task
+      const successfulUploads = newUploads.filter(u => u.url !== null);
+      task.uploads = [...task.uploads, ...successfulUploads];
     }
 
-    // Handle file uploads/deletions
+    // Handle removed uploads
     if (removedUploads && removedUploads.length > 0) {
+      const parsedRemovedUploads = Array.isArray(removedUploads) ?
+        removedUploads :
+        JSON.parse(removedUploads);
+
+      // Filter out null values
+      const validRemovedUploads = parsedRemovedUploads.filter(url => url !== null);
+      console.log("Valid removed uploads:", validRemovedUploads);
+
       await Promise.all(
-        removedUploads.map(async (fileUrl) => {
+        validRemovedUploads.map(async (fileUrl) => {
           try {
-            const fileId = extractImageKitFileId(fileUrl);
-            await deleteFromImageKit(fileId);
+            const fileId = await task.uploads.find(upload => upload.url === fileUrl)?.fileId;
+            if (fileId) await deleteFromImageKit(fileId);
           } catch (error) {
             console.error(`Error deleting file ${fileUrl}:`, error);
           }
         })
       );
-      // Filter out removed uploads
-      task.uploads = task.uploads.filter(upload => !removedUploads.includes(upload));
-    }
 
-    // Process new file uploads
-    if (req.files && req.files.length > 0) {
-      const newUploads = await Promise.all(
-        req.files.map(async (file) => {
-          return await uploadToImageKit(file);
-        })
+      // Update task uploads by filtering out removed ones
+      task.uploads = task.uploads.filter(upload =>
+        !validRemovedUploads.includes(upload.url)
       );
-      task.uploads = [...task.uploads, ...newUploads];
     }
 
-    // Update task fields
-    const updateFields = {
-      title: title ?? task.title,
-      description: description ?? task.description,
-      dueDate: dueDate ?? task.dueDate,
-      priority: priority ?? task.priority,
-      assignedTo: assignedTo ?? task.assignedTo,
-      steps: steps ?? task.steps,
-      updatedAt: new Date()
-    };
+    // Update other task fields
+    task.title = title || task.title;
+    task.description = description || task.description;
+    task.dueDate = dueDate || task.dueDate;
+    task.priority = priority || task.priority;
+    task.updatedAt = new Date();
 
-    // Apply updates
-    Object.assign(task, updateFields);
+    // Handle assignedTo
+    if (assignedTo) {
+      const parsedAssignedTo = Array.isArray(assignedTo) ?
+        assignedTo :
+        JSON.parse(assignedTo);
+      task.assignedTo = parsedAssignedTo;
+    }
+
+    // Handle steps
+    if (steps) {
+      const parsedSteps = Array.isArray(steps) ?
+        steps :
+        JSON.parse(steps);
+      task.steps = parsedSteps;
+    }
+
+    // Save the updated task
     const updatedTask = await task.save();
-
-    if (assignedTo && !arraysEqual(assignedTo, originalTask.assignedTo)) {
-      await notifyAssignedUsers(updatedTask);
-    }
 
     sendSuccess(res, updatedTask, "Task updated successfully");
   } catch (error) {
@@ -237,7 +318,6 @@ const updateTask = asyncHandler(async (req, res, next) => {
 const removeTask = asyncHandler(async (req, res, next) => {
   const taskId = req.params.taskId;
   try {
-
     const checkOwner = await Task.findById(taskId).populate('createdBy', 'fullName username');
     if (checkOwner.createdBy._id.toString() !== req.user._id.toString()) {
       return next(new ErrorResponse("You are not authorized to delete this task", 403));
@@ -329,9 +409,8 @@ const deleteMessageInSpecificTask = asyncHandler(async (req, res, next) => {
   const { teamId, taskId, messageId } = req.params;
 
   try {
-
-
-    const task = await Task.findOne({ _id: taskId, teamId });
+    console.log("team message: ", teamId, taskId, messageId);
+    const task = await Task.findOne({ _id: taskId });
     if (!task) {
       return next(new ErrorResponse("Task not found in this team", 404));
     }
@@ -367,28 +446,24 @@ const deleteMessageInSpecificTask = asyncHandler(async (req, res, next) => {
 
 const updateTaskStatus = asyncHandler(async (req, res, next) => {
   const taskId = req.params.taskId;
-  const { status, steps } = req.body;
+  const { status, stepId, completed } = req.body;
 
   try {
+    console.log("Updating task status:", { taskId, status, stepId, completed });
 
     const task = await Task.findById(taskId);
     if (!task) {
       return next(new ErrorResponse("Task not found", 404));
     }
 
-    if (task.status === status) {
-      return next(new ErrorResponse("Task status is already updated", 400));
-    }
     if (status) task.status = status;
     // get steps and make isCompleted true update reported by user
-    if (steps) {
-      steps.forEach((step) => {
-        const taskStep = task.steps.id(step._id);
-        if (taskStep) {
-          taskStep.isCompleted = step.isCompleted;
-          taskStep.reportedBy = req.user._id;
-        }
-      });
+    if (stepId && completed !== undefined) {
+      const step = task.steps.find(s => s._id.toString() === stepId);
+      if (!step) {
+        return next(new ErrorResponse("Step not found", 404));
+      }
+      step.isCompleted = completed;
     }
     await task.save();
     sendSuccess(res, task, "Task status updated");

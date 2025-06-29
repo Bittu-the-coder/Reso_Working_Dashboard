@@ -28,6 +28,14 @@ const ChatSchema = new mongoose.Schema({
   }
 });
 
+const UploadSchema = new mongoose.Schema({
+  url: String,
+  fileId: String,
+  name: String,
+  size: Number,
+  fileType: String
+});
+
 const TaskSchema = new mongoose.Schema({
   teamId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -40,9 +48,7 @@ const TaskSchema = new mongoose.Schema({
   description: {
     type: String,
   },
-  uploads: [{
-    type: String,
-  }],
+  uploads: [UploadSchema],
   dueDate: {
     type: Date,
   },

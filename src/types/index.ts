@@ -10,6 +10,14 @@ export interface User {
   updatedAt?: string;
 }
 
+export interface Message {
+  _id: string;
+  message: string;
+  user: string | User;
+  createdAt: string;
+  updatedAt?: string;
+}
+
 // Auth store types
 export interface AuthState {
   user: User | null;
@@ -101,7 +109,7 @@ export interface Task {
 }
 
 export interface TaskStep {
-  description: string;
+  title: string;
   isCompleted: boolean;
   _id?: string;
 }

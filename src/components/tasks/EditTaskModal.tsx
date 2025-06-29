@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { X, Upload, Check, ChevronDown } from "lucide-react";
-import { useTaskStore } from "../../store/useTaskStore";
+import { X, Check, ChevronDown, Upload, FileIcon } from "lucide-react";
 import toast from "react-hot-toast";
+import { useTaskStore } from "../../store/useTaskStore";
 
-const CreateTaskModal = ({ teams, onClose, isDarkMode = false }) => {
-  const { createTask, loading } = useTaskStore();
+const EditTaskModal = ({
+  task,
+  teams,
+  onClose,
+  onUpdate,
+  isDarkMode = false,
+}) => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -12,24 +17,40 @@ const CreateTaskModal = ({ teams, onClose, isDarkMode = false }) => {
     priority: "medium",
     teamId: "",
     assignedTo: [],
-    files: [],
-    steps: [
-      {
-        title: "",
-        isCompleted: false,
-      },
-    ],
+    steps: [],
+    files: [], // New files to upload
+    existingUploads: [], // Existing uploads from the task
+    removedUploads: [], // URLs of uploads to be removed
   });
+
   const [selectedTeam, setSelectedTeam] = useState(null);
-  const [errors, setErrors] = useState({});
   const [isTeamDropdownOpen, setIsTeamDropdownOpen] = useState(false);
+  const { updateTask } = useTaskStore();
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    if (formData.teamId) {
-      const team = teams.find((t) => t._id === formData.teamId);
-      setSelectedTeam(team);
+    if (task) {
+      setFormData({
+        title: task.title,
+        description: task.description || "",
+        dueDate: task.dueDate
+          ? new Date(task.dueDate).toISOString().split("T")[0]
+          : "",
+        priority: task.priority || "medium",
+        teamId: task.teamId?._id || "",
+        assignedTo: task.assignedTo?.map((user) => user._id) || [],
+        steps: task.steps || [],
+        files: [], // Initialize as empty array
+        existingUploads: task.uploads || [], // Store existing uploads
+        removedUploads: [], // Initialize as empty array
+      });
+
+      if (task.teamId?._id) {
+        const team = teams.find((t) => t._id === task.teamId._id);
+        setSelectedTeam(team);
+      }
     }
-  }, [formData.teamId, teams]);
+  }, [task, teams]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -44,30 +65,49 @@ const CreateTaskModal = ({ teams, onClose, isDarkMode = false }) => {
     if (!validateForm()) return;
 
     try {
-      const response = await createTask(
+      // Prepare the task data
+      const taskData = {
+        title: formData.title,
+        description: formData.description,
+        dueDate: formData.dueDate,
+        priority: formData.priority,
+        assignedTo: formData.assignedTo,
+        steps: formData.steps.map((step) => ({
+          title: step.title,
+          isCompleted: step.isCompleted || false,
+        })),
+      };
+
+      // Extract the actual File objects from the formData.files
+      const filesToUpload = formData.files.map(
+        (fileObj) => fileObj.file || fileObj
+      );
+
+      console.log("Files to upload:", filesToUpload);
+      console.log("Removed uploads:", formData.removedUploads);
+
+      // Call the update function with extracted files
+      const response = await updateTask(
         formData.teamId,
-        {
-          title: formData.title,
-          description: formData.description,
-          dueDate: formData.dueDate,
-          priority: formData.priority,
-          assignedTo: formData.assignedTo,
-          steps: formData.steps,
-        },
-        formData.files
+        task._id,
+        taskData,
+        filesToUpload, // Pass the extracted File objects
+        formData.removedUploads
       );
 
       if (response.success) {
-        toast.success("Task created successfully!");
+        toast.success("Task updated successfully!");
         onClose();
       } else {
-        toast.error(response.error || "Failed to create task");
+        toast.error(response.error || "Failed to update task");
       }
     } catch (error) {
-      toast.error(error.message || "Failed to create task");
+      console.error("Error updating task:", error);
+      toast.error(error.message || "Failed to update task");
     }
   };
 
+  // File handling functions
   const handleFileChange = (e) => {
     const newFiles = Array.from(e.target.files).map((file) => ({
       file, // Store the actual file object for upload
@@ -75,19 +115,31 @@ const CreateTaskModal = ({ teams, onClose, isDarkMode = false }) => {
       size: file.size,
       type: file.type,
     }));
-    setFormData({
-      ...formData,
-      files: [...formData.files, ...newFiles],
-    });
+    if (e.target.files && e.target.files.length > 0) {
+      setFormData((prev) => ({
+        ...prev,
+        files: [...prev.files, ...newFiles],
+      }));
+    }
   };
 
-  const removeFile = (index) => {
-    setFormData({
-      ...formData,
-      files: formData.files.filter((_, i) => i !== index),
-    });
+  const removeNewFile = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      files: prev.files.filter((_, i) => i !== index),
+    }));
+  };
+  console.log("==========form data", formData);
+
+  const removeExistingUpload = (index, url) => {
+    setFormData((prev) => ({
+      ...prev,
+      existingUploads: prev.existingUploads.filter((_, i) => i !== index),
+      removedUploads: [...prev.removedUploads, url],
+    }));
   };
 
+  // Step handling functions (unchanged from your original)
   const addStep = () => {
     setFormData({
       ...formData,
@@ -122,6 +174,7 @@ const CreateTaskModal = ({ teams, onClose, isDarkMode = false }) => {
         isDarkMode ? "bg-black bg-opacity-70" : "bg-black bg-opacity-50"
       }`}
     >
+      {/* Modal container */}
       <div
         className={`relative rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto ${
           isDarkMode ? "bg-gray-800 text-white" : "bg-white text-gray-900"
@@ -133,7 +186,7 @@ const CreateTaskModal = ({ teams, onClose, isDarkMode = false }) => {
             isDarkMode ? "border-gray-700" : "border-gray-200"
           }`}
         >
-          <h2 className="text-xl font-semibold">Create New Task</h2>
+          <h2 className="text-xl font-semibold">Edit Task</h2>
           <button
             onClick={onClose}
             className={`p-1 rounded-full ${
@@ -168,12 +221,9 @@ const CreateTaskModal = ({ teams, onClose, isDarkMode = false }) => {
                   : isDarkMode
                   ? "border-gray-700 bg-gray-700"
                   : "border-gray-300"
-              } ${
-                isDarkMode
-                  ? "focus:ring-blue-500 focus:border-blue-500"
-                  : "focus:ring-blue-500 focus:border-blue-500"
               }`}
               placeholder="Enter task title"
+              required
             />
             {errors.title && (
               <p className="mt-1 text-sm text-red-500">{errors.title}</p>
@@ -182,7 +232,7 @@ const CreateTaskModal = ({ teams, onClose, isDarkMode = false }) => {
 
           {/* Description */}
           <div>
-            <label className={`block mb-1 text-sm font-medium`}>
+            <label className="block mb-1 text-sm font-medium">
               Description
             </label>
             <textarea
@@ -192,10 +242,6 @@ const CreateTaskModal = ({ teams, onClose, isDarkMode = false }) => {
               }
               className={`w-full p-2 rounded border ${
                 isDarkMode ? "border-gray-700 bg-gray-700" : "border-gray-300"
-              } ${
-                isDarkMode
-                  ? "focus:ring-blue-500 focus:border-blue-500"
-                  : "focus:ring-blue-500 focus:border-blue-500"
               }`}
               rows={3}
               placeholder="Enter task description"
@@ -218,10 +264,6 @@ const CreateTaskModal = ({ teams, onClose, isDarkMode = false }) => {
                   : isDarkMode
                   ? "border-gray-700 bg-gray-700"
                   : "border-gray-300"
-              } ${
-                isDarkMode
-                  ? "focus:ring-blue-500 focus:border-blue-500"
-                  : "focus:ring-blue-500 focus:border-blue-500"
               }`}
               onClick={() => setIsTeamDropdownOpen(!isTeamDropdownOpen)}
             >
@@ -251,7 +293,9 @@ const CreateTaskModal = ({ teams, onClose, isDarkMode = false }) => {
                         teamId: team._id,
                         assignedTo: [],
                       });
+                      setSelectedTeam(team);
                       setIsTeamDropdownOpen(false);
+                      if (errors.teamId) setErrors({ ...errors, teamId: "" });
                     }}
                   >
                     {team.name}
@@ -281,7 +325,7 @@ const CreateTaskModal = ({ teams, onClose, isDarkMode = false }) => {
                 >
                   {selectedTeam.members.map((member) => (
                     <div
-                      key={member._id}
+                      key={member.userId}
                       className="flex items-center mb-2 last:mb-0"
                     >
                       <input
@@ -306,13 +350,12 @@ const CreateTaskModal = ({ teams, onClose, isDarkMode = false }) => {
                         className="flex items-center"
                       >
                         <div
-                          className={` flex items-center rounded-md justify-center mr-2 ${
+                          className={`flex items-center rounded-md justify-center mr-2 ${
                             isDarkMode ? "bg-gray-600" : "bg-gray-200"
                           }`}
                         >
                           {member.name}
                         </div>
-                        <span>{member.userId.name}</span>
                       </label>
                     </div>
                   ))}
@@ -331,10 +374,6 @@ const CreateTaskModal = ({ teams, onClose, isDarkMode = false }) => {
               }
               className={`w-full p-2 rounded border ${
                 isDarkMode ? "border-gray-700 bg-gray-700" : "border-gray-300"
-              } ${
-                isDarkMode
-                  ? "focus:ring-blue-500 focus:border-blue-500"
-                  : "focus:ring-blue-500 focus:border-blue-500"
               }`}
             />
           </div>
@@ -381,10 +420,6 @@ const CreateTaskModal = ({ teams, onClose, isDarkMode = false }) => {
                       isDarkMode
                         ? "border-gray-700 bg-gray-700"
                         : "border-gray-300"
-                    } ${
-                      isDarkMode
-                        ? "focus:ring-blue-500 focus:border-blue-500"
-                        : "focus:ring-blue-500 focus:border-blue-500"
                     }`}
                     placeholder={`Step ${index + 1}`}
                   />
@@ -415,11 +450,59 @@ const CreateTaskModal = ({ teams, onClose, isDarkMode = false }) => {
             </div>
           </div>
 
-          {/* File Upload */}
+          {/* File Upload Section */}
           <div>
             <label className="block mb-1 text-sm font-medium">
               Attachments
             </label>
+
+            {/* Existing Uploads Display */}
+            {formData.existingUploads?.length > 0 && (
+              <div className="mb-4 space-y-2">
+                <h4 className="text-sm font-medium">Current Attachments</h4>
+                {formData.existingUploads.map((upload, index) => (
+                  <div
+                    key={upload.fileId || index}
+                    className={`flex items-center justify-between p-2 rounded ${
+                      isDarkMode ? "bg-gray-700" : "bg-gray-100"
+                    }`}
+                  >
+                    <div className="flex items-center">
+                      {upload.fileType?.startsWith("image/") ? (
+                        <img
+                          src={upload.url}
+                          alt={upload.name}
+                          className="w-10 h-10 object-cover mr-2 rounded"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 flex items-center justify-center bg-gray-200 dark:bg-gray-600 mr-2 rounded">
+                          <FileIcon className="w-5 h-5" />
+                        </div>
+                      )}
+                      <div className="truncate max-w-xs">
+                        <p className="text-sm truncate">
+                          {upload.url.split("/").pop()}
+                        </p>
+                        {upload.size && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            {upload.size || "Unknown Size"}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeExistingUpload(index, upload.url)}
+                      className="text-red-500 hover:text-red-700 dark:hover:text-red-400 p-1"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* New Files Upload Area */}
             <label
               className={`block w-full p-4 rounded border-2 border-dashed cursor-pointer ${
                 isDarkMode
@@ -430,7 +513,9 @@ const CreateTaskModal = ({ teams, onClose, isDarkMode = false }) => {
               <div className="flex flex-col items-center justify-center text-center">
                 <Upload size={24} className="mb-2" />
                 <span className="text-sm">Click to upload files</span>
-                <span className="text-xs text-gray-500">or drag and drop</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  or drag and drop
+                </span>
               </div>
               <input
                 type="file"
@@ -439,8 +524,11 @@ const CreateTaskModal = ({ teams, onClose, isDarkMode = false }) => {
                 className="hidden"
               />
             </label>
-            {formData.files.length > 0 && (
-              <div className="mt-2 space-y-2">
+
+            {/* New Files Preview */}
+            {formData.files?.length > 0 && (
+              <div className="mt-4 space-y-2">
+                <h4 className="text-sm font-medium">New Files to Upload</h4>
                 {formData.files.map((file, index) => (
                   <div
                     key={index}
@@ -451,8 +539,8 @@ const CreateTaskModal = ({ teams, onClose, isDarkMode = false }) => {
                     <span className="text-sm truncate">{file.name}</span>
                     <button
                       type="button"
-                      onClick={() => removeFile(index)}
-                      className="text-red-500 hover:text-red-700"
+                      onClick={() => removeNewFile(index)}
+                      className="text-red-500 hover:text-red-700 dark:hover:text-red-400"
                     >
                       <X size={16} />
                     </button>
@@ -477,14 +565,13 @@ const CreateTaskModal = ({ teams, onClose, isDarkMode = false }) => {
             </button>
             <button
               type="submit"
-              disabled={loading || !formData.title || !formData.teamId}
               className={`px-4 py-2 rounded text-white ${
-                loading || !formData.title || !formData.teamId
-                  ? "bg-blue-400 cursor-not-allowed"
+                isDarkMode
+                  ? "bg-blue-600 hover:bg-blue-700"
                   : "bg-blue-600 hover:bg-blue-700"
               }`}
             >
-              {loading ? "Creating..." : "Create Task"}
+              Update Task
             </button>
           </div>
         </form>
@@ -493,4 +580,4 @@ const CreateTaskModal = ({ teams, onClose, isDarkMode = false }) => {
   );
 };
 
-export default CreateTaskModal;
+export default EditTaskModal;

@@ -8,7 +8,7 @@ const {
   updatePassword,
   getAllUsers,
   checkNotification,
-  deleteNotificationById
+  deleteNotificationById,
 } = require('../controllers/user.controller');
 const { protect } = require('../middlewares/auth.middleware');
 const { acceptTeamInvitation } = require('../controllers/team.controller');

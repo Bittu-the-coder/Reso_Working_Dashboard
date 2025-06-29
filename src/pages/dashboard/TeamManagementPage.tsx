@@ -19,6 +19,7 @@ import MemberDetailModal from "../../components/teams/MemberDetailModal";
 import MemberEditModal from "../../components/teams/MemberEditModal";
 import { useTeamStore } from "../../store/useTeamStore";
 import { useAuthStore } from "../../store/useAuthStore";
+import EditTeam from "../../components/teams/EditTeam";
 
 const TeamManagementPage: React.FC = () => {
   const { teamId } = useParams<{ teamId: string }>();
@@ -31,6 +32,7 @@ const TeamManagementPage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"admin" | "member">("member");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   const {
     currentTeam,
@@ -45,8 +47,21 @@ const TeamManagementPage: React.FC = () => {
     removeTeamMember,
     updateTeamMember,
   } = useTeamStore();
-  const { user } = useAuthStore();
-  console.log("currentTeam", currentTeam);
+  const { user, getMe, loading: authLoading } = useAuthStore();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (!user) {
+        try {
+          await getMe();
+        } catch (error) {
+          console.error("Error fetching user:", error);
+        }
+      }
+    };
+
+    fetchUser();
+  }, [user, getMe]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -207,7 +222,7 @@ const TeamManagementPage: React.FC = () => {
     );
   }
 
-  const isOwner = currentTeam?.ownerId._id.toString() === user._id.toString();
+  const isOwner = currentTeam?.ownerId._id === user._id;
   const isAdmin =
     currentTeam?.members.some(
       (member) =>
@@ -250,13 +265,38 @@ const TeamManagementPage: React.FC = () => {
             isDarkMode ? "bg-gray-800" : "bg-white"
           } shadow-lg`}
         >
-          <h2
-            className={`text-xl font-semibold mb-4 ${
-              isDarkMode ? "text-white" : "text-gray-900"
-            }`}
-          >
-            Team Members
-          </h2>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <h2
+                className={`text-xl font-semibold ${
+                  isDarkMode ? "text-white" : "text-gray-900"
+                }`}
+              >
+                Team Members ({currentTeam?.members.length || 0})
+              </h2>
+              <span
+                className={`text-sm ${
+                  isDarkMode ? "text-gray-400" : "text-gray-500"
+                }`}
+              >
+                {currentTeam?.description && `• ${currentTeam.description}`}
+              </span>
+            </div>
+
+            {isAdmin && (
+              <button
+                onClick={() => setShowEditModal(true)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors ${
+                  isDarkMode
+                    ? "bg-gray-700 hover:bg-gray-600 text-gray-300"
+                    : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                }`}
+              >
+                <Pencil className="w-4 h-4" />
+                <span className="text-sm font-medium">Edit Team</span>
+              </button>
+            )}
+          </div>
           <div className="space-y-4">
             {currentTeam?.members.map((member) => (
               <div
@@ -334,40 +374,39 @@ const TeamManagementPage: React.FC = () => {
                 </div>
                 {isAdmin && (
                   <div className="flex space-x-2 opacity-70 group-hover:opacity-100 transition-opacity">
-                    {isOwner &&
-                      member.userId.toString() !==
-                        currentTeam?.ownerId?._id.toString() && (
-                        <>
-                          <button
-                            onClick={() => setMemberToEdit(member)}
-                            className={`p-1.5 rounded ${
-                              isDarkMode
-                                ? "bg-gray-700 text-blue-400 hover:bg-gray-600"
-                                : "bg-gray-200 text-blue-600 hover:bg-gray-300"
-                            }`}
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </button>
-                          <select
-                            value={member.role}
-                            onChange={(e) =>
-                              handleChangeRole(
-                                member._id,
-                                e.target.value as "admin" | "member"
-                              )
-                            }
-                            className={`text-sm rounded px-2 py-1 ${
-                              isDarkMode
-                                ? "bg-gray-700 text-gray-300 border-gray-600"
-                                : "bg-white text-gray-700 border-gray-300"
-                            } border`}
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <option value="member">Member</option>
-                            <option value="admin">Admin</option>
-                          </select>
-                        </>
-                      )}
+                    {member.userId.toString() !==
+                      currentTeam?.ownerId?._id.toString() && (
+                      <>
+                        <button
+                          onClick={() => setMemberToEdit(member)}
+                          className={`p-1.5 rounded ${
+                            isDarkMode
+                              ? "bg-gray-700 text-blue-400 hover:bg-gray-600"
+                              : "bg-gray-200 text-blue-600 hover:bg-gray-300"
+                          }`}
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        <select
+                          value={member.role}
+                          onChange={(e) =>
+                            handleChangeRole(
+                              member._id,
+                              e.target.value as "admin" | "member"
+                            )
+                          }
+                          className={`text-sm rounded px-2 py-1 ${
+                            isDarkMode
+                              ? "bg-gray-700 text-gray-300 border-gray-600"
+                              : "bg-white text-gray-700 border-gray-300"
+                          } border`}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <option value="member">Member</option>
+                          <option value="admin">Admin</option>
+                        </select>
+                      </>
+                    )}
                     {(isOwner || (isAdmin && member.role === "member")) &&
                       member.userId.toString() !==
                         currentTeam?.ownerId?._id.toString() && (
@@ -582,6 +621,14 @@ const TeamManagementPage: React.FC = () => {
             handleUpdateMember(memberToEdit._id, updatedData)
           }
           isDarkMode={isDarkMode}
+        />
+      )}
+      {/* Edit Team Modal */}
+      {showEditModal && (
+        <EditTeam
+          onClose={() => setShowEditModal(false)}
+          isDarkMode={isDarkMode}
+          teamData={currentTeam}
         />
       )}
     </div>

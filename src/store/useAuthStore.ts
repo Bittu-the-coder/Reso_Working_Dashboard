@@ -194,12 +194,15 @@ export const useAuthStore = create<AuthStoreState>()(
 
       // Get all users (admin)
       getAllUsers: async (): Promise<UsersResponseResult> => {
+        // Skip if already loading
+        if (get().loading) return { success: false, error: "Already loading" };
+
         set({ loading: true, error: null });
         try {
           const response = await axios.get(`${API_URL}/users/getallusers`, {
             headers: { Authorization: `Bearer ${get().token}` },
           });
-          set({ loading: false });
+          set({ loading: false, users: response.data.data });
           return { success: true, users: response.data.data };
         } catch (error: any) {
           const message =

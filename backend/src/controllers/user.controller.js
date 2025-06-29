@@ -106,7 +106,7 @@ const updateUser = asyncHandler(async (req, res, next) => {
     // upload avatar if provided
     if (req.file) {
       const avatarUrl = await uploadToImageKit(req.file);
-      user.avatar = avatarUrl;
+      user.avatar = avatarUrl.url;
     }
 
     // Check if email is being changed and if it already exists
@@ -155,7 +155,6 @@ const updatePassword = asyncHandler(async (req, res, next) => {
 });
 
 const getAllUsers = asyncHandler(async (req, res, next) => {
-  await connect();
   try {
     const users = await User.find();
     sendSuccess(res, users, 'Users fetched successfully');
@@ -167,7 +166,6 @@ const getAllUsers = asyncHandler(async (req, res, next) => {
 
 const checkNotification = asyncHandler(async (req, res, next) => {
   try {
-    await connect();
 
     const user = await User.findById(req.user._id);
     if (!user) {
@@ -194,7 +192,6 @@ const deleteNotificationById = asyncHandler(async (req, res, next) => {
   const notificationId = req.params.id;
 
   try {
-    await connect();
 
     const user = await User.findById(req.user._id);
     if (!user) {

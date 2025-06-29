@@ -5,11 +5,6 @@ function arraysEqual(a, b) {
   return a.length === b.length && a.every((val, index) => val === b[index]);
 }
 
-function extractImageKitFileId(url) {
-  const parts = url.split('/');
-  return parts[parts.length - 1].split('?')[0];
-}
-
 const notifyAssignedUsers = async (task) => {
   try {
     // Get current assigned users who should be notified
@@ -53,4 +48,4 @@ const notifyAssignedUsers = async (task) => {
   }
 };
 
-module.exports = { arraysEqual, extractImageKitFileId, notifyAssignedUsers };
+module.exports = { arraysEqual, notifyAssignedUsers };
