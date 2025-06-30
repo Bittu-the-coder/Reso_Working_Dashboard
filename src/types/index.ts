@@ -397,7 +397,7 @@ export interface UpdateUserData {
   name?: string;
   username?: string;
   email?: string;
-  avatarFile?: File;
+  avatar?: File;
 }
 
 export interface PasswordUpdateData {

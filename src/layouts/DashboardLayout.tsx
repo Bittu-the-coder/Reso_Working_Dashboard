@@ -21,16 +21,16 @@ const DashboardLayout: React.FC = () => {
     () => [
       { name: "Overview", icon: <BarChart3 size={20} />, path: "/dashboard" },
       { name: "Teams", icon: <Users size={20} />, path: "/dashboard/teams" },
-      {
-        name: "Events",
-        icon: <CalendarClock size={20} />,
-        path: "/dashboard/events",
-      },
-      {
-        name: "Projects",
-        icon: <Code size={20} />,
-        path: "/dashboard/projects",
-      },
+      // {
+      //   name: "Events",
+      //   icon: <CalendarClock size={20} />,
+      //   path: "/dashboard/events",
+      // },
+      // {
+      //   name: "Projects",
+      //   icon: <Code size={20} />,
+      //   path: "/dashboard/projects",
+      // },
       { name: "Tasks", icon: <FileText size={20} />, path: "/dashboard/tasks" },
       {
         name: "Documents",

@@ -23,6 +23,7 @@ export const useAuthStore = create<AuthStoreState>()(
       token: null,
       error: null,
       loading: false,
+      notifications: [],
 
       // Register user
       register: async (userData: RegisterUserData): Promise<ResponseResult> => {
@@ -87,8 +88,10 @@ export const useAuthStore = create<AuthStoreState>()(
       getMe: async (): Promise<ResponseResult> => {
         set({ loading: true, error: null });
         try {
+          const token = get().token || localStorage.getItem("authToken");
+          if (!token) throw new Error("No authentication token found");
           const response = await axios.get(`${API_URL}/users/me`, {
-            headers: { Authorization: `Bearer ${get().token}` },
+            headers: { Authorization: `Bearer ${token}` },
           });
           set({ user: response.data.data, loading: false });
           return { success: true };
@@ -104,24 +107,31 @@ export const useAuthStore = create<AuthStoreState>()(
       updateUser: async (userData: UpdateUserData): Promise<ResponseResult> => {
         set({ loading: true, error: null });
         try {
+          const token = get().token || localStorage.getItem("authToken");
+          if (!token) throw new Error("No authentication token found");
           const formData = new FormData();
-          if (userData.avatarFile) {
-            formData.append("avatar", userData.avatarFile);
+          formData.append("name", userData.name);
+          formData.append("username", userData.username);
+          formData.append("email", userData.email);
+          if (userData.avatar) {
+            formData.append("avatar", userData.avatar);
           }
-          if (userData.name) formData.append("name", userData.name);
-          if (userData.username) formData.append("username", userData.username);
-          if (userData.email) formData.append("email", userData.email);
+
+          // Debug: Log FormData contents
+          for (const [key, value] of formData.entries()) {
+            console.log(key, value);
+          }
 
           const response = await axios.put(
             `${API_URL}/users/update`,
             formData,
             {
               headers: {
-                Authorization: `Bearer ${get().token}`,
-                "Content-Type": "multipart/form-data",
+                Authorization: `Bearer ${token}`,
               },
             }
           );
+
           set({ user: response.data.data, loading: false });
           return { success: true };
         } catch (error: any) {
@@ -137,8 +147,10 @@ export const useAuthStore = create<AuthStoreState>()(
       ): Promise<ResponseResult> => {
         set({ loading: true, error: null });
         try {
+          const token = get().token || localStorage.getItem("authToken");
+          if (!token) throw new Error("No authentication token found");
           await axios.put(`${API_URL}/users/updatepassword`, passwords, {
-            headers: { Authorization: `Bearer ${get().token}` },
+            headers: { Authorization: `Bearer ${token}` },
           });
           set({ loading: false });
           return { success: true };
@@ -149,17 +161,41 @@ export const useAuthStore = create<AuthStoreState>()(
           return { success: false, error: message };
         }
       },
+      //get all notification
+      getAllNotifications: async (): Promise<NotificationResponseResult> => {
+        try {
+          const token = get().token || localStorage.getItem("authToken");
+          if (!token) throw new Error("No authentication token found");
+
+          const response = await axios.get(`${API_URL}/users/notifications`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
+          console.log("get notifications", response);
+          return { success: true, notifications: response.data.data };
+        } catch (error: any) {
+          const message =
+            error.response?.data?.message || "Failed to fetch notifications";
+          return { success: false, error: message };
+        }
+      },
 
       // Check notifications
-      checkNotifications: async (): Promise<NotificationResponseResult> => {
+      checkNotifications: async (
+        notificationId: string
+      ): Promise<NotificationResponseResult> => {
         set({ loading: true, error: null });
         try {
+          const token = get().token || localStorage.getItem("authToken");
+          console.log("token", token);
+          if (!token) throw new Error("No authentication token found");
           const response = await axios.get(
-            `${API_URL}/users/checknotifications`,
+            `${API_URL}/users/checknotification/${notificationId}`,
             {
-              headers: { Authorization: `Bearer ${get().token}` },
+              headers: { Authorization: `Bearer ${token}` },
             }
           );
+          console.log("check notifications", response);
           set({ loading: false });
           return { success: true, notifications: response.data.data };
         } catch (error: any) {
@@ -176,10 +212,12 @@ export const useAuthStore = create<AuthStoreState>()(
       ): Promise<ResponseResult> => {
         set({ loading: true, error: null });
         try {
-          await axios.get(
+          const token = get().token || localStorage.getItem("authToken");
+          if (!token) throw new Error("No authentication token found");
+          await axios.delete(
             `${API_URL}/users/checknotification/${notificationId}`,
             {
-              headers: { Authorization: `Bearer ${get().token}` },
+              headers: { Authorization: `Bearer ${token}` },
             }
           );
           set({ loading: false });
@@ -199,8 +237,10 @@ export const useAuthStore = create<AuthStoreState>()(
 
         set({ loading: true, error: null });
         try {
+          const token = get().token || localStorage.getItem("authToken");
+          if (!token) throw new Error("No authentication token found");
           const response = await axios.get(`${API_URL}/users/getallusers`, {
-            headers: { Authorization: `Bearer ${get().token}` },
+            headers: { Authorization: `Bearer ${token}` },
           });
           set({ loading: false, users: response.data.data });
           return { success: true, users: response.data.data };

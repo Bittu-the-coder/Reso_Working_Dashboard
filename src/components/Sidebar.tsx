@@ -110,20 +110,25 @@ const Sidebar: React.FC<SidebarProps> = ({ navigationItems }) => {
       >
         {/* Show user initial on mobile */}
         <div
-          className={`w-8 h-8 text-xs rounded-full bg-gradient-to-r hidden sm:flex
-          ${
-            isDarkMode
-              ? "from-blue-500 to-purple-500"
-              : "from-blue-600 to-purple-600"
-          }
-          items-center justify-center text-white font-bold`}
+          className={`w-10 h-10 rounded-full overflow-hidden flex-shrink-0 
+                      ring-2 ${
+                        isDarkMode ? "ring-blue-400/30" : "ring-blue-600/20"
+                      }`}
         >
-          {user?.fullName
-            ? user.fullName
-                .split(" ")
-                .map((name) => name.charAt(0))
-                .join("")
-            : "U"}
+          <img
+            src={
+              user?.avatar ||
+              "https://mighty.tools/mockmind-api/content/cartoon/25.jpg"
+            }
+            alt={user?.fullName || "User avatar"}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.currentTarget.src =
+                "https://ui-avatars.com/api/?name=" +
+                (user?.fullName || "User") +
+                "&background=0D8ABC&color=fff";
+            }}
+          />
         </div>
         <button
           onClick={toggleTheme}
@@ -214,18 +219,25 @@ const Sidebar: React.FC<SidebarProps> = ({ navigationItems }) => {
                   <div className="flex items-center gap-3">
                     {" "}
                     <div
-                      className={`w-10 h-10 rounded-full bg-gradient-to-r ${
-                        isDarkMode
-                          ? "from-blue-500 to-purple-500"
-                          : "from-blue-600 to-purple-600"
-                      } flex items-center justify-center text-white font-bold`}
+                      className={`w-10 h-10 rounded-full overflow-hidden flex-shrink-0 
+                      ring-2 ${
+                        isDarkMode ? "ring-blue-400/30" : "ring-blue-600/20"
+                      }`}
                     >
-                      {user?.fullName
-                        ? user.fullName
-                            .split(" ")
-                            .map((name) => name.charAt(0))
-                            .join("")
-                        : "U"}
+                      <img
+                        src={
+                          user?.avatar ||
+                          "https://mighty.tools/mockmind-api/content/cartoon/25.jpg"
+                        }
+                        alt={user?.fullName || "User avatar"}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src =
+                            "https://ui-avatars.com/api/?name=" +
+                            (user?.fullName || "User") +
+                            "&background=0D8ABC&color=fff";
+                        }}
+                      />
                     </div>
                     <Link
                       to="/dashboard/profile"
@@ -423,22 +435,24 @@ const Sidebar: React.FC<SidebarProps> = ({ navigationItems }) => {
             </button>
           </div>{" "}
           {isCollapsed ? (
-            <div className="px-2 mt-4 mb-6 flex justify-center">
-              <div
-                className={`w-10 h-10 text-lg rounded-full bg-gradient-to-r ${
-                  isDarkMode
-                    ? "from-blue-500 to-purple-500"
-                    : "from-blue-600 to-purple-600"
-                } flex items-center justify-center text-white font-bold`}
-                title={user?.name || "User"}
-              >
-                {user?.fullName
-                  ? user.fullName
-                      .split(" ")
-                      .map((name) => name.charAt(0))
-                      .join("")
-                  : "U"}
-              </div>
+            <div
+              className={`w-10 h-10 rounded-full overflow-hidden flex-shrink-0 
+            ring-2 ${isDarkMode ? "ring-blue-400/30" : "ring-blue-600/20"}`}
+            >
+              <img
+                src={
+                  user?.avatar ||
+                  "https://mighty.tools/mockmind-api/content/cartoon/25.jpg"
+                }
+                alt={user?.fullName || "User avatar"}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.src =
+                    "https://ui-avatars.com/api/?name=" +
+                    (user?.fullName || "User") +
+                    "&background=0D8ABC&color=fff";
+                }}
+              />
             </div>
           ) : (
             <div className={`px-4 mt-2 mb-6`}>
@@ -449,18 +463,25 @@ const Sidebar: React.FC<SidebarProps> = ({ navigationItems }) => {
               >
                 <div className="flex items-center gap-3">
                   <div
-                    className={`w-10 h-10 text-lg rounded-full bg-gradient-to-r ${
-                      isDarkMode
-                        ? "from-blue-500 to-purple-500"
-                        : "from-blue-600 to-purple-600"
-                    } flex items-center justify-center text-white font-bold`}
+                    className={`w-10 h-10 rounded-full overflow-hidden flex-shrink-0 
+                      ring-2 ${
+                        isDarkMode ? "ring-blue-400/30" : "ring-blue-600/20"
+                      }`}
                   >
-                    {user?.fullName
-                      ? user.fullName
-                          .split(" ")
-                          .map((name) => name.charAt(0))
-                          .join("")
-                      : "U"}
+                    <img
+                      src={
+                        user?.avatar ||
+                        "https://mighty.tools/mockmind-api/content/cartoon/25.jpg"
+                      }
+                      alt={user?.fullName || "User avatar"}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src =
+                          "https://ui-avatars.com/api/?name=" +
+                          (user?.fullName || "User") +
+                          "&background=0D8ABC&color=fff";
+                      }}
+                    />
                   </div>
                   <Link to={"/dashboard/profile"}>
                     <div className="flex-1">

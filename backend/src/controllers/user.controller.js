@@ -14,8 +14,6 @@ const registerUser = asyncHandler(async (req, res, next) => {
   }
 
   try {
-    await connect();
-
     const existingUser = await User.findOne({
       $or: [{ email }, { username }]
     });
@@ -94,8 +92,6 @@ const logoutUser = asyncHandler(async (req, res, next) => {
 
 // Update user details
 const updateUser = asyncHandler(async (req, res, next) => {
-  const { name, username, email, avatar } = req.body
-
   try {
     const user = await User.findById(req.user.id);
 
@@ -103,13 +99,12 @@ const updateUser = asyncHandler(async (req, res, next) => {
       return next(new ErrorResponse('User not found', 404));
     }
 
-    // upload avatar if provided
+    const { name, username, email } = req.body;
+
     if (req.file) {
       const avatarUrl = await uploadToImageKit(req.file);
       user.avatar = avatarUrl.url;
     }
-
-    // Check if email is being changed and if it already exists
     if (email && email !== user.email) {
       const emailExists = await User.findOne({ email });
       if (emailExists) {
@@ -117,7 +112,6 @@ const updateUser = asyncHandler(async (req, res, next) => {
       }
     }
 
-    // Check if username is being changed and if it already exists
     if (username && username !== user.username) {
       const usernameExists = await User.findOne({ username });
       if (usernameExists) {
@@ -125,14 +119,13 @@ const updateUser = asyncHandler(async (req, res, next) => {
       }
     }
 
-    if (name) user.fullName = name
-    if (username) user.username = username
-    if (email) user.email = email
-    if (avatar) user.avatar = avatar
+    if (name) user.name = name;
+    if (username) user.username = username;
+    if (email) user.email = email;
 
-    await user.save()
+    await user.save();
 
-    sendSuccess(res, user, 'User updated successfully')
+    sendSuccess(res, user, 'User updated successfully');
   } catch (error) {
     console.error('Error updating user:', error);
     return next(new ErrorResponse("Internal Server Error", 500));
@@ -142,7 +135,6 @@ const updateUser = asyncHandler(async (req, res, next) => {
 // Update password
 const updatePassword = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.user.id).select('+password');
-  await connect();
   // Check current password
   if (!(await user.matchPassword(req.body.currentPassword))) {
     return next(new ErrorResponse('Password is incorrect', 401));
@@ -164,24 +156,56 @@ const getAllUsers = asyncHandler(async (req, res, next) => {
   }
 });
 
-const checkNotification = asyncHandler(async (req, res, next) => {
+const getAllNotification = asyncHandler(async (req, res, next) => {
   try {
+    const user = await User.findOne(req.user._id)
+    const response = user.notifications;
+    sendSuccess(res, response, "Notifications fetched successfully.")
+  } catch (error) {
+    return next(new ErrorResponse("server error", 500))
+  }
+})
 
+const checkNotification = asyncHandler(async (req, res, next) => {
+  const notificationId = req.params.id;
+  try {
     const user = await User.findById(req.user._id);
     if (!user) {
       return next(new ErrorResponse("User not found", 404));
     }
-
-    const unreadNotifications = user.notifications.filter(n => !n.isRead);
-    // isRead = true
-    user.notifications.forEach(n => {
-      if (!n.isRead) {
-        n.isRead = true;
-      }
-    });
+    const markedRead = user.notifications.filter(n => n._id.toString() === notificationId ? n.isRead = true : null);
     await user.save();
+    const readInvitation = user.notifications.find(
+      (n) => n.type === 'invitation' && n.isRead === true
+    );
+    const teamIds = user.teams.map(t => t.teamId);
+    let invitationAccepted = false;
 
-    return sendSuccess(res, unreadNotifications, "Fetched unread notifications");
+    for (const teamId of teamIds) {
+      const team = await Team.findById(teamId);
+      if (!team) continue;
+
+      // Find invitation in the team
+      const invitationIndex = team.invitations.findIndex(
+        (inv) => inv.userId.toString() === req.user._id.toString()
+      );
+
+      if (invitationIndex === -1) continue;
+
+      const memberIdx = team.members.findIndex(
+        (mem) => mem.userId.toString() === req.user._id.toString()
+      );
+
+      if (memberIdx !== -1) {
+        team.members[memberIdx].isAcceptedInvite = true;
+        team.invitations.splice(invitationIndex, 1);
+        await team.save();
+        invitationAccepted = true;
+        break; // Accept only the first valid invitation
+      }
+    }
+
+    return sendSuccess(res, markedRead, "Fetched unread notifications");
   } catch (error) {
     console.error("Error while checking notifications:", error);
     return next(new ErrorResponse("Server error", 500));
@@ -227,6 +251,7 @@ module.exports = {
   updateUser,
   updatePassword,
   getAllUsers,
+  getAllNotification,
   checkNotification,
   deleteNotificationById
 };

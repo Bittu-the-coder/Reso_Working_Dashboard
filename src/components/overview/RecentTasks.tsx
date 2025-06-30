@@ -6,6 +6,7 @@ import { CheckSquare, Clock } from "lucide-react";
 
 const RecentTasks = ({ tasks }) => {
   const { isDarkMode } = useTheme();
+  console.log(tasks);
 
   return (
     <motion.div
@@ -46,22 +47,24 @@ const RecentTasks = ({ tasks }) => {
             isDarkMode ? "divide-gray-700" : "divide-blue-100"
           }`}
         >
-          <thead className="bg-blue-50">
+          <thead className={`${isDarkMode ? "bg-gray-800" : "bg-white"}`}>
             <tr>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-blue-900 uppercase tracking-wider"
-              >
-                Task
-              </th>
               <th
                 scope="col"
                 className={`px-6 py-3 text-left text-xs font-medium ${
                   isDarkMode ? "text-blue-300" : "text-blue-900"
                 } uppercase tracking-wider`}
               >
-                Assignee
+                Task
               </th>
+              {/* <th
+                scope="col"
+                className={`px-6 py-3 text-left text-xs font-medium ${
+                  isDarkMode ? "text-blue-300" : "text-blue-900"
+                } uppercase tracking-wider`}
+              >
+                Assignee
+              </th> */}
               <th
                 scope="col"
                 className={`px-6 py-3 text-left text-xs font-medium ${
@@ -105,15 +108,15 @@ const RecentTasks = ({ tasks }) => {
                     {task.title}
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                {/* <td className="px-6 py-4 whitespace-nowrap">
                   <div
                     className={`text-sm ${
                       isDarkMode ? "text-blue-400" : "text-blue-700"
                     }`}
                   >
-                    {task.assignee}
+                    {task.createdBy}
                   </div>
-                </td>
+                </td> */}
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div
                     className={`text-sm ${
@@ -123,17 +126,17 @@ const RecentTasks = ({ tasks }) => {
                     <Clock
                       className={`w-4 h-4 ${isDarkMode ? "text-blue-400" : ""}`}
                     />{" "}
-                    {task.deadline}
+                    {new Date(task.dueDate).toLocaleDateString()}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span
                     className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      task.status === "completed"
+                      task.status === "done"
                         ? isDarkMode
                           ? "bg-green-900 text-green-300"
                           : "bg-green-100 text-green-800"
-                        : task.status === "in-progress"
+                        : task.status === "in_progress"
                         ? isDarkMode
                           ? "bg-blue-900 text-blue-300"
                           : "bg-blue-100 text-blue-800"
@@ -142,7 +145,11 @@ const RecentTasks = ({ tasks }) => {
                         : "bg-yellow-100 text-yellow-800"
                     }`}
                   >
-                    {task.status}
+                    {task.status === "done"
+                      ? "Done"
+                      : task.status === "in_progress"
+                      ? "In Progress"
+                      : "Todo"}
                   </span>
                 </td>
               </motion.tr>

@@ -372,64 +372,6 @@ const updateTeamMember = asyncHandler(async (req, res, next) => {
 });
 
 
-const acceptTeamInvitation = asyncHandler(async (req, res, next) => {
-  try {
-    ;
-
-    const user = await User.findById(req.user._id);
-    if (!user) {
-      return next(new ErrorResponse("User not found", 404));
-    }
-
-    // Find first 'invitation' type notification that is already read
-    const readInvitation = user.notifications.find(
-      (n) => n.type === 'invitation' && n.isRead === true
-    );
-
-    if (!readInvitation) {
-      return next(new ErrorResponse("No read invitation notification found", 404));
-    }
-
-    // Find all teamIds where user is invited
-    const teamIds = user.teams.map(t => t.teamId);
-    let invitationAccepted = false;
-
-    for (const teamId of teamIds) {
-      const team = await Team.findById(teamId);
-      if (!team) continue;
-
-      // Find invitation in the team
-      const invitationIndex = team.invitations.findIndex(
-        (inv) => inv.userId.toString() === req.user._id.toString()
-      );
-
-      if (invitationIndex === -1) continue;
-
-      const memberIdx = team.members.findIndex(
-        (mem) => mem.userId.toString() === req.user._id.toString()
-      );
-
-      if (memberIdx !== -1) {
-        team.members[memberIdx].isAcceptedInvite = true;
-        team.invitations.splice(invitationIndex, 1);
-        await team.save();
-        invitationAccepted = true;
-        break; // Accept only the first valid invitation
-      }
-    }
-
-    if (!invitationAccepted) {
-      return next(new ErrorResponse("No matching invitation found in teams", 404));
-    }
-
-    return sendSuccess(res, null, "Team invitation accepted successfully");
-  } catch (error) {
-    console.error("Error while accepting invitation:", error);
-    return next(new ErrorResponse("Server error", 500));
-  }
-});
-
-
 
 
 
@@ -446,5 +388,4 @@ module.exports = {
   getTeamMemberById,
   removeTeamMember,
   updateTeamMember,
-  acceptTeamInvitation,
 }

@@ -6,7 +6,6 @@ const asyncHandler = require("../utils/asyncHandler");
 // Protect routes
 exports.protect = asyncHandler(async (req, res, next) => {
   let token;
-
   // Check headers for Bearer token
   if (
     req.headers.authorization &&

@@ -1,9 +1,9 @@
 // pages/OverviewPage.js
 import React, { useEffect } from "react";
 import { useTheme } from "../../contexts/ThemeContext";
-import StatsCard from "../../components/overview/StatsCard";
-import RecentActivities from "../../components/overview/RecentActivities";
-import ProjectStatus from "../../components/overview/ProjectStatus";
+// import StatsCard from "../../components/overview/StatsCard";
+// import RecentActivities from "../../components/overview/RecentActivities";
+// import ProjectStatus from "../../components/overview/ProjectStatus";
 import RecentTasks from "../../components/overview/RecentTasks";
 import { useEventStore } from "../../store/useEventStore";
 import { useProjectStore } from "../../store/useProjectStore";
@@ -67,13 +67,13 @@ const OverviewPage = () => {
       <div className="container mx-auto px-4 py-8">
         <motion.div className="space-y-6" initial="hidden" animate="visible">
           <motion.div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {stats.map((stat, index) => (
+            {/* {stats.map((stat, index) => (
               <StatsCard key={index} {...stat} />
-            ))}
+            ))} */}
           </motion.div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <RecentActivities events={events} />
-            <ProjectStatus projects={projects} />
+            {/* <RecentActivities events={events} /> */}
+            {/* <ProjectStatus projects={projects} /> */}
           </div>
           <RecentTasks tasks={tasks} />
         </motion.div>
