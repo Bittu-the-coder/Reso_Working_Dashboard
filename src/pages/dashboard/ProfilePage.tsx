@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import {
   User,
@@ -86,28 +86,8 @@ const ProfilePage = () => {
     new: "",
     confirm: "",
   });
-  const {
-    user,
-    updateUser,
-    updatePassword,
-    logout,
-    checkNotifications,
-    getAllNotifications,
-    deleteNotification,
-  } = useAuthStore();
-  const [activeTab, setActiveTab] = useState("profile");
-  interface Notification {
-    _id: string;
-    message: string;
-    isRead: boolean;
-    type: string;
-    createdAt: string;
-  }
 
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [editMode, setEditMode] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const { isDarkMode } = useTheme();
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -125,23 +105,8 @@ const ProfilePage = () => {
       }
     };
 
-    fetchNotifications(); // Always fetch on initial load, not just when empty
+    fetchNotifications();
   }, [getAllNotifications]);
-
-  // Form states
-  const [profile, setProfile] = useState({
-    name: "",
-    email: "",
-    username: "",
-    avatar: null,
-    avatarPreview: "",
-  });
-
-  const [passwords, setPasswords] = useState({
-    current: "",
-    new: "",
-    confirm: "",
-  });
 
   // Initialize form with user data
   useEffect(() => {
@@ -156,11 +121,10 @@ const ProfilePage = () => {
       });
     }
   }, [user]);
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   // Handle avatar file selection
-  const handleAvatarChange = (e) => {
-    const file = e.target.files[0];
+  const handleAvatarChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
       setProfile((prev) => ({
         ...prev,
@@ -170,7 +134,7 @@ const ProfilePage = () => {
     }
   };
 
-  const handleProfileSubmit = async (e: { preventDefault: () => void }) => {
+  const handleProfileSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
@@ -194,7 +158,7 @@ const ProfilePage = () => {
     }
   };
 
-  const handlePasswordSubmit = async (e) => {
+  const handlePasswordSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (passwords.new !== passwords.confirm) {
       toast("Passwords don't match");
@@ -225,11 +189,13 @@ const ProfilePage = () => {
     }
   };
 
-  const handleNotificationAction = async (id, action) => {
+  const handleNotificationAction = async (
+    id: string,
+    action: "read" | "delete"
+  ) => {
     try {
       if (action === "read") {
         await checkNotifications(id);
-        // Update local state to mark as read
         setNotifications((prev) =>
           prev.map((notification) =>
             notification._id === id
@@ -249,7 +215,7 @@ const ProfilePage = () => {
   };
 
   // Dark mode classes
-  const darkModeClasses = {
+  const darkModeClasses: DarkModeClasses = {
     container: isDarkMode ? "bg-gray-900" : "bg-gray-50",
     sidebar: isDarkMode
       ? "bg-gray-800 border-gray-700"

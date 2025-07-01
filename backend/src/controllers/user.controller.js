@@ -1,5 +1,6 @@
 const { sendTokenResponse } = require('../utils/jwt');
 const User = require("../models/User.model");
+const Team = require("../models/team.model");
 const connect = require("../db/db");
 const asyncHandler = require("../utils/asyncHandler");
 const { ErrorResponse, sendSuccess } = require("../utils/sendResponse");

@@ -9,7 +9,6 @@ import {
   Moon,
   Sun,
   ChevronDown,
-  ChevronLeft,
 } from "lucide-react";
 import { useTheme } from "../contexts/ThemeContext";
 import { useAuthStore } from "../store/useAuthStore";
@@ -25,11 +24,11 @@ interface SidebarProps {
   navigationItems: NavigationItem[];
 }
 
-interface UserData {
-  avatar?: string;
-  fullName?: string;
-  email?: string;
-}
+// interface UserData {
+//   avatar?: string;
+//   fullName?: string;
+//   email?: string;
+// }
 
 const Sidebar: React.FC<SidebarProps> = ({ navigationItems }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
