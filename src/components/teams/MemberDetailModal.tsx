@@ -1,4 +1,3 @@
-import React from "react";
 import { X, Mail, User, Shield, Crown } from "lucide-react";
 import { useTheme } from "../../contexts/ThemeContext";
 

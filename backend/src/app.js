@@ -33,8 +33,9 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Body parser with size limits
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 app.use(express.static("public"));
 
@@ -47,15 +48,15 @@ app.use((req, res, next) => {
   next();
 });
 
-// Connect to MongoDB only if not already connected
-// This prevents multiple connection attempts in serverless environment
-if (mongoose.connection.readyState !== 1) {
-  // Handle connection asynchronously but don't block app startup
-  connect().catch((err) => {
-    console.error("Initial database connection failed:", err.message);
-    // Don't exit the process in serverless environment
-  });
-}
+
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
+// Connect to MongoDB
+connect();
 
 app.get("/", (req, res) => {
   res.send("Welcome to the Reso Working Dashboard API");
@@ -67,6 +68,18 @@ app.use("/api/documents", documentsRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/tasks", taskRoutes);
+
+// Log error details before passing to the error handler
+app.use((err, req, res, next) => {
+  console.error('Error details:', {
+    message: err.message,
+    stack: err.stack,
+    path: req.path,
+    method: req.method,
+    headers: req.headers
+  });
+  next(err);
+});
 
 // Error handler (should be after all route handlers)
 app.use(errorHandler);

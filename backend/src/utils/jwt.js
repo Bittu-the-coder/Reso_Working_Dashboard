@@ -1,16 +1,17 @@
 const jwt = require("jsonwebtoken");
 
-// Get token from model, create cookie and send response
 const sendTokenResponse = (user, statusCode, res) => {
-  const token = user.getSignedJwtToken();
+  const token = jwt.sign(
+    { id: user._id },
+    process.env.JWT_SECRET,
+    { expiresIn: process.env.JWT_EXPIRE || '30d' }
+  );
 
   const options = {
-    expires: new Date(
-      Date.now() + (process.env.JWT_COOKIE_EXPIRE || 30) * 24 * 60 * 60 * 1000
-    ),
+    expires: new Date(Date.now() + (process.env.JWT_COOKIE_EXPIRE || 30) * 24 * 60 * 60 * 1000),
     httpOnly: true,
-    sameSite: 'strict',
-    secure: process.env.NODE_ENV === "production"
+    secure: process.env.NODE_ENV === "production",
+    sameSite: 'strict'
   };
 
   res
@@ -18,17 +19,15 @@ const sendTokenResponse = (user, statusCode, res) => {
     .cookie("token", token, options)
     .json({
       success: true,
-      token, // Still send token in response for frontend storage if needed
-      data: {
+      token,
+      user: {
         id: user._id,
-        name: user.name,
+        name: user.fullName,
         email: user.email,
-        role: user.role,
-        teamId: user.teamId?.toString()
+        username: user.username
       }
     });
 };
-
 // Generate JWT token
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET || "your-secret-key", {
@@ -36,7 +35,4 @@ const generateToken = (id) => {
   });
 };
 
-module.exports = {
-  sendTokenResponse,
-  generateToken,
-};
+module.exports = { sendTokenResponse, generateToken };

@@ -1,7 +1,19 @@
 import React from "react";
 import { CheckCircle, Clock, AlertCircle } from "lucide-react";
 
-const StatusBadge = ({ status, darkMode = false, className = "" }) => {
+type Status = "Done" | "In Progress" | "To Do" | string;
+
+interface StatusBadgeProps {
+  status: Status;
+  darkMode?: boolean;
+  className?: string;
+}
+
+const StatusBadge: React.FC<StatusBadgeProps> = ({
+  status,
+  darkMode = false,
+  className = "",
+}) => {
   const statusConfig = {
     Done: {
       icon: <CheckCircle className="w-4 h-4" />,
@@ -20,7 +32,8 @@ const StatusBadge = ({ status, darkMode = false, className = "" }) => {
     },
   };
 
-  const config = statusConfig[status] || statusConfig["To Do"];
+  const config =
+    statusConfig[status as keyof typeof statusConfig] || statusConfig["To Do"];
 
   return (
     <span

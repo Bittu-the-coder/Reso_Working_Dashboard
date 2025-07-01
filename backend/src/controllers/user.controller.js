@@ -158,13 +158,19 @@ const getAllUsers = asyncHandler(async (req, res, next) => {
 
 const getAllNotification = asyncHandler(async (req, res, next) => {
   try {
-    const user = await User.findOne(req.user._id)
-    const response = user.notifications;
-    sendSuccess(res, response, "Notifications fetched successfully.")
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return next(new ErrorResponse("User not found", 404));
+    }
+
+    const response = user.notifications || [];
+    sendSuccess(res, response, "Notifications fetched successfully.");
   } catch (error) {
-    return next(new ErrorResponse("server error", 500))
+    console.error("Error fetching notifications:", error);
+    return next(new ErrorResponse("Failed to fetch notifications", 500));
   }
-})
+});
 
 const checkNotification = asyncHandler(async (req, res, next) => {
   const notificationId = req.params.id;

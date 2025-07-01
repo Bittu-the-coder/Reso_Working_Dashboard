@@ -1,6 +1,14 @@
-import React from "react";
+interface LoadingSpinnerProps {
+  darkMode?: boolean;
+  size?: "sm" | "md" | "lg";
+  className?: string;
+}
 
-const LoadingSpinner = ({ darkMode = false, size = "md", className = "" }) => {
+const LoadingSpinner = ({
+  darkMode = false,
+  size = "md",
+  className = "",
+}: LoadingSpinnerProps) => {
   const sizeClasses = {
     sm: "h-5 w-5 border-2",
     md: "h-8 w-8 border-b-2",

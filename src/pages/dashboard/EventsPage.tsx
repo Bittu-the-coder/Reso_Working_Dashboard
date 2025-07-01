@@ -1,4 +1,3 @@
-// pages/EventsPage.js
 import React, { useState, useEffect } from "react";
 import { useTheme } from "../../contexts/ThemeContext";
 import EventForm from "../../components/events/EventForm";
@@ -6,10 +5,25 @@ import EventList from "../../components/events/EventList";
 import { useEventStore } from "../../store/useEventStore";
 import { motion } from "framer-motion";
 
+// interface Event {
+//   id: string;
+//   title: string;
+//   date: string;
+//   description: string;
+//   location?: string;
+//   isPublic?: boolean;
+// }
+
+interface NewEvent {
+  title: string;
+  date: string;
+  description: string;
+}
+
 const EventsPage = () => {
   const { isDarkMode } = useTheme();
   const { events, getUserEvents, createEvent } = useEventStore();
-  const [newEvent, setNewEvent] = useState({
+  const [newEvent, setNewEvent] = useState<NewEvent>({
     title: "",
     date: "",
     description: "",
@@ -19,7 +33,7 @@ const EventsPage = () => {
     getUserEvents();
   }, [getUserEvents]);
 
-  const handleAddEvent = async (e) => {
+  const handleAddEvent = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!newEvent.title || !newEvent.date) {

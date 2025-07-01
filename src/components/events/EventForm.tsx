@@ -1,10 +1,24 @@
-// components/EventForm.js
-import React from "react";
 import { useTheme } from "../../contexts/ThemeContext";
 import { motion } from "framer-motion";
 import { Calendar, Plus } from "lucide-react";
 
-const EventForm = ({ newEvent, setNewEvent, handleAddEvent }) => {
+interface Event {
+  title: string;
+  date: string;
+  description: string;
+}
+
+interface EventFormProps {
+  newEvent: Event;
+  setNewEvent: (event: Event) => void;
+  handleAddEvent: (e: React.FormEvent) => void;
+}
+
+const EventForm = ({
+  newEvent,
+  setNewEvent,
+  handleAddEvent,
+}: EventFormProps) => {
   const { isDarkMode } = useTheme();
 
   return (

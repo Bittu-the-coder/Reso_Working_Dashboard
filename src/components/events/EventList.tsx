@@ -1,10 +1,19 @@
-// components/EventList.js
-import React from "react";
 import { useTheme } from "../../contexts/ThemeContext";
 import { motion } from "framer-motion";
 import { CalendarCheck, Calendar } from "lucide-react";
 
-const EventList = ({ events }) => {
+interface Event {
+  id: string | number;
+  title: string;
+  date: string;
+  description: string;
+}
+
+interface EventListProps {
+  events: Event[];
+}
+
+const EventList = ({ events }: EventListProps) => {
   const { isDarkMode } = useTheme();
 
   return (

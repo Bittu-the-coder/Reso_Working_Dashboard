@@ -1,6 +1,16 @@
-import React from "react";
+import type { ReactNode } from "react";
 
-const EmptyState = ({
+interface EmptyStateProps {
+  icon: ReactNode;
+  title: string;
+  description: string;
+  action?: ReactNode;
+  darkMode?: boolean;
+  small?: boolean;
+  className?: string;
+}
+
+const EmptyState: React.FC<EmptyStateProps> = ({
   icon,
   title,
   description,

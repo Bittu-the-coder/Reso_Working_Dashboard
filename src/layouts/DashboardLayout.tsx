@@ -2,10 +2,8 @@ import React, { useMemo } from "react";
 import {
   BarChart3,
   Users,
-  CalendarClock,
   FileText,
   Settings,
-  Code,
   NotebookPen,
 } from "lucide-react";
 import { useTheme } from "../contexts/ThemeContext";
@@ -13,11 +11,17 @@ import Footer from "../components/Footer";
 import Sidebar from "../components/Sidebar";
 import DashboardRoutes from "./DashboardRoutes";
 
+interface NavigationItem {
+  name: string;
+  icon: React.ReactNode;
+  path: string;
+}
+
 const DashboardLayout: React.FC = () => {
   const { isDarkMode } = useTheme();
 
   // Navigation items with useMemo for optimization
-  const navigationItems = useMemo(
+  const navigationItems = useMemo<NavigationItem[]>(
     () => [
       { name: "Overview", icon: <BarChart3 size={20} />, path: "/dashboard" },
       { name: "Teams", icon: <Users size={20} />, path: "/dashboard/teams" },

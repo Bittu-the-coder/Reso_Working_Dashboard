@@ -1,11 +1,23 @@
-// components/ProjectForm.js
 import React, { useState } from "react";
 import { useTheme } from "../../contexts/ThemeContext";
 import { motion } from "framer-motion";
 
-const ProjectForm = ({ project, onSubmit }) => {
+interface Project {
+  name: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  priority: "low" | "medium" | "high" | "critical";
+}
+
+interface ProjectFormProps {
+  project?: Partial<Project>;
+  onSubmit: (formData: Project) => void;
+}
+
+const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSubmit }) => {
   const { isDarkMode } = useTheme();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<Project>({
     name: project?.name || "",
     description: project?.description || "",
     startDate: project?.startDate || "",
@@ -13,12 +25,16 @@ const ProjectForm = ({ project, onSubmit }) => {
     priority: project?.priority || "medium",
   });
 
-  const handleChange = (e) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value } as Project));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(formData);
   };

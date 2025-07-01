@@ -1,9 +1,22 @@
-// components/ProjectDetails.js
-import React from "react";
 import { useTheme } from "../../contexts/ThemeContext";
 import { motion } from "framer-motion";
 
-const ProjectDetails = ({ project, onClose }) => {
+interface Project {
+  name: string;
+  description: string;
+  startDate: string | Date;
+  endDate: string | Date;
+  priority: string;
+  status: string;
+  progress: number;
+}
+
+interface ProjectDetailsProps {
+  project: Project;
+  onClose: () => void;
+}
+
+const ProjectDetails = ({ project, onClose }: ProjectDetailsProps) => {
   const { isDarkMode } = useTheme();
 
   return (

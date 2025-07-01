@@ -22,6 +22,24 @@ interface GoogleDoc {
   addedOn: string;
 }
 
+interface Team {
+  _id: string;
+  name: string;
+}
+
+interface DocumentFormData {
+  title: string;
+  url: string;
+  department: string;
+  team: string;
+}
+
+interface EditDocData {
+  title: string;
+  url: string;
+  department: string;
+}
+
 const DocumentsPage: React.FC = () => {
   const { isDarkMode } = useTheme();
   const {
@@ -35,7 +53,7 @@ const DocumentsPage: React.FC = () => {
   const [localDocs, setLocalDocs] = useState<GoogleDoc[]>([]);
   const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
   const [showAddForm, setShowAddForm] = useState<boolean>(false);
-  const [newDoc, setNewDoc] = useState({
+  const [newDoc, setNewDoc] = useState<DocumentFormData>({
     title: "",
     url: "",
     department: "dev",
@@ -44,7 +62,7 @@ const DocumentsPage: React.FC = () => {
   const { teams, getMyTeams, loading: teamsLoading } = useTeamStore();
   const [selectedTeamId, setSelectedTeamId] = useState<string>("");
   const [editingDoc, setEditingDoc] = useState<string | null>(null);
-  const [editDocData, setEditDocData] = useState({
+  const [editDocData, setEditDocData] = useState<EditDocData>({
     title: "",
     url: "",
     department: "",

@@ -1,6 +1,18 @@
 import React from "react";
 
-const PriorityBadge = ({ priority, darkMode = false, className = "" }) => {
+type Priority = "High" | "Medium" | "Low" | string;
+
+interface PriorityBadgeProps {
+  priority: Priority;
+  darkMode?: boolean;
+  className?: string;
+}
+
+const PriorityBadge: React.FC<PriorityBadgeProps> = ({
+  priority,
+  darkMode = false,
+  className = "",
+}) => {
   const priorityConfig = {
     High: {
       bgColor: darkMode ? "bg-red-900/30" : "bg-red-50",
@@ -16,7 +28,7 @@ const PriorityBadge = ({ priority, darkMode = false, className = "" }) => {
     },
   };
 
-  const config = priorityConfig[priority] || {
+  const config = priorityConfig[priority as keyof typeof priorityConfig] || {
     bgColor: darkMode ? "bg-gray-700" : "bg-gray-100",
     textColor: darkMode ? "text-gray-300" : "text-gray-800",
   };

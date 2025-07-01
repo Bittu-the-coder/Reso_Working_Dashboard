@@ -1,10 +1,9 @@
-// pages/ProjectsPage.js
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useTheme } from "../../contexts/ThemeContext";
 import ProjectForm from "../../components/projects/ProjectForm";
 import ProjectDetails from "../../components/projects/ProjectDetails";
 import { useProjectStore } from "../../store/useProjectStore";
-import Projects from "../../../backend/backup/unused/Projects";
+import Projects from "../../components/projects/Projects";
 
 const ProjectsPage = () => {
   const { isDarkMode } = useTheme();

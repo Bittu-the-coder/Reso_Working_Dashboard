@@ -6,42 +6,39 @@ const asyncHandler = require("../utils/asyncHandler");
 // Protect routes
 exports.protect = asyncHandler(async (req, res, next) => {
   let token;
+
   // Check headers for Bearer token
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith("Bearer")
-  ) {
-    // Set token from Bearer token in header
+  if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
     token = req.headers.authorization.split(" ")[1];
   }
-  // If no token in Authorization header, check cookies (support both methods)
-  else if (req.cookies && req.cookies.token) {
+  // Check cookies
+  else if (req.cookies?.token) {
     token = req.cookies.token;
   }
 
-  // Make sure token exists
   if (!token) {
-    return next(new ErrorResponse("Not authorized to access this route", 401));
+    return next(new ErrorResponse("Not authorized - No token provided", 401));
   }
 
   try {
     // Verify token
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET || "your-secret-key"
-    );
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Get user from database
-    req.user = await User.findById(decoded.id);
+    // Add more detailed logging
+    console.log('Token verification successful:', decoded);
 
-    if (!req.user) {
+    // Get user from token
+    const user = await User.findById(decoded.id);
+
+    if (!user) {
       return next(new ErrorResponse("User not found", 404));
     }
 
+    req.user = user;
     next();
-  } catch (err) {
-    console.error('Auth error:', err.message);
-    return next(new ErrorResponse("Not authorized to access this route", 401));
+  } catch (error) {
+    console.error('Token verification failed:', error.message);
+    return next(new ErrorResponse("Not authorized - Invalid token", 401));
   }
 });
 

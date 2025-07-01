@@ -1,12 +1,23 @@
-// components/RecentTasks.js
-import React from "react";
 import { useTheme } from "../../contexts/ThemeContext";
 import { motion } from "framer-motion";
 import { CheckSquare, Clock } from "lucide-react";
 
-const RecentTasks = ({ tasks }) => {
+type TaskStatus = "todo" | "in_progress" | "done";
+
+interface Task {
+  id: string | number;
+  title: string;
+  dueDate: string;
+  status: TaskStatus;
+  // createdBy?: string; // Uncomment if needed
+}
+
+interface RecentTasksProps {
+  tasks: Task[];
+}
+
+const RecentTasks = ({ tasks }: RecentTasksProps) => {
   const { isDarkMode } = useTheme();
-  console.log(tasks);
 
   return (
     <motion.div
@@ -57,14 +68,6 @@ const RecentTasks = ({ tasks }) => {
               >
                 Task
               </th>
-              {/* <th
-                scope="col"
-                className={`px-6 py-3 text-left text-xs font-medium ${
-                  isDarkMode ? "text-blue-300" : "text-blue-900"
-                } uppercase tracking-wider`}
-              >
-                Assignee
-              </th> */}
               <th
                 scope="col"
                 className={`px-6 py-3 text-left text-xs font-medium ${
@@ -108,15 +111,6 @@ const RecentTasks = ({ tasks }) => {
                     {task.title}
                   </div>
                 </td>
-                {/* <td className="px-6 py-4 whitespace-nowrap">
-                  <div
-                    className={`text-sm ${
-                      isDarkMode ? "text-blue-400" : "text-blue-700"
-                    }`}
-                  >
-                    {task.createdBy}
-                  </div>
-                </td> */}
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div
                     className={`text-sm ${

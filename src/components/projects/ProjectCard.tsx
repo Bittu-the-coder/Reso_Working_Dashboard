@@ -1,13 +1,28 @@
-// components/ProjectCard.js
-import React from "react";
 import { motion } from "framer-motion";
 import { Users, ChevronRight } from "lucide-react";
 import { useTheme } from "../../contexts/ThemeContext";
 
-const ProjectCard = ({ project, onViewDetails, onDelete }) => {
+interface Project {
+  _id: string;
+  name: string;
+  progress: number;
+  members: number;
+}
+
+interface ProjectCardProps {
+  project: Project;
+  onViewDetails: (project: Project) => void;
+  onDelete: (id: string) => void;
+}
+
+const ProjectCard = ({
+  project,
+  onViewDetails,
+  onDelete,
+}: ProjectCardProps) => {
   const { isDarkMode } = useTheme();
 
-  const progressColorClass = (progress) => {
+  const progressColorClass = (progress: number): string => {
     if (progress < 30) return "from-red-500 to-red-600";
     if (progress < 70) return "from-yellow-500 to-orange-500";
     return "from-green-500 to-emerald-500";

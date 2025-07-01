@@ -1,10 +1,19 @@
-// components/RecentActivities.js
-import React from "react";
 import { useTheme } from "../../contexts/ThemeContext";
 import { motion } from "framer-motion";
 import { Calendar } from "lucide-react";
 
-const RecentActivities = ({ events }) => {
+interface Event {
+  id: string | number;
+  title: string;
+  date: string;
+  description: string;
+}
+
+interface RecentActivitiesProps {
+  events: Event[];
+}
+
+const RecentActivities = ({ events }: RecentActivitiesProps) => {
   const { isDarkMode } = useTheme();
 
   return (

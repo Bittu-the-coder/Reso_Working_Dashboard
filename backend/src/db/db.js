@@ -13,7 +13,8 @@ const connect = async () => {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     };
-    const conn = await mongoose.connect(process.env.MONGODB_URI, options);
+    const conn = await mongoose.connect(process.env.MONGO_URI, options);
+    console.log("MongoDB connected successfully");
     cachedConnection = conn;
     return conn;
   } catch (error) {

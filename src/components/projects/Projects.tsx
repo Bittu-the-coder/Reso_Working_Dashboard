@@ -1,11 +1,19 @@
-// components/Projects.js
-import React from "react";
 import { motion } from "framer-motion";
 import { Code } from "lucide-react";
 import { useTheme } from "../../contexts/ThemeContext";
 import ProjectCard from "./ProjectCard";
 
-const Projects = ({ projects, onViewDetails, onDelete }) => {
+interface ProjectsProps {
+  projects: ProjectType[];
+  onViewDetails: (project: ProjectType) => void;
+  onDelete: (id: string) => void;
+}
+
+const Projects: React.FC<ProjectsProps> = ({
+  projects,
+  onViewDetails,
+  onDelete,
+}) => {
   const { isDarkMode } = useTheme();
 
   return (

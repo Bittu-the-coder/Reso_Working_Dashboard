@@ -1,10 +1,19 @@
-// components/ProjectStatus.js
-import React from "react";
 import { useTheme } from "../../contexts/ThemeContext";
 import { motion } from "framer-motion";
 import { BarChart } from "lucide-react";
 
-const ProjectStatus = ({ projects }) => {
+interface Project {
+  id: string | number;
+  name: string;
+  members: number;
+  progress: number;
+}
+
+interface ProjectStatusProps {
+  projects: Project[];
+}
+
+const ProjectStatus = ({ projects }: ProjectStatusProps) => {
   const { isDarkMode } = useTheme();
 
   return (
@@ -52,12 +61,14 @@ const ProjectStatus = ({ projects }) => {
             whileHover={{ scale: 1.01 }}
           >
             <div className="flex justify-between mb-2">
-              <h5 className="font-medium text-purple-900">{project.name}</h5>
-              <span className="text-sm bg-purple-100 text-purple-700 py-1 px-2 rounded-full">
+              <h5 className="font-medium text-purple-900 dark:text-purple-200">
+                {project.name}
+              </h5>
+              <span className="text-sm bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 py-1 px-2 rounded-full">
                 {project.members} members
               </span>
             </div>
-            <div className="w-full bg-purple-100 rounded-full h-2.5">
+            <div className="w-full bg-purple-100 dark:bg-purple-900/30 rounded-full h-2.5">
               <motion.div
                 className="h-2.5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500"
                 style={{ width: `${project.progress}%` }}
