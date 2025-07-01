@@ -1,32 +1,25 @@
 const mongoose = require("mongoose");
 
-// Cache the database connection
 let cachedConnection = null;
 
 const connect = async () => {
   if (cachedConnection) {
-    console.log("Using cached database connection");
     return cachedConnection;
   }
 
   try {
-    if (!process.env.MONGO_URI) {
-      throw new Error("MONGO_URI environment variable is not defined");
-    }
-
-    const conn = await mongoose.connect(process.env.MONGO_URI, {
+    // Add these connection options
+    const options = {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-    });
-
-    console.log("MongoDB connected successfully");
+    };
+    const conn = await mongoose.connect(process.env.MONGODB_URI, options);
     cachedConnection = conn;
     return conn;
   } catch (error) {
     console.error("MongoDB connection failed:", error.message);
-    // Don't exit process in serverless environment
     throw error;
   }
-}
+};
 
 module.exports = connect;
