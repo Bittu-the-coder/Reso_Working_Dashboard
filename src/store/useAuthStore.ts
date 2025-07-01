@@ -174,7 +174,6 @@ export const useAuthStore = create<AuthStoreState>()(
           return { success: false, error: message };
         }
       },
-
       //get all notification
       getAllNotifications: async (): Promise<NotificationResponseResult> => {
         try {
@@ -186,7 +185,10 @@ export const useAuthStore = create<AuthStoreState>()(
           });
 
           console.log("get notifications", response);
-          return { success: true, notifications: response.data.data };
+          return {
+            success: true,
+            notifications: response.data.data,
+          };
         } catch (error: any) {
           const message =
             error.response?.data?.message || "Failed to fetch notifications";

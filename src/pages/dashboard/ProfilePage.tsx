@@ -86,12 +86,35 @@ const ProfilePage = () => {
     new: "",
     confirm: "",
   });
+  const {
+    user,
+    updateUser,
+    updatePassword,
+    logout,
+    checkNotifications,
+    getAllNotifications,
+    deleteNotification,
+  } = useAuthStore();
+  const [activeTab, setActiveTab] = useState("profile");
+  interface Notification {
+    _id: string;
+    message: string;
+    isRead: boolean;
+    type: string;
+    createdAt: string;
+  }
+
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [editMode, setEditMode] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { isDarkMode } = useTheme();
 
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
         setLoading(true);
         const response = await getAllNotifications();
+        console.log("Notice res", response);
         if (response.success && response.notifications) {
           setNotifications(response.notifications);
         }
@@ -102,12 +125,28 @@ const ProfilePage = () => {
       }
     };
 
-    fetchNotifications();
+    fetchNotifications(); // Always fetch on initial load, not just when empty
   }, [getAllNotifications]);
+
+  // Form states
+  const [profile, setProfile] = useState({
+    name: "",
+    email: "",
+    username: "",
+    avatar: null,
+    avatarPreview: "",
+  });
+
+  const [passwords, setPasswords] = useState({
+    current: "",
+    new: "",
+    confirm: "",
+  });
 
   // Initialize form with user data
   useEffect(() => {
     if (user) {
+      console.log("User data:", user);
       setProfile({
         name: user.fullName || "",
         email: user.email || "",
@@ -117,13 +156,12 @@ const ProfilePage = () => {
       });
     }
   }, [user]);
-
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   // Handle avatar file selection
-  const handleAvatarChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
       setProfile((prev) => ({
         ...prev,
         avatar: file,
@@ -132,7 +170,7 @@ const ProfilePage = () => {
     }
   };
 
-  const handleProfileSubmit = async (e: FormEvent) => {
+  const handleProfileSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     setLoading(true);
     try {
@@ -145,25 +183,25 @@ const ProfilePage = () => {
 
       if (result.success) {
         setEditMode(false);
-        toast.success("Profile updated successfully!");
+        toast("Profile updated successfully!");
       } else {
-        toast.error(result.error || "Update failed");
+        toast(result.error || "Update failed");
       }
     } catch (error) {
-      toast.error("Update failed");
+      toast("Update failed");
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePasswordSubmit = async (e: FormEvent) => {
+  const handlePasswordSubmit = async (e) => {
     e.preventDefault();
     if (passwords.new !== passwords.confirm) {
-      toast.error("Passwords don't match");
+      toast("Passwords don't match");
       return;
     }
     if (passwords.new.length < 6) {
-      toast.error("Password must be at least 6 characters long");
+      toast("Password must be at least 6 characters long");
       return;
     }
 
@@ -176,24 +214,22 @@ const ProfilePage = () => {
 
       if (result.success) {
         setPasswords({ current: "", new: "", confirm: "" });
-        toast.success("Password updated successfully!");
+        toast("Password updated successfully!");
       } else {
-        toast.error(result.error || "Password update failed");
+        toast(result.error || "Password update failed");
       }
     } catch (error) {
-      toast.error("Password update failed");
+      toast("Password update failed");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleNotificationAction = async (
-    id: string,
-    action: "read" | "delete"
-  ) => {
+  const handleNotificationAction = async (id, action) => {
     try {
       if (action === "read") {
         await checkNotifications(id);
+        // Update local state to mark as read
         setNotifications((prev) =>
           prev.map((notification) =>
             notification._id === id
@@ -213,7 +249,7 @@ const ProfilePage = () => {
   };
 
   // Dark mode classes
-  const darkModeClasses: DarkModeClasses = {
+  const darkModeClasses = {
     container: isDarkMode ? "bg-gray-900" : "bg-gray-50",
     sidebar: isDarkMode
       ? "bg-gray-800 border-gray-700"
@@ -247,7 +283,7 @@ const ProfilePage = () => {
             {user?.avatar ? (
               <img
                 src={user.avatar}
-                alt={user.fullName || "User avatar"}
+                alt={user.name}
                 className="w-full h-full object-cover"
               />
             ) : (
@@ -321,400 +357,343 @@ const ProfilePage = () => {
       {/* Main Content */}
       <div className="flex-1 p-8">
         {activeTab === "profile" && (
-          <ProfileTab
-            editMode={editMode}
-            setEditMode={setEditMode}
-            profile={profile}
-            handleAvatarChange={handleAvatarChange}
-            handleProfileSubmit={handleProfileSubmit}
-            loading={loading}
-            user={user}
-            darkModeClasses={darkModeClasses}
-            isDarkMode={isDarkMode}
-            setProfile={setProfile}
-          />
+          <div className={`${darkModeClasses.card} rounded-lg shadow-sm p-6`}>
+            <div className="flex justify-between items-center mb-6">
+              <h2
+                className={`text-2xl font-semibold ${darkModeClasses.text.primary}`}
+              >
+                Profile Information
+              </h2>
+              {editMode ? (
+                <button
+                  onClick={() => setEditMode(false)}
+                  className={`${darkModeClasses.text.secondary} hover:${darkModeClasses.text.primary} px-4 py-2 text-sm transition-colors`}
+                >
+                  Cancel
+                </button>
+              ) : (
+                <button
+                  onClick={() => setEditMode(true)}
+                  className="flex items-center text-blue-600 hover:text-blue-700 px-4 py-2 text-sm"
+                >
+                  <Edit size={16} className="mr-2" /> Edit
+                </button>
+              )}
+            </div>
+
+            {editMode ? (
+              <div className="space-y-6">
+                {/* Avatar Upload */}
+                <div>
+                  <label
+                    className={`block text-sm font-medium ${darkModeClasses.text.secondary} mb-2`}
+                  >
+                    Avatar
+                  </label>
+                  <div className="flex items-center space-x-4">
+                    <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200">
+                      {profile.avatarPreview ? (
+                        <img
+                          src={profile.avatarPreview}
+                          alt="Avatar preview"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                          <User size={24} />
+                        </div>
+                      )}
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarChange}
+                      className={`px-4 py-2 rounded-lg ${darkModeClasses.input}`}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label
+                    className={`block text-sm font-medium ${darkModeClasses.text.secondary} mb-2`}
+                  >
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    value={profile.name}
+                    onChange={(e) =>
+                      setProfile({
+                        ...profile,
+                        name: e.target.value,
+                      })
+                    }
+                    className={`w-full px-4 py-2 rounded-lg ${darkModeClasses.input}`}
+                  />
+                </div>
+                <div>
+                  <label
+                    className={`block text-sm font-medium ${darkModeClasses.text.secondary} mb-2`}
+                  >
+                    Username
+                  </label>
+                  <input
+                    type="text"
+                    value={profile.username}
+                    onChange={(e) =>
+                      setProfile({
+                        ...profile,
+                        username: e.target.value,
+                      })
+                    }
+                    className={`w-full px-4 py-2 rounded-lg ${darkModeClasses.input}`}
+                  />
+                </div>
+                <div>
+                  <label
+                    className={`block text-sm font-medium ${darkModeClasses.text.secondary} mb-2`}
+                  >
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={profile.email}
+                    onChange={(e) =>
+                      setProfile({
+                        ...profile,
+                        email: e.target.value,
+                      })
+                    }
+                    className={`w-full px-4 py-2 rounded-lg ${darkModeClasses.input}`}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={handleProfileSubmit}
+                  disabled={loading}
+                  className="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-colors"
+                >
+                  {loading ? (
+                    "Saving..."
+                  ) : (
+                    <>
+                      <Save size={16} className="mr-2" /> Save Changes
+                    </>
+                  )}
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div
+                  className={`flex border-b ${
+                    isDarkMode ? "border-gray-700" : "border-gray-200"
+                  } py-4`}
+                >
+                  <span
+                    className={`w-1/4 text-sm font-medium ${darkModeClasses.text.secondary}`}
+                  >
+                    Name
+                  </span>
+                  <span
+                    className={`flex-1 text-sm ${darkModeClasses.text.primary}`}
+                  >
+                    {profile?.name || "-"}
+                  </span>
+                </div>
+                <div
+                  className={`flex border-b ${
+                    isDarkMode ? "border-gray-700" : "border-gray-200"
+                  } py-4`}
+                >
+                  <span
+                    className={`w-1/4 text-sm font-medium ${darkModeClasses.text.secondary}`}
+                  >
+                    Email
+                  </span>
+                  <span
+                    className={`flex-1 text-sm ${darkModeClasses.text.primary}`}
+                  >
+                    {user?.email || "-"}
+                  </span>
+                </div>
+                <div className="flex py-4">
+                  <span
+                    className={`w-1/4 text-sm font-medium ${darkModeClasses.text.secondary}`}
+                  >
+                    Username
+                  </span>
+                  <span
+                    className={`flex-1 text-sm ${darkModeClasses.text.primary}`}
+                  >
+                    @{user?.username || "-"}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
         )}
 
         {activeTab === "security" && (
-          <SecurityTab
-            passwords={passwords}
-            setPasswords={setPasswords}
-            handlePasswordSubmit={handlePasswordSubmit}
-            loading={loading}
-            darkModeClasses={darkModeClasses}
-          />
+          <div className={`${darkModeClasses.card} rounded-lg shadow-sm p-6`}>
+            <h2
+              className={`text-2xl font-semibold ${darkModeClasses.text.primary} mb-6`}
+            >
+              Change Password
+            </h2>
+            <div className="space-y-6 max-w-md">
+              <div>
+                <label
+                  className={`block text-sm font-medium ${darkModeClasses.text.secondary} mb-2`}
+                >
+                  Current Password
+                </label>
+                <input
+                  type="password"
+                  value={passwords.current}
+                  onChange={(e) =>
+                    setPasswords({
+                      ...passwords,
+                      current: e.target.value,
+                    })
+                  }
+                  className={`w-full px-4 py-2 rounded-lg ${darkModeClasses.input}`}
+                  required
+                />
+              </div>
+              <div>
+                <label
+                  className={`block text-sm font-medium ${darkModeClasses.text.secondary} mb-2`}
+                >
+                  New Password
+                </label>
+                <input
+                  type="password"
+                  value={passwords.new}
+                  onChange={(e) =>
+                    setPasswords({
+                      ...passwords,
+                      new: e.target.value,
+                    })
+                  }
+                  className={`w-full px-4 py-2 rounded-lg ${darkModeClasses.input}`}
+                  required
+                  minLength={6}
+                />
+              </div>
+              <div>
+                <label
+                  className={`block text-sm font-medium ${darkModeClasses.text.secondary} mb-2`}
+                >
+                  Confirm New Password
+                </label>
+                <input
+                  type="password"
+                  value={passwords.confirm}
+                  onChange={(e) =>
+                    setPasswords({
+                      ...passwords,
+                      confirm: e.target.value,
+                    })
+                  }
+                  className={`w-full px-4 py-2 rounded-lg ${darkModeClasses.input}`}
+                  required
+                  minLength={6}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={handlePasswordSubmit}
+                disabled={loading}
+                className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-colors"
+              >
+                {loading ? "Updating..." : "Update Password"}
+              </button>
+            </div>
+          </div>
         )}
 
         {activeTab === "notifications" && (
-          <NotificationsTab
-            notifications={notifications}
-            handleNotificationAction={handleNotificationAction}
-            darkModeClasses={darkModeClasses}
-            isDarkMode={isDarkMode}
-          />
-        )}
-      </div>
-    </div>
-  );
-};
-
-// Extracted components for better readability
-const ProfileTab = ({
-  editMode,
-  setEditMode,
-  profile,
-  handleAvatarChange,
-  handleProfileSubmit,
-  loading,
-  user,
-  darkModeClasses,
-  isDarkMode,
-  setProfile,
-}: {
-  editMode: boolean;
-  setEditMode: (value: boolean) => void;
-  profile: ProfileForm;
-  handleAvatarChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  handleProfileSubmit: (e: FormEvent) => void;
-  loading: boolean;
-  user: any; // Replace with your User type
-  darkModeClasses: DarkModeClasses;
-  isDarkMode: boolean;
-  setProfile: React.Dispatch<React.SetStateAction<ProfileForm>>;
-}) => {
-  return (
-    <div className={`${darkModeClasses.card} rounded-lg shadow-sm p-6`}>
-      <div className="flex justify-between items-center mb-6">
-        <h2
-          className={`text-2xl font-semibold ${darkModeClasses.text.primary}`}
-        >
-          Profile Information
-        </h2>
-        {editMode ? (
-          <button
-            onClick={() => setEditMode(false)}
-            className={`${darkModeClasses.text.secondary} hover:${darkModeClasses.text.primary} px-4 py-2 text-sm transition-colors`}
-          >
-            Cancel
-          </button>
-        ) : (
-          <button
-            onClick={() => setEditMode(true)}
-            className="flex items-center text-blue-600 hover:text-blue-700 px-4 py-2 text-sm"
-          >
-            <Edit size={16} className="mr-2" /> Edit
-          </button>
-        )}
-      </div>
-
-      {editMode ? (
-        <div className="space-y-6">
-          {/* Avatar Upload */}
-          <div>
-            <label
-              className={`block text-sm font-medium ${darkModeClasses.text.secondary} mb-2`}
+          <div className={`${darkModeClasses.card} rounded-lg shadow-sm p-6`}>
+            <h2
+              className={`text-2xl font-semibold ${darkModeClasses.text.primary} mb-6`}
             >
-              Avatar
-            </label>
-            <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200">
-                {profile.avatarPreview ? (
-                  <img
-                    src={profile.avatarPreview}
-                    alt="Avatar preview"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400">
-                    <User size={24} />
-                  </div>
-                )}
-              </div>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleAvatarChange}
-                className={`px-4 py-2 rounded-lg ${darkModeClasses.input}`}
-              />
-            </div>
-          </div>
-
-          <div>
-            <label
-              className={`block text-sm font-medium ${darkModeClasses.text.secondary} mb-2`}
-            >
-              Name
-            </label>
-            <input
-              type="text"
-              value={profile.name}
-              onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-              className={`w-full px-4 py-2 rounded-lg ${darkModeClasses.input}`}
-            />
-          </div>
-          <div>
-            <label
-              className={`block text-sm font-medium ${darkModeClasses.text.secondary} mb-2`}
-            >
-              Username
-            </label>
-            <input
-              type="text"
-              value={profile.username}
-              onChange={(e) =>
-                setProfile({ ...profile, username: e.target.value })
-              }
-              className={`w-full px-4 py-2 rounded-lg ${darkModeClasses.input}`}
-            />
-          </div>
-          <div>
-            <label
-              className={`block text-sm font-medium ${darkModeClasses.text.secondary} mb-2`}
-            >
-              Email
-            </label>
-            <input
-              type="email"
-              value={profile.email}
-              onChange={(e) =>
-                setProfile({ ...profile, email: e.target.value })
-              }
-              className={`w-full px-4 py-2 rounded-lg ${darkModeClasses.input}`}
-            />
-          </div>
-          <button
-            type="button"
-            onClick={handleProfileSubmit}
-            disabled={loading}
-            className="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-colors"
-          >
-            {loading ? (
-              "Saving..."
-            ) : (
-              <>
-                <Save size={16} className="mr-2" /> Save Changes
-              </>
-            )}
-          </button>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          <div
-            className={`flex border-b ${
-              isDarkMode ? "border-gray-700" : "border-gray-200"
-            } py-4`}
-          >
-            <span
-              className={`w-1/4 text-sm font-medium ${darkModeClasses.text.secondary}`}
-            >
-              Name
-            </span>
-            <span className={`flex-1 text-sm ${darkModeClasses.text.primary}`}>
-              {user?.fullName || "-"}
-            </span>
-          </div>
-          <div
-            className={`flex border-b ${
-              isDarkMode ? "border-gray-700" : "border-gray-200"
-            } py-4`}
-          >
-            <span
-              className={`w-1/4 text-sm font-medium ${darkModeClasses.text.secondary}`}
-            >
-              Email
-            </span>
-            <span className={`flex-1 text-sm ${darkModeClasses.text.primary}`}>
-              {user?.email || "-"}
-            </span>
-          </div>
-          <div className="flex py-4">
-            <span
-              className={`w-1/4 text-sm font-medium ${darkModeClasses.text.secondary}`}
-            >
-              Username
-            </span>
-            <span className={`flex-1 text-sm ${darkModeClasses.text.primary}`}>
-              @{user?.username || "-"}
-            </span>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-const SecurityTab = ({
-  passwords,
-  setPasswords,
-  handlePasswordSubmit,
-  loading,
-  darkModeClasses,
-}: {
-  passwords: PasswordForm;
-  setPasswords: React.Dispatch<React.SetStateAction<PasswordForm>>;
-  handlePasswordSubmit: (e: FormEvent) => void;
-  loading: boolean;
-  darkModeClasses: DarkModeClasses;
-}) => {
-  return (
-    <div className={`${darkModeClasses.card} rounded-lg shadow-sm p-6`}>
-      <h2
-        className={`text-2xl font-semibold ${darkModeClasses.text.primary} mb-6`}
-      >
-        Change Password
-      </h2>
-      <div className="space-y-6 max-w-md">
-        <div>
-          <label
-            className={`block text-sm font-medium ${darkModeClasses.text.secondary} mb-2`}
-          >
-            Current Password
-          </label>
-          <input
-            type="password"
-            value={passwords.current}
-            onChange={(e) =>
-              setPasswords({ ...passwords, current: e.target.value })
-            }
-            className={`w-full px-4 py-2 rounded-lg ${darkModeClasses.input}`}
-            required
-          />
-        </div>
-        <div>
-          <label
-            className={`block text-sm font-medium ${darkModeClasses.text.secondary} mb-2`}
-          >
-            New Password
-          </label>
-          <input
-            type="password"
-            value={passwords.new}
-            onChange={(e) =>
-              setPasswords({ ...passwords, new: e.target.value })
-            }
-            className={`w-full px-4 py-2 rounded-lg ${darkModeClasses.input}`}
-            required
-            minLength={6}
-          />
-        </div>
-        <div>
-          <label
-            className={`block text-sm font-medium ${darkModeClasses.text.secondary} mb-2`}
-          >
-            Confirm New Password
-          </label>
-          <input
-            type="password"
-            value={passwords.confirm}
-            onChange={(e) =>
-              setPasswords({ ...passwords, confirm: e.target.value })
-            }
-            className={`w-full px-4 py-2 rounded-lg ${darkModeClasses.input}`}
-            required
-            minLength={6}
-          />
-        </div>
-        <button
-          type="button"
-          onClick={handlePasswordSubmit}
-          disabled={loading}
-          className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-colors"
-        >
-          {loading ? "Updating..." : "Update Password"}
-        </button>
-      </div>
-    </div>
-  );
-};
-
-const NotificationsTab = ({
-  notifications,
-  handleNotificationAction,
-  darkModeClasses,
-  isDarkMode,
-}: {
-  notifications: Notification[];
-  handleNotificationAction: (id: string, action: "read" | "delete") => void;
-  darkModeClasses: DarkModeClasses;
-  isDarkMode: boolean;
-}) => {
-  return (
-    <div className={`${darkModeClasses.card} rounded-lg shadow-sm p-6`}>
-      <h2
-        className={`text-2xl font-semibold ${darkModeClasses.text.primary} mb-6`}
-      >
-        Notifications
-      </h2>
-      {notifications.length > 0 ? (
-        <div className="space-y-4">
-          {notifications.map((notification) => (
-            <div
-              key={notification._id}
-              className={`flex items-center justify-between p-4 rounded-lg border ${
-                notification.isRead
-                  ? isDarkMode
-                    ? "bg-gray-700 border-gray-600"
-                    : "bg-gray-50 border-gray-200"
-                  : isDarkMode
-                  ? "bg-blue-900/20 border-blue-700"
-                  : "bg-blue-50 border-blue-200"
-              }`}
-            >
-              <div className="flex-1">
-                <p className={`text-sm ${darkModeClasses.text.primary}`}>
-                  {notification.message}
-                </p>
-                <p className={`text-xs ${darkModeClasses.text.muted} mt-1`}>
-                  {new Date(notification.createdAt).toLocaleString()}
-                </p>
-                <span
-                  className={`flex items-center gap-1 ${darkModeClasses.text.secondary} mt-1`}
-                >
-                  {notification.type === "task" ? (
-                    <>
-                      <CheckSquare size={14} /> Task
-                    </>
-                  ) : notification.type === "invitation" ? (
-                    <>
-                      <UserPlus size={14} /> Invitation
-                    </>
-                  ) : (
-                    <>
-                      <Bell size={14} /> Notification
-                    </>
-                  )}
-                </span>
-              </div>
-              <div className="flex items-center space-x-2">
-                {!notification.isRead && (
-                  <button
-                    onClick={() =>
-                      handleNotificationAction(notification._id, "read")
-                    }
-                    className="p-1 text-blue-600 hover:text-blue-700 transition-colors"
-                    title="Mark as read"
+              Notifications
+            </h2>
+            {notifications.length > 0 ? (
+              <div className="space-y-4">
+                {notifications.map((notification) => (
+                  <div
+                    key={notification._id}
+                    className={`flex items-center justify-between p-4 rounded-lg border ${
+                      notification.isRead
+                        ? isDarkMode
+                          ? "bg-gray-700 border-gray-600"
+                          : "bg-gray-50 border-gray-200"
+                        : isDarkMode
+                        ? "bg-blue-900/20 border-blue-700"
+                        : "bg-blue-50 border-blue-200"
+                    }`}
                   >
-                    <Check size={16} />
-                  </button>
-                )}
-                <button
-                  onClick={() =>
-                    handleNotificationAction(notification._id, "delete")
-                  }
-                  className="p-1 text-red-600 hover:text-red-700 transition-colors"
-                  title="Delete notification"
-                >
-                  <X size={16} />
-                </button>
+                    <div className="flex-1">
+                      <p className={`text-sm ${darkModeClasses.text.primary}`}>
+                        {notification.message}
+                      </p>
+                      <p
+                        className={`text-xs ${darkModeClasses.text.muted} mt-1`}
+                      >
+                        {new Date(notification.createdAt).toLocaleString()}
+                      </p>
+                      <span
+                        className={`flex items-center gap-1 ${darkModeClasses.text.secondary} mt-1`}
+                      >
+                        {notification.type === "task" ? (
+                          <>
+                            <CheckSquare size={14} /> Task
+                          </>
+                        ) : notification.type === "invitation" ? (
+                          <>
+                            <UserPlus size={14} /> Invitation
+                          </>
+                        ) : (
+                          <>
+                            <Bell size={14} /> Notification
+                          </>
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      {!notification.isRead && (
+                        <button
+                          onClick={() =>
+                            handleNotificationAction(notification._id, "read")
+                          }
+                          className="p-1 text-blue-600 hover:text-blue-700 transition-colors"
+                          title="Mark as read"
+                        >
+                          <Check size={16} />
+                        </button>
+                      )}
+                      <button
+                        onClick={() =>
+                          handleNotificationAction(notification._id, "delete")
+                        }
+                        className="p-1 text-red-600 hover:text-red-700 transition-colors"
+                        title="Delete notification"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className={`${darkModeClasses.text.muted} text-center py-8`}>
-          No notifications yet
-        </p>
-      )}
+            ) : (
+              <p className={`${darkModeClasses.text.muted} text-center py-8`}>
+                No notifications yet
+              </p>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
