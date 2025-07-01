@@ -146,9 +146,9 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
         })),
       };
 
-      const filesToUpload = formData.files.map(
-        (fileObj) => fileObj.file || fileObj
-      );
+      const filesToUpload = formData.files
+        .map((fileObj) => fileObj.file)
+        .filter((file): file is File => file !== undefined);
 
       const response = await updateTask(
         formData.teamId,

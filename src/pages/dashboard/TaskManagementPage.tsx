@@ -29,64 +29,7 @@ import LoadingSpinner from "../../components/LoadingSpinner";
 import EmptyState from "../../components/tasks/EmptyState";
 import ConfirmationModal from "../../components/ConfirmationModal";
 
-interface User {
-  _id: string;
-  fullName: string;
-  avatar?: string;
-}
-
-interface TaskStep {
-  _id: string;
-  title: string;
-  description?: string;
-  isCompleted: boolean;
-}
-
-interface TaskMessage {
-  _id: string;
-  message: string;
-  sender: string;
-  timestamp: string;
-}
-
-interface FileUpload {
-  fileId: string;
-  url: string;
-  name?: string;
-  size?: string;
-  fileType?: string;
-}
-
-interface Task {
-  _id: string;
-  title: string;
-  description?: string;
-  status: string;
-  priority: string;
-  teamId: {
-    _id: string;
-    name: string;
-  };
-  createdBy: User;
-  assignedTo: User[];
-  createdAt: string;
-  dueDate?: string;
-  steps: TaskStep[];
-  messages: TaskMessage[];
-  uploads: FileUpload[];
-}
-
-interface TeamMember {
-  userId: string;
-  name: string;
-  email?: string;
-}
-
-interface Team {
-  _id: string;
-  name: string;
-  members: TeamMember[];
-}
+import type { Task } from "../../types/task.types";
 
 const TaskManagementPage = () => {
   const { taskId } = useParams<{ taskId: string }>();
@@ -225,7 +168,7 @@ const TaskManagementPage = () => {
   };
 
   const handleEditMessage = (messageId: string) => {
-    const messageToEdit = currentTask?.messages.find(
+    const messageToEdit = currentTask?.messages?.find(
       (msg) => msg._id === messageId
     );
     if (messageToEdit) {
@@ -652,7 +595,7 @@ const TaskManagementPage = () => {
                 </div>
 
                 {/* Messages List */}
-                {currentTask.messages?.length > 0 ? (
+                {currentTask.messages && currentTask.messages?.length > 0 ? (
                   <div className="space-y-4">
                     {currentTask.messages.map((msg) => (
                       <motion.div
@@ -977,7 +920,8 @@ const TaskManagementPage = () => {
                   Assigned To
                 </h3>
                 <div className="space-y-2">
-                  {currentTask.assignedTo?.length > 0 ? (
+                  {currentTask.assignedTo &&
+                  currentTask.assignedTo.length > 0 ? (
                     currentTask.assignedTo.map((user) => (
                       <div key={user._id} className="flex items-center gap-2">
                         <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center text-white text-xs font-medium">

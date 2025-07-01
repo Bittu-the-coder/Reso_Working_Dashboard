@@ -21,7 +21,7 @@ const EditTeam = ({
 
   const { updateTeam } = useTeamStore();
 
-  const handleUpdate = async (e) => {
+  const handleUpdate = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     try {
       await updateTeam(teamData._id, {

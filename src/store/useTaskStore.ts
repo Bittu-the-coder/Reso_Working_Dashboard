@@ -1,7 +1,8 @@
 import { create } from "zustand";
 import axios from "axios";
 import { API_URL } from "../utils/api";
-import type { Task, TaskStep, Message } from "../types";
+import type { TaskStep, Message } from "../types";
+import type { Task } from "../types/task.types";
 
 interface CreateTaskData {
   title: string;
@@ -54,10 +55,13 @@ interface TaskStoreState {
     teamId: string,
     taskId: string,
     status: string,
-    stepId: string,
-    completed: boolean
+    stepId?: string,
+    completed?: boolean
   ) => Promise<ApiResponse<Task>>;
-  deleteTask: (teamId: string, taskId: string) => Promise<ApiResponse<void>>;
+  deleteTask: (
+    teamId: { _id: string } | string,
+    taskId: string
+  ) => Promise<ApiResponse<void>>;
 
   // Message operations
   getTaskMessages: (

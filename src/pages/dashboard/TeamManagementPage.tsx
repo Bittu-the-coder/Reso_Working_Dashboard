@@ -20,32 +20,16 @@ import MemberEditModal from "../../components/teams/MemberEditModal";
 import { useTeamStore } from "../../store/useTeamStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import EditTeam from "../../components/teams/EditTeam";
-
-interface Member {
-  _id: string;
-  userId: string;
-  name: string;
-  email: string;
-  role: "admin" | "member";
-  department?: string;
-}
-
-interface Team {
-  _id: string;
-  name: string;
-  description?: string;
-  ownerId: {
-    _id: string;
-  };
-  members: Member[];
-}
+import type { TeamMember } from "../../types";
 
 const TeamManagementPage: React.FC = () => {
   const { teamId } = useParams<{ teamId: string }>();
   const navigate = useNavigate();
   const { isDarkMode } = useTheme();
-  const [showMemberDetail, setShowMemberDetail] = useState<Member | null>(null);
-  const [memberToEdit, setMemberToEdit] = useState<Member | null>(null);
+  const [showMemberDetail, setShowMemberDetail] = useState<TeamMember | null>(
+    null
+  );
+  const [memberToEdit, setMemberToEdit] = useState<TeamMember | null>(null);
   const [name, setName] = useState("");
   const [department, setDepartment] = useState("");
   const [email, setEmail] = useState("");
@@ -83,7 +67,7 @@ const TeamManagementPage: React.FC = () => {
     const fetchData = async () => {
       if (teamId) {
         try {
-          const response = await getTeam(teamId);
+          await getTeam(teamId);
         } catch (error) {
           console.error("Error fetching team:", error);
         }
@@ -168,7 +152,7 @@ const TeamManagementPage: React.FC = () => {
       name?: string;
       email?: string;
       department?: string;
-      role?: "admin" | "member";
+      role: "admin" | "member";
     }
   ) => {
     if (!currentTeam) return;
@@ -632,7 +616,10 @@ const TeamManagementPage: React.FC = () => {
           member={memberToEdit}
           onClose={() => setMemberToEdit(null)}
           onUpdate={(updatedData) =>
-            handleUpdateMember(memberToEdit._id, updatedData)
+            handleUpdateMember(memberToEdit._id, {
+              ...updatedData,
+              role: updatedData.role || "member",
+            })
           }
           isDarkMode={isDarkMode}
         />

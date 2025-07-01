@@ -286,8 +286,7 @@ const addTeamMember = asyncHandler(async (req, res, next) => {
         await team.save();
         await existingUser.save();
 
-        // Optionally notify the invited user here
-        // e.g., sendNotification(userId, "You've been invited to join a team")
+        //notify the invited user here
         await notifyUserByEmail(
             userId,
             "Team Invitation",
@@ -359,7 +358,7 @@ const removeTeamMember = asyncHandler(async (req, res, next) => {
         const checkIfDeletedMemberIsOwner =
             memberIndex !== -1 &&
             team.members[memberIndex].userId?._id.toString() ===
-                team.ownerId.toString();
+            team.ownerId.toString();
 
         if (checkIfDeletedMemberIsOwner) {
             return next(

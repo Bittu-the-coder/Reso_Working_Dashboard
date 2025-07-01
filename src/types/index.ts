@@ -1,588 +1,611 @@
 // User related types
 export interface User {
-    _id: string;
-    name: string;
-    username: string;
-    email: string;
-    avatar?: string;
-    role?: string;
-    createdAt?: string;
-    updatedAt?: string;
-    fullName?: string;
+  _id: string;
+  name: string;
+  username: string;
+  email: string;
+  avatar?: string;
+  role?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  fullName?: string;
 }
 
 export interface Message {
-    _id: string;
-    message: string;
-    user: string | User;
-    createdAt: string;
-    updatedAt?: string;
+  _id: string;
+  message: string;
+  user: string | User;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 // Auth store types
 export interface AuthState {
-    user: User | null;
-    token: string | null;
-    error: string | null;
-    loading: boolean;
-    register: (userData: RegisterUserData) => Promise<ResponseResult>;
-    login: (credentials: LoginCredentials) => Promise<ResponseResult>;
-    logout: () => void;
-    getMe: () => Promise<ResponseResult>;
-    updateUser: (userData: UpdateUserData) => Promise<ResponseResult>;
-    updatePassword: (passwords: PasswordUpdateData) => Promise<ResponseResult>;
-    checkNotifications: () => Promise<NotificationResponseResult>;
-    deleteNotification: (notificationId: string) => Promise<ResponseResult>;
-    getAllNotifications: () => Promise<NotificationResponseResult>;
-    getAllUsers: () => Promise<UsersResponseResult>;
+  user: User | null;
+  token: string | null;
+  error: string | null;
+  loading: boolean;
+  register: (userData: RegisterUserData) => Promise<ResponseResult>;
+  login: (credentials: LoginCredentials) => Promise<ResponseResult>;
+  logout: () => void;
+  getMe: () => Promise<ResponseResult>;
+  updateUser: (userData: UpdateUserData) => Promise<ResponseResult>;
+  updatePassword: (passwords: PasswordUpdateData) => Promise<ResponseResult>;
+  checkNotifications: () => Promise<NotificationResponseResult>;
+  deleteNotification: (notificationId: string) => Promise<ResponseResult>;
+  getAllNotifications: () => Promise<NotificationResponseResult>;
+  getAllUsers: () => Promise<UsersResponseResult>;
 }
 
 // Team related types
+interface userId {
+  _id: string;
+}
 export interface Team {
-    _id: string;
-    name: string;
-    description?: string;
-    createdBy: string | User;
-    members: TeamMember[];
-    invitations?: TeamInvitation[];
-    createdAt?: string;
-    updatedAt?: string;
+  _id: string;
+  name: string;
+  description?: string;
+  avatar: string;
+  ownerId: userId;
+  createdBy: string | User;
+  members: TeamMember[];
+  invitations?: TeamInvitation[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface TeamMember {
-    userId: string | User;
-    role: string;
-    joinedAt?: string;
+  _id: string;
+  name: string;
+  email: string;
+  department: string;
+  userId: userId | string;
+  role: string;
+  joinedAt?: string;
 }
 
 export interface TeamInvitation {
-    userId: string | User;
-    status: string;
-    createdAt?: string;
+  userId: string | User;
+  status: string;
+  createdAt?: string;
 }
 
 export interface TeamState {
-    teams: Team[];
-    currentTeam: Team | null;
-    loading: boolean;
-    error: string | null;
-    createTeam: (teamData: CreateTeamData) => Promise<TeamResponseResult>;
-    getMyTeams: () => Promise<ResponseResult>;
-    getTeam: (teamId: string) => Promise<ResponseResult>;
-    updateTeam: (
-        teamId: string,
-        teamData: UpdateTeamData
-    ) => Promise<ResponseResult>;
-    deleteTeam: (teamId: string) => Promise<ResponseResult>;
-    getTeamMembers: (teamId: string) => Promise<MembersResponseResult>;
-    addTeamMember: (
-        teamId: string,
-        memberData: AddTeamMemberData
-    ) => Promise<ResponseResult>;
-    removeTeamMember: (
-        teamId: string,
-        memberId: string
-    ) => Promise<ResponseResult>;
-    updateTeamMember: (
-        teamId: string,
-        memberId: string,
-        memberData: UpdateTeamMemberData
-    ) => Promise<ResponseResult>;
-    acceptTeamInvitation: () => Promise<ResponseResult>;
-    clearCurrentTeam: () => void;
+  teams: Team[];
+  currentTeam: Team | null;
+  loading: boolean;
+  error: string | null;
+  createTeam: (teamData: CreateTeamData) => Promise<TeamResponseResult>;
+  getMyTeams: () => Promise<ResponseResult>;
+  getTeam: (teamId: string) => Promise<ResponseResult>;
+  updateTeam: (
+    teamId: string,
+    teamData: UpdateTeamData
+  ) => Promise<ResponseResult>;
+  deleteTeam: (teamId: string) => Promise<ResponseResult>;
+  getTeamMembers: (teamId: string) => Promise<MembersResponseResult>;
+  addTeamMember: (
+    teamId: string,
+    memberData: AddTeamMemberData
+  ) => Promise<ResponseResult>;
+  removeTeamMember: (
+    teamId: string,
+    memberId: string
+  ) => Promise<ResponseResult>;
+  updateTeamMember: (
+    teamId: string,
+    memberId: string,
+    memberData: UpdateTeamMemberData
+  ) => Promise<ResponseResult>;
+  acceptTeamInvitation: () => Promise<ResponseResult>;
+  clearCurrentTeam: () => void;
 }
 
 // Task related types
 export interface Task {
-    _id: string;
-    title: string;
-    description?: string;
-    dueDate?: string;
-    priority: "low" | "medium" | "high";
-    status: string;
-    assignedTo: string[] | User[];
-    steps?: TaskStep[];
-    uploads?: string[];
-    createdBy: string | User;
-    teamId: string | Team;
-    messages?: TaskMessage[];
-    createdAt?: string;
-    updatedAt?: string;
+  _id: string;
+  title: string;
+  description?: string;
+  dueDate?: string;
+  priority: "low" | "medium" | "high";
+  status: string;
+  assignedTo: string[] | User[];
+  steps?: TaskStep[];
+  uploads?: string[];
+  createdBy: string | User;
+  teamId: string | Team;
+  messages?: TaskMessage[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface TaskStep {
-    title: string;
-    isCompleted: boolean;
-    _id?: string;
+  title: string;
+  isCompleted: boolean;
+  _id?: string;
 }
 
 export interface TaskMessage {
-    _id: string;
-    message: string;
-    user: string | User;
-    createdAt: string;
-    updatedAt?: string;
+  _id: string;
+  message: string;
+  user: string | User;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 export interface TaskState {
-    tasks: Task[];
-    teamTasks: Task[];
-    currentTask: Task | null;
-    loading: boolean;
-    error: string | null;
-    createTask: (
-        teamId: string,
-        taskData: CreateTaskData,
-        files?: FileList
-    ) => Promise<TaskResponseResult>;
-    getTeamTasks: (teamId: string) => Promise<ResponseResult>;
-    getUserTasks: () => Promise<ResponseResult>;
-    getTaskById: (teamId: string, taskId: string) => Promise<ResponseResult>;
-    updateTask: (
-        teamId: string,
-        taskId: string,
-        taskData: UpdateTaskData,
-        files?: FileList,
-        removedUploads?: string[]
-    ) => Promise<ResponseResult>;
-    updateTaskStatus: (
-        teamId: string,
-        taskId: string,
-        status: string,
-        steps?: TaskStep[]
-    ) => Promise<ResponseResult>;
-    deleteTask: (teamId: string, taskId: string) => Promise<ResponseResult>;
-    getTaskMessages: (
-        teamId: string,
-        taskId: string
-    ) => Promise<MessagesResponseResult>;
-    addTaskMessage: (
-        teamId: string,
-        taskId: string,
-        message: string
-    ) => Promise<MessageResponseResult>;
-    updateTaskMessage: (
-        teamId: string,
-        taskId: string,
-        messageId: string,
-        message: string
-    ) => Promise<MessageResponseResult>;
-    deleteTaskMessage: (
-        teamId: string,
-        taskId: string,
-        messageId: string
-    ) => Promise<ResponseResult>;
-    clearCurrentTask: () => void;
+  tasks: Task[];
+  teamTasks: Task[];
+  currentTask: Task | null;
+  loading: boolean;
+  error: string | null;
+  createTask: (
+    teamId: string,
+    taskData: CreateTaskData,
+    files?: FileList
+  ) => Promise<TaskResponseResult>;
+  getTeamTasks: (teamId: string) => Promise<ResponseResult>;
+  getUserTasks: () => Promise<ResponseResult>;
+  getTaskById: (teamId: string, taskId: string) => Promise<ResponseResult>;
+  updateTask: (
+    teamId: string,
+    taskId: string,
+    taskData: UpdateTaskData,
+    files?: FileList,
+    removedUploads?: string[]
+  ) => Promise<ResponseResult>;
+  updateTaskStatus: (
+    teamId: string,
+    taskId: string,
+    status: string,
+    steps?: TaskStep[]
+  ) => Promise<ResponseResult>;
+  deleteTask: (teamId: string, taskId: string) => Promise<ResponseResult>;
+  getTaskMessages: (
+    teamId: string,
+    taskId: string
+  ) => Promise<MessagesResponseResult>;
+  addTaskMessage: (
+    teamId: string,
+    taskId: string,
+    message: string
+  ) => Promise<MessageResponseResult>;
+  updateTaskMessage: (
+    teamId: string,
+    taskId: string,
+    messageId: string,
+    message: string
+  ) => Promise<MessageResponseResult>;
+  deleteTaskMessage: (
+    teamId: string,
+    taskId: string,
+    messageId: string
+  ) => Promise<ResponseResult>;
+  clearCurrentTask: () => void;
 }
 
 // Document related types
 export interface Document {
-    _id: string;
-    title: string;
-    content: string;
-    teamId: string | Team;
-    createdBy: string | User;
-    createdAt?: string;
-    updatedAt?: string;
+  accessLevel: any;
+  department: any;
+  link: string;
+  _id: string;
+  title: string;
+  content: string;
+  teamId: string | Team;
+  createdBy: string | User;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface DocumentState {
-    documents: Document[];
-    currentDocument: Document | null;
-    loading: boolean;
-    error: string | null;
-    createDocument: (
-        teamId: string,
-        documentData: CreateDocumentData
-    ) => Promise<DocumentResponseResult>;
-    getTeamDocuments: (teamId: string) => Promise<ResponseResult>;
-    getDocumentById: (
-        teamId: string,
-        documentId: string
-    ) => Promise<ResponseResult>;
-    updateDocument: (
-        teamId: string,
-        documentId: string,
-        documentData: UpdateDocumentData
-    ) => Promise<ResponseResult>;
-    deleteDocument: (
-        teamId: string,
-        documentId: string
-    ) => Promise<ResponseResult>;
-    clearCurrentDocument: () => void;
+  documents: Document[];
+  currentDocument: Document | null;
+  loading: boolean;
+  error: string | null;
+  createDocument: (
+    teamId: string,
+    documentData: CreateDocumentData
+  ) => Promise<DocumentResponseResult>;
+  getTeamDocuments: (teamId: string) => Promise<ResponseResult>;
+  getDocumentById: (
+    teamId: string,
+    documentId: string
+  ) => Promise<ResponseResult>;
+  updateDocument: (
+    teamId: string,
+    documentId: string,
+    documentData: UpdateDocumentData
+  ) => Promise<ResponseResult>;
+  deleteDocument: (
+    teamId: string,
+    documentId: string
+  ) => Promise<ResponseResult>;
+  clearCurrentDocument: () => void;
 }
 
 // Project related types
 export interface Project {
-    _id: string;
-    name: string;
-    description: string;
-    startDate: string;
-    endDate: string;
-    priority: "low" | "medium" | "high";
-    status: string;
-    members: ProjectMember[];
-    milestones?: ProjectMilestone[];
-    budget?: ProjectBudget;
-    progress?: number;
-    tags?: string[];
-    repository?: string;
-    technologies?: string[];
-    files?: string[];
-    isPrivate: boolean;
-    teamId: string | Team;
-    createdBy: string | User;
-    createdAt?: string;
-    updatedAt?: string;
+  _id: string;
+  name: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  priority: "low" | "medium" | "high";
+  status: string;
+  members: ProjectMember[];
+  milestones?: ProjectMilestone[];
+  budget?: ProjectBudget;
+  progress?: number;
+  tags?: string[];
+  repository?: string;
+  technologies?: string[];
+  files?: string[];
+  isPrivate: boolean;
+  teamId: string | Team;
+  createdBy: string | User;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface ProjectMember {
-    userId: string | User;
-    role: string;
+  userId: string | User;
+  role: string;
 }
 
 export interface ProjectMilestone {
-    _id?: string;
-    title: string;
-    description?: string;
-    dueDate: string;
-    isCompleted: boolean;
+  _id?: string;
+  title: string;
+  description?: string;
+  dueDate: string;
+  isCompleted: boolean;
 }
 
 export interface ProjectBudget {
-    total: number;
-    spent: number;
-    currency: string;
-    items?: BudgetItem[];
+  total: number;
+  spent: number;
+  currency: string;
+  items?: BudgetItem[];
 }
 
 export interface BudgetItem {
-    description: string;
-    amount: number;
-    date: string;
+  description: string;
+  amount: number;
+  date: string;
 }
 
 export interface ProjectState {
-    projects: Project[];
-    teamProjects: Project[];
-    currentProject: Project | null;
-    loading: boolean;
-    error: string | null;
-    createProject: (
-        teamId: string,
-        projectData: CreateProjectData,
-        files?: FileList
-    ) => Promise<ProjectResponseResult>;
-    getTeamProjects: (
-        teamId: string,
-        filters?: Record<string, any>
-    ) => Promise<PaginatedResponseResult>;
-    getUserProjects: (filters?: Record<string, any>) => Promise<ResponseResult>;
-    getProjectById: (projectId: string) => Promise<ResponseResult>;
-    updateProject: (
-        projectId: string,
-        projectData: UpdateProjectData,
-        files?: FileList,
-        removedUploads?: string[]
-    ) => Promise<ResponseResult>;
-    deleteProject: (projectId: string) => Promise<ResponseResult>;
-    updateMilestoneStatus: (
-        projectId: string,
-        milestoneId: string,
-        isCompleted: boolean
-    ) => Promise<ResponseResult>;
-    updateProjectBudget: (
-        projectId: string,
-        budgetData: UpdateBudgetData
-    ) => Promise<ResponseResult>;
-    clearCurrentProject: () => void;
+  projects: Project[];
+  teamProjects: Project[];
+  currentProject: Project | null;
+  loading: boolean;
+  error: string | null;
+  createProject: (
+    teamId: string,
+    projectData: CreateProjectData,
+    files?: FileList
+  ) => Promise<ProjectResponseResult>;
+  getTeamProjects: (
+    teamId: string,
+    filters?: Record<string, any>
+  ) => Promise<PaginatedResponseResult>;
+  getUserProjects: (filters?: Record<string, any>) => Promise<ResponseResult>;
+  getProjectById: (projectId: string) => Promise<ResponseResult>;
+  updateProject: (
+    projectId: string,
+    projectData: UpdateProjectData,
+    files?: FileList,
+    removedUploads?: string[]
+  ) => Promise<ResponseResult>;
+  deleteProject: (projectId: string) => Promise<ResponseResult>;
+  updateMilestoneStatus: (
+    projectId: string,
+    milestoneId: string,
+    isCompleted: boolean
+  ) => Promise<ResponseResult>;
+  updateProjectBudget: (
+    projectId: string,
+    budgetData: UpdateBudgetData
+  ) => Promise<ResponseResult>;
+  clearCurrentProject: () => void;
 }
 
 // Event related types
 export interface Event {
-    _id: string;
-    title: string;
-    description: string;
-    location: string;
-    eventDate: string;
-    endDate?: string;
-    priority: "low" | "medium" | "high";
-    attendees: EventAttendee[];
-    status: string;
-    isPublic: boolean;
-    maxAttendees?: number;
-    tags?: string[];
-    files?: string[];
-    reminders?: EventReminder[];
-    teamId: string | Team;
-    createdBy: string | User;
-    createdAt?: string;
-    updatedAt?: string;
+  _id: string;
+  title: string;
+  description: string;
+  location: string;
+  eventDate: string;
+  endDate?: string;
+  priority: "low" | "medium" | "high";
+  attendees: EventAttendee[];
+  status: string;
+  isPublic: boolean;
+  maxAttendees?: number;
+  tags?: string[];
+  files?: string[];
+  reminders?: EventReminder[];
+  teamId: string | Team;
+  createdBy: string | User;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface EventAttendee {
-    userId: string | User;
-    status: "pending" | "accepted" | "declined";
+  userId: string | User;
+  status: "pending" | "accepted" | "declined";
 }
 
 export interface EventReminder {
-    time: string;
-    sent: boolean;
+  time: string;
+  sent: boolean;
 }
 
 export interface EventState {
-    events: Event[];
-    teamEvents: Event[];
-    currentEvent: Event | null;
-    loading: boolean;
-    error: string | null;
-    createEvent: (
-        teamId: string,
-        eventData: CreateEventData,
-        files?: FileList
-    ) => Promise<EventResponseResult>;
-    getTeamEvents: (
-        teamId: string,
-        filters?: Record<string, any>
-    ) => Promise<PaginatedResponseResult>;
-    getUserEvents: (filters?: Record<string, any>) => Promise<ResponseResult>;
-    getEventById: (eventId: string) => Promise<ResponseResult>;
-    updateEvent: (
-        eventId: string,
-        eventData: UpdateEventData,
-        files?: FileList,
-        removedUploads?: string[]
-    ) => Promise<ResponseResult>;
-    deleteEvent: (eventId: string) => Promise<ResponseResult>;
-    respondToEvent: (
-        eventId: string,
-        status: "accepted" | "declined"
-    ) => Promise<ResponseResult>;
-    clearCurrentEvent: () => void;
+  events: Event[];
+  teamEvents: Event[];
+  currentEvent: Event | null;
+  loading: boolean;
+  error: string | null;
+  createEvent: (
+    teamId: string,
+    eventData: CreateEventData,
+    files?: FileList
+  ) => Promise<EventResponseResult>;
+  getTeamEvents: (
+    teamId: string,
+    filters?: Record<string, any>
+  ) => Promise<PaginatedResponseResult>;
+  getUserEvents: (filters?: Record<string, any>) => Promise<ResponseResult>;
+  getEventById: (eventId: string) => Promise<ResponseResult>;
+  updateEvent: (
+    eventId: string,
+    eventData: UpdateEventData,
+    files?: FileList,
+    removedUploads?: string[]
+  ) => Promise<ResponseResult>;
+  deleteEvent: (eventId: string) => Promise<ResponseResult>;
+  respondToEvent: (
+    eventId: string,
+    status: "accepted" | "declined"
+  ) => Promise<ResponseResult>;
+  clearCurrentEvent: () => void;
 }
 
 // Notification related types
 export interface Notification {
-    _id: string;
-    type: string;
-    message: string;
-    isRead: boolean;
-    userId: string;
-    relatedTo?: string;
-    createdAt: string;
+  _id: string;
+  type: string;
+  message: string;
+  isRead: boolean;
+  userId: string;
+  relatedTo?: string;
+  createdAt: string;
 }
 
 export interface NotificationState {
-    notifications: Notification[];
-    unreadCount: number;
-    setNotifications: (notifications: Notification[]) => void;
-    addNotification: (notification: Notification) => void;
-    markAsRead: (notificationId: string) => void;
-    deleteNotification: (notificationId: string) => void;
-    clearNotifications: () => void;
+  notifications: Notification[];
+  unreadCount: number;
+  setNotifications: (notifications: Notification[]) => void;
+  addNotification: (notification: Notification) => void;
+  markAsRead: (notificationId: string) => void;
+  deleteNotification: (notificationId: string) => void;
+  clearNotifications: () => void;
 }
 
 // Common input data types
 export interface RegisterUserData {
-    name: string;
-    username: string;
-    email: string;
-    password: string;
+  name: string;
+  username: string;
+  email: string;
+  password: string;
 }
 
 export interface LoginCredentials {
-    email: string;
-    password: string;
+  email: string;
+  password: string;
 }
 
 export interface UpdateUserData {
-    name?: string;
-    username?: string;
-    email?: string;
-    avatar?: File;
+  name?: string;
+  username?: string;
+  email?: string;
+  avatar?: File | string | null;
 }
 
 export interface PasswordUpdateData {
-    currentPassword: string;
-    newPassword: string;
+  currentPassword: string;
+  newPassword: string;
 }
 
 export interface CreateTeamData {
-    name: string;
-    description?: string;
+  name: string;
+  description?: string;
 }
 
 export interface UpdateTeamData {
-    name?: string;
-    description?: string;
+  name?: string;
+  description?: string;
+  department?: string;
 }
 
 export interface AddTeamMemberData {
-    email: string;
-    role?: string;
+  name: string;
+  department?: string;
+  email: string;
+  role?: string;
 }
 
 export interface UpdateTeamMemberData {
-    role: string;
+  name?: string;
+  email?: string;
+  department?: string;
+  role: string;
 }
 
 export interface CreateTaskData {
-    title: string;
-    description?: string;
-    dueDate?: string;
-    priority?: "low" | "medium" | "high";
-    assignedTo?: string[];
-    steps?: Omit<TaskStep, "_id">[];
+  title: string;
+  description?: string;
+  dueDate?: string;
+  priority?: "low" | "medium" | "high";
+  assignedTo?: string[];
+  steps?: Omit<TaskStep, "_id">[];
 }
 
 export interface UpdateTaskData {
-    title?: string;
-    description?: string;
-    dueDate?: string;
-    priority?: "low" | "medium" | "high";
-    assignedTo?: string[];
-    steps?: TaskStep[];
+  title?: string;
+  description?: string;
+  dueDate?: string;
+  priority?: "low" | "medium" | "high";
+  assignedTo?: string[];
+  steps?: TaskStep[];
 }
 
 export interface CreateDocumentData {
-    title: string;
-    content: string;
+  title: string;
+  link: string;
+  department: string;
+  team: string;
+  contentType: string;
+  accessLevel: string;
 }
 
 export interface UpdateDocumentData {
-    title?: string;
-    content?: string;
+  title?: string;
+  link?: string;
+  department?: string;
 }
 
 export interface CreateProjectData {
-    name: string;
-    description: string;
-    startDate: string;
-    endDate: string;
-    priority?: "low" | "medium" | "high";
-    members?: ProjectMember[];
-    milestones?: Omit<ProjectMilestone, "_id">[];
-    budget?: ProjectBudget;
-    tags?: string[];
-    repository?: string;
-    technologies?: string[];
-    isPrivate?: boolean;
+  name: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  priority?: "low" | "medium" | "high";
+  members?: ProjectMember[];
+  milestones?: Omit<ProjectMilestone, "_id">[];
+  budget?: ProjectBudget;
+  tags?: string[];
+  repository?: string;
+  technologies?: string[];
+  isPrivate?: boolean;
 }
 
 export interface UpdateProjectData {
-    name?: string;
-    description?: string;
-    startDate?: string;
-    endDate?: string;
-    priority?: "low" | "medium" | "high";
-    status?: string;
-    members?: ProjectMember[];
-    milestones?: ProjectMilestone[];
-    budget?: ProjectBudget;
-    progress?: number;
-    tags?: string[];
-    repository?: string;
-    technologies?: string[];
-    isPrivate?: boolean;
+  name?: string;
+  description?: string;
+  startDate?: string;
+  endDate?: string;
+  priority?: "low" | "medium" | "high";
+  status?: string;
+  members?: ProjectMember[];
+  milestones?: ProjectMilestone[];
+  budget?: ProjectBudget;
+  progress?: number;
+  tags?: string[];
+  repository?: string;
+  technologies?: string[];
+  isPrivate?: boolean;
 }
 
 export interface UpdateBudgetData {
-    total?: number;
-    spent?: number;
-    currency?: string;
-    items?: BudgetItem[];
+  total?: number;
+  spent?: number;
+  currency?: string;
+  items?: BudgetItem[];
 }
 
 export interface CreateEventData {
-    title: string;
-    description: string;
-    location: string;
-    eventDate: string;
-    endDate?: string;
-    priority?: "low" | "medium" | "high";
-    attendees?: string[];
-    isPublic?: boolean;
-    maxAttendees?: number;
-    tags?: string[];
-    reminders?: Omit<EventReminder, "sent">[];
+  title: string;
+  description: string;
+  location: string;
+  eventDate: string;
+  endDate?: string;
+  priority?: "low" | "medium" | "high";
+  attendees?: string[];
+  isPublic?: boolean;
+  maxAttendees?: number;
+  tags?: string[];
+  reminders?: Omit<EventReminder, "sent">[];
 }
 
 export interface UpdateEventData {
-    title?: string;
-    description?: string;
-    location?: string;
-    eventDate?: string;
-    endDate?: string;
-    priority?: "low" | "medium" | "high";
-    attendees?: string[];
-    status?: string;
-    isPublic?: boolean;
-    maxAttendees?: number;
-    tags?: string[];
+  title?: string;
+  description?: string;
+  location?: string;
+  eventDate?: string;
+  endDate?: string;
+  priority?: "low" | "medium" | "high";
+  attendees?: string[];
+  status?: string;
+  isPublic?: boolean;
+  maxAttendees?: number;
+  tags?: string[];
 }
 
 // Response types
 export interface ResponseResult {
-    success: boolean;
-    error?: string;
+  success: boolean;
+  error?: string;
 }
 
 export interface TeamResponseResult extends ResponseResult {
-    team?: Team;
+  team?: Team;
 }
 
 export interface TaskResponseResult extends ResponseResult {
-    task?: Task;
+  task?: Task;
 }
 
 export interface DocumentResponseResult extends ResponseResult {
-    document?: Document;
+  document?: Document;
 }
 
 export interface ProjectResponseResult extends ResponseResult {
-    project?: Project;
+  project?: Project;
 }
 
 export interface EventResponseResult extends ResponseResult {
-    event?: Event;
+  event?: Event;
 }
 
 export interface MessageResponseResult extends ResponseResult {
-    message?: TaskMessage;
+  message?: TaskMessage;
 }
 
 export interface MessagesResponseResult extends ResponseResult {
-    messages?: TaskMessage[];
+  messages?: TaskMessage[];
 }
 
 export interface MembersResponseResult extends ResponseResult {
-    members?: TeamMember[];
+  members?: TeamMember[];
 }
 
 export interface NotificationResponseResult extends ResponseResult {
-    notifications?: Notification[];
+  notifications?: Notification[];
 }
 
 export interface UsersResponseResult extends ResponseResult {
-    users?: User[];
+  users?: User[];
 }
 
 export interface PaginatedResponseResult extends ResponseResult {
-    pagination?: {
-        total: number;
-        page: number;
-        limit: number;
-        pages: number;
-    };
+  pagination?: {
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  };
 }
 
 // Main store type that combines all stores
 export interface StoreState {
-    auth: AuthState;
-    team: TeamState;
-    notification: NotificationState;
-    document: DocumentState;
-    task: TaskState;
-    event: EventState;
-    project: ProjectState;
+  auth: AuthState;
+  team: TeamState;
+  notification: NotificationState;
+  document: DocumentState;
+  task: TaskState;
+  event: EventState;
+  project: ProjectState;
 }

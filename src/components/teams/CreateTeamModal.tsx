@@ -2,10 +2,11 @@ import React, { useState, useRef } from "react";
 import { X, Upload } from "lucide-react";
 import { useTheme } from "../../contexts/ThemeContext";
 import { motion } from "framer-motion";
+import type { CreateTeamData } from "../../types";
 
 interface CreateTeamModalProps {
   onClose: () => void;
-  onSubmit: (data: FormData) => Promise<void>;
+  onSubmit: (formData: CreateTeamData) => Promise<void>;
   isCreating: boolean;
 }
 
@@ -93,8 +94,8 @@ const CreateTeamModal: React.FC<CreateTeamModalProps> = ({
     try {
       await onSubmit(formDataObj);
       onClose();
-    } catch (err) {
-      setError("Failed to create team. Please try again.");
+    } catch (err: any) {
+      setError(`Failed to create team. Please try again. ${err.message || ""}`);
     }
   };
 

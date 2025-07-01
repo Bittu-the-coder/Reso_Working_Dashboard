@@ -17,28 +17,7 @@ import { useTeamStore } from "../../store/useTeamStore";
 import { toast } from "react-hot-toast";
 import CreateTaskModal from "../../components/tasks/CreateTaskModal";
 import { useAuthStore } from "../../store/useAuthStore";
-
-interface Task {
-  _id: string;
-  title: string;
-  description?: string;
-  status: string;
-  priority: string;
-  dueDate: string;
-  teamId: string;
-  createdBy: string;
-  assignedTo: string[];
-}
-
-// interface Team {
-//   _id: string;
-//   name: string;
-//   members: Array<{
-//     userId: string;
-//     name: string;
-//     role: string;
-//   }>;
-// }
+import type { Task } from "../../types/task.types";
 
 interface Filters {
   team: string;
@@ -71,7 +50,6 @@ const TasksPage: React.FC = () => {
     loading,
     getUserTasks,
     getTeamTasks,
-    createTask,
     updateTaskStatus,
   } = useTaskStore();
   const { teams, getMyTeams } = useTeamStore();
@@ -127,14 +105,11 @@ const TasksPage: React.FC = () => {
     let result = filters.team
       ? teamTasks.filter(
           (task) =>
-            task.createdBy === user?._id || task.assignedTo.includes(user?._id)
+            task.createdBy === user?._id ||
+            (user?._id && task.assignedTo?.includes(user._id)) ||
+            false
         )
       : tasks;
-    console.log(
-      "Testing tasks:",
-      teamTasks.filter((task) => task.assignedTo.includes(user?._id))
-    );
-
     console.log("Filtered Tasks:", result);
 
     if (filters.status) {
@@ -156,29 +131,6 @@ const TasksPage: React.FC = () => {
 
     return result;
   }, [tasks, teamTasks, filters, user?._id]);
-
-  const handleCreateTask = async (taskData: {
-    teamId: string;
-    title: string;
-    description: string;
-    priority: string;
-    dueDate: string;
-    assignedTo: string[];
-  }) => {
-    try {
-      const response = await createTask(taskData.teamId, taskData);
-      if (response.success) {
-        toast.success("Task created successfully!");
-        setShowCreateModal(false);
-      } else {
-        throw new Error(response.error);
-      }
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to create task"
-      );
-    }
-  };
 
   const handleUpdateTaskStatus = async (taskId: string, status: string) => {
     try {
@@ -453,9 +405,7 @@ const TasksPage: React.FC = () => {
         {filteredTasks.length > 0 ? (
           filteredTasks.map((task) => {
             const statusInfo = getStatusInfo(task.status);
-            const priorityColor = getPriorityColor(task.priority);
-            const dueDate = new Date(task.dueDate);
-
+            const priorityColor = getPriorityColor(task.priority || "Medium");
             return (
               <motion.div
                 key={task._id}
@@ -523,7 +473,7 @@ const TasksPage: React.FC = () => {
                     </div>
 
                     {/* Assigned Users Section */}
-                    {task.assignedTo?.length > 0 && (
+                    {task.assignedTo && task.assignedTo.length > 0 && (
                       <div className="flex flex-col space-y-2">
                         <span
                           className={`text-xs ${
@@ -642,7 +592,6 @@ const TasksPage: React.FC = () => {
         <CreateTaskModal
           teams={teams}
           onClose={() => setShowCreateModal(false)}
-          onSubmit={handleCreateTask}
           isDarkMode={isDarkMode}
         />
       )}

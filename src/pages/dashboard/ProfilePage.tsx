@@ -98,8 +98,9 @@ const ProfilePage = () => {
         if (response.success && response.notifications) {
           setNotifications(response.notifications);
         }
-      } catch (error) {
+      } catch (error: any) {
         toast.error("Failed to fetch notifications");
+        console.log(error);
       } finally {
         setLoading(false);
       }
@@ -151,8 +152,8 @@ const ProfilePage = () => {
       } else {
         toast(result.error || "Update failed");
       }
-    } catch (error) {
-      toast("Update failed");
+    } catch (error: any) {
+      toast("Update failed ", error.message);
     } finally {
       setLoading(false);
     }
@@ -182,8 +183,8 @@ const ProfilePage = () => {
       } else {
         toast(result.error || "Password update failed");
       }
-    } catch (error) {
-      toast("Password update failed");
+    } catch (error: any) {
+      toast("Password update failed", error.message);
     } finally {
       setLoading(false);
     }
@@ -209,8 +210,8 @@ const ProfilePage = () => {
           prev.filter((notification) => notification._id !== id)
         );
       }
-    } catch (error) {
-      toast.error(`Failed to ${action} notification`);
+    } catch (error: any) {
+      toast.error(`Failed to ${action} notification`, error.message);
     }
   };
 

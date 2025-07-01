@@ -32,6 +32,10 @@ const corsOptions = {
   ],
 };
 
+if (!process.env.IMAGEKIT_PUBLIC_KEY || !process.env.IMAGEKIT_PRIVATE_KEY || !process.env.IMAGEKIT_URL_ENDPOINT) {
+  console.error('Missing required ImageKit configuration');
+}
+
 app.use(cors(corsOptions));
 // Body parser with size limits
 app.use(express.json({ limit: '10mb' }));

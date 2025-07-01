@@ -22,13 +22,14 @@ interface GoogleDoc {
   addedOn: string;
 }
 
-interface Team {
-  _id: string;
-  name: string;
-}
+// interface Team {
+//   _id: string;
+//   name: string;
+// }
 
 interface DocumentFormData {
   title: string;
+  link: string;
   url: string;
   department: string;
   team: string;
@@ -56,6 +57,7 @@ const DocumentsPage: React.FC = () => {
   const [newDoc, setNewDoc] = useState<DocumentFormData>({
     title: "",
     url: "",
+    link: "",
     department: "dev",
     team: "",
   });
@@ -185,6 +187,7 @@ const DocumentsPage: React.FC = () => {
       setNewDoc({
         title: "",
         url: "",
+        link: "",
         department: "dev",
         team: selectedTeamId,
       });

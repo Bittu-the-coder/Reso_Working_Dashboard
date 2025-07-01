@@ -1,16 +1,7 @@
 import { useTheme } from "../../contexts/ThemeContext";
 import { motion } from "framer-motion";
 import { CheckSquare, Clock } from "lucide-react";
-
-type TaskStatus = "todo" | "in_progress" | "done";
-
-interface Task {
-  id: string | number;
-  title: string;
-  dueDate: string;
-  status: TaskStatus;
-  // createdBy?: string; // Uncomment if needed
-}
+import type { Task } from "../../types/task.types";
 
 interface RecentTasksProps {
   tasks: Task[];
@@ -95,7 +86,7 @@ const RecentTasks = ({ tasks }: RecentTasksProps) => {
           >
             {tasks.slice(0, 4).map((task) => (
               <motion.tr
-                key={task.id}
+                key={task._id}
                 whileHover={{
                   backgroundColor: isDarkMode
                     ? "rgba(55, 65, 81, 0.6)"
@@ -120,7 +111,9 @@ const RecentTasks = ({ tasks }: RecentTasksProps) => {
                     <Clock
                       className={`w-4 h-4 ${isDarkMode ? "text-blue-400" : ""}`}
                     />{" "}
-                    {new Date(task.dueDate).toLocaleDateString()}
+                    {task.dueDate
+                      ? new Date(task.dueDate).toLocaleDateString()
+                      : "No date"}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">

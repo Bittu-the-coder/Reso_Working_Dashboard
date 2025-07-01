@@ -2,23 +2,7 @@ import React, { useState, useEffect } from "react";
 import { X, Upload, Check, ChevronDown } from "lucide-react";
 import { useTaskStore } from "../../store/useTaskStore";
 import toast from "react-hot-toast";
-
-interface Team {
-  _id: string;
-  name: string;
-  members: TeamMember[];
-}
-
-interface TeamMember {
-  _id: string;
-  userId: User;
-  name: string;
-}
-
-interface User {
-  _id: string;
-  name: string;
-}
+import type { Team } from "../../types";
 
 interface Step {
   title: string;
@@ -366,7 +350,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                         >
                           {member.name}
                         </div>
-                        <span>{member.userId.name}</span>
+                        <span>{member.name}</span>
                       </label>
                     </div>
                   ))}

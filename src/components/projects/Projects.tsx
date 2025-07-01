@@ -3,6 +3,12 @@ import { Code } from "lucide-react";
 import { useTheme } from "../../contexts/ThemeContext";
 import ProjectCard from "./ProjectCard";
 
+type ProjectType = {
+  _id: string;
+  name: string;
+  description: string;
+};
+
 interface ProjectsProps {
   projects: ProjectType[];
   onViewDetails: (project: ProjectType) => void;

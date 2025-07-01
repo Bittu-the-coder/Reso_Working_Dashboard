@@ -247,6 +247,58 @@ const deleteNotificationById = asyncHandler(async (req, res, next) => {
   }
 });
 
+//notify user by email
+const notifyUserByEmail = async (userId, subject, message) => {
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    console.log(`Sending email to ${user.email} with subject: ${subject}`);
+    console.log(`Message: ${message}`);
+
+    const mailOptions = {
+      to: user.email,
+      subject: subject,
+      html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                  <h2 style="color: #333;">Hello ${user.fullName || user.username
+        },</h2>
+                  <p style="font-size: 16px; line-height: 1.5; color: #555;">
+                      ${message}
+                  </p>
+                  <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                      <p style="font-size: 14px; color: #888;">
+                          Best regards,<br>
+                          Reso Team
+                      </p>
+                  </div>
+              </div>
+          `,
+    };
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+      port: 587,
+    });
+    const info = await transporter.sendMail({
+      from: process.env.EMAIL_FROM,
+      to: mailOptions.to,
+      subject: mailOptions.subject,
+      html: mailOptions.html,
+    });
+    console.log(
+      `Email sent successfully to ${user.email}:`,
+      info.messageId
+    );
+  } catch (error) {
+    console.error("Error sending email notification:", error);
+  }
+};
+
 
 
 
@@ -260,5 +312,6 @@ module.exports = {
   getAllUsers,
   getAllNotification,
   checkNotification,
-  deleteNotificationById
+  deleteNotificationById,
+  notifyUserByEmail
 };

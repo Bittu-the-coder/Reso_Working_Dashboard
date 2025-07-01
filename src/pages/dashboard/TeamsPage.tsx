@@ -7,7 +7,7 @@ import { toast } from "react-hot-toast";
 import { useTeamStore } from "../../store/useTeamStore";
 import CreateTeamModal from "../../components/teams/CreateTeamModal";
 
-import type { Team, TeamMember } from "../../types";
+import type { CreateTeamData, Team, TeamMember } from "../../types";
 
 const TeamsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -15,13 +15,13 @@ const TeamsPage: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
   const [isCreatingTeam, setIsCreatingTeam] = useState<boolean>(false);
 
-  const { teams, loading, error, getMyTeams, createTeam } = useTeamStore();
+  const { teams, loading, getMyTeams, createTeam } = useTeamStore();
 
   useEffect(() => {
     getMyTeams();
   }, [getMyTeams]);
 
-  const handleCreateTeam = async (formData: FormData) => {
+  const handleCreateTeam = async (formData: CreateTeamData) => {
     setIsCreatingTeam(true);
     try {
       await createTeam(formData);
@@ -286,7 +286,6 @@ const TeamsPage: React.FC = () => {
         <CreateTeamModal
           onClose={() => setShowCreateModal(false)}
           onSubmit={handleCreateTeam}
-          isDarkMode={isDarkMode}
           isCreating={isCreatingTeam}
         />
       )}
