@@ -1,6 +1,5 @@
 const connect = require("../db/db.js");
 const Document = require("../models/document.model.js");
-// Fix the User model import - ensure correct capitalization
 const User = require("../models/user.model.js");
 const asyncHandler = require("../utils/asyncHandler.js");
 const { ErrorResponse, sendSuccess } = require("../utils/sendResponse.js");

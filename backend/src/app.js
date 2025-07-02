@@ -1,33 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
-const path = require('path');
-const fs = require('fs');
 
-// Add file existence check utility
-const checkFileExists = (filePath) => {
-  try {
-    if (fs.existsSync(filePath)) {
-      console.log(`✅ File exists: ${filePath}`);
-    } else {
-      console.error(`❌ File not found: ${filePath}`);
-    }
-  } catch (err) {
-    console.error(`Error checking file ${filePath}:`, err);
-  }
-};
-
-// Check critical model files
-const modelsPath = path.join(__dirname, 'models');
-console.log('Models directory:', modelsPath);
-try {
-  if (fs.existsSync(modelsPath)) {
-    const files = fs.readdirSync(modelsPath);
-    console.log('Available model files:', files);
-  }
-} catch (err) {
-  console.error('Error reading models directory:', err);
-}
 
 const documentsRoutes = require("./routes/document.route.js");
 const eventRoutes = require("./routes/event.route.js");
@@ -63,8 +37,6 @@ const corsOptions = {
     "Date",
     "X-Api-Version"
   ],
-  preflightContinue: false,
-  optionsSuccessStatus: 204
 };
 
 if (!process.env.IMAGEKIT_PUBLIC_KEY || !process.env.IMAGEKIT_PRIVATE_KEY || !process.env.IMAGEKIT_URL_ENDPOINT) {

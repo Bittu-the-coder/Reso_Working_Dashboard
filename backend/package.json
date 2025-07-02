@@ -3,10 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/app.js",
-    "dev": "nodemon src/app.js",
-    "vercel-build": "echo 'Building for Vercel deployment'"
+    "dev": "nodemon src/app.js"
   },
   "keywords": [],
   "author": "",
