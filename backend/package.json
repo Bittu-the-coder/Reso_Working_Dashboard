@@ -4,7 +4,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/app.js",
-    "dev": "nodemon src/app.js"
+    "dev": "nodemon src/app.js",
+    "debug:models": "ls -la src/models && echo 'Checking Document.model.js exists:' && [ -f src/models/document.model.js ] && echo 'Exists' || echo 'Missing'"
   },
   "keywords": [],
   "author": "",
