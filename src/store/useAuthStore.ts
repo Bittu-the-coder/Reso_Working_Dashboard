@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import axios from "axios";
 import { persist } from "zustand/middleware";
 import type {
   AuthState,
@@ -11,6 +10,7 @@ import type {
   NotificationResponseResult,
   UsersResponseResult,
 } from "../types";
+import axios from "axios";
 import { API_URL } from "../utils/api";
 
 export const useAuthStore = create<AuthState>()(

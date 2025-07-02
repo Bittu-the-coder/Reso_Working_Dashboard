@@ -56,7 +56,15 @@ const corsOptions = {
     "Content-Type",
     "Accept",
     "Authorization",
+    "X-CSRF-Token",
+    "Accept-Version",
+    "Content-Length",
+    "Content-MD5",
+    "Date",
+    "X-Api-Version"
   ],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 };
 
 if (!process.env.IMAGEKIT_PUBLIC_KEY || !process.env.IMAGEKIT_PRIVATE_KEY || !process.env.IMAGEKIT_URL_ENDPOINT) {
@@ -74,7 +82,12 @@ app.use(express.static("public"));
 // This is a more compatible way of handling all OPTIONS requests
 app.use((req, res, next) => {
   if (req.method === "OPTIONS") {
-    return res.status(200).end();
+    // Add CORS headers specifically for OPTIONS requests
+    res.header("Access-Control-Allow-Origin", "https://reso-working-dashboard.vercel.app");
+    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,PATCH,OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-CSRF-Token, Accept-Version, Content-Length, Content-MD5, Date, X-Api-Version");
+    res.header("Access-Control-Allow-Credentials", "true");
+    return res.status(204).end();
   }
   next();
 });
