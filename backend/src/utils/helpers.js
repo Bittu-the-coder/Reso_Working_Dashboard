@@ -48,4 +48,33 @@ const notifyAssignedUsers = async (task) => {
   }
 };
 
-module.exports = { arraysEqual, notifyAssignedUsers };
+/**
+ * Extract ImageKit fileId from a URL
+ * This is a utility function to help with deleting files from ImageKit
+ * @param {string} url - The ImageKit file URL
+ * @returns {string} The extracted fileId or the original url if extraction fails
+ */
+const extractImageKitFileId = (url) => {
+  try {
+    if (!url) return null;
+
+    // If the url already looks like a fileId, return it
+    if (!url.includes('/') && !url.includes('.')) {
+      return url;
+    }
+
+    // Extract the fileId from the URL path
+    // Assumes the fileId is the last part of the path before query params
+    const urlParts = url.split('?')[0].split('/');
+    const fileNameWithExtension = urlParts[urlParts.length - 1];
+    const fileId = fileNameWithExtension.split('.')[0];
+
+    return fileId;
+  } catch (error) {
+    console.error("Error extracting ImageKit fileId:", error);
+    // Return the original URL as fallback
+    return url;
+  }
+};
+
+module.exports = { arraysEqual, notifyAssignedUsers, extractImageKitFileId };

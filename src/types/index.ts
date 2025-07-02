@@ -531,9 +531,22 @@ export interface PasswordUpdateData {
   newPassword: string;
 }
 
-export interface CreateTeamData {
+interface FileData {
+  file: File;
   name: string;
-  description?: string;
+  size: number;
+  type: string;
+}
+
+export interface CreateTeamData {
+  title: string;
+  description: string;
+  dueDate: string;
+  priority: "low" | "medium" | "high";
+  teamId: string;
+  assignedTo: string[];
+  files: FileData[];
+  steps: TaskStep[];
 }
 
 export interface UpdateTeamData {

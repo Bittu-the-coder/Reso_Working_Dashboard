@@ -262,20 +262,28 @@ const notifyUserByEmail = async (userId, subject, message) => {
       to: user.email,
       subject: subject,
       html: `
-              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                  <h2 style="color: #333;">Hello ${user.fullName || user.username
-        },</h2>
-                  <p style="font-size: 16px; line-height: 1.5; color: #555;">
-                      ${message}
-                  </p>
-                  <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
-                      <p style="font-size: 14px; color: #888;">
-                          Best regards,<br>
-                          Reso Team
-                      </p>
-                  </div>
-              </div>
-          `,
+      <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h1 style="color: #2c3e50; margin: 0; font-size: 28px; font-weight: 600;">Reso</h1>
+          <p style="color: #7f8c8d; margin: 5px 0 0;">Collaborative Project Management</p>
+        </div>
+        <h2 style="color: #2c3e50; font-size: 24px; margin-bottom: 20px;">Hello ${user.fullName || user.username},</h2>
+        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 6px; margin-bottom: 30px;">
+          <p style="font-size: 16px; line-height: 1.6; color: #34495e; margin: 0;">
+            ${message}
+          </p>
+        </div>
+        <div style="border-top: 2px solid #eceef1; padding-top: 20px; margin-top: 30px;">
+          <p style="font-size: 14px; color: #7f8c8d; line-height: 1.5; margin: 0;">
+            Best regards,<br>
+            <strong style="color: #2c3e50;">The Reso Team</strong>
+          </p>
+        </div>
+        <div style="text-align: center; margin-top: 30px;">
+          <p style="color: #95a5a6; font-size: 12px; margin: 0;">© ${new Date().getFullYear()} Reso. All rights reserved.</p>
+        </div>
+      </div>
+      `,
     };
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,

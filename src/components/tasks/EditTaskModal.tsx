@@ -77,8 +77,12 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
           ? new Date(task.dueDate).toISOString().split("T")[0]
           : "",
         priority: (task.priority as "low" | "medium" | "high") || "medium",
-        teamId: task.teamId || "",
-        assignedTo: task.assignedTo?.map((user) => user) || [],
+        teamId:
+          typeof task.teamId === "string" ? task.teamId : task.teamId?._id,
+        assignedTo:
+          task.assignedTo?.map((user) =>
+            typeof user === "string" ? user : user._id
+          ) || [],
         steps: task.steps || [],
         files: [],
         existingUploads: task.uploads || [],
@@ -86,7 +90,11 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
       });
 
       if (task.teamId) {
-        const team = teams.find((t) => t._id === task.teamId);
+        const team = teams.find(
+          (t) =>
+            t._id ===
+            (typeof task.teamId === "string" ? task.teamId : task.teamId?._id)
+        );
         setSelectedTeam(team || null);
       }
     }

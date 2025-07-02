@@ -59,8 +59,16 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
-// Connect to MongoDB
-connect();
+// Connect to MongoDB with better error handling
+try {
+  connect().then(() => {
+    console.log("Database connection initialized");
+  }).catch(err => {
+    console.error("Failed to initialize database connection:", err);
+  });
+} catch (error) {
+  console.error("Error in database connection setup:", error);
+}
 
 app.get("/", (req, res) => {
   res.send("Welcome to the Reso Working Dashboard API");
@@ -73,15 +81,18 @@ app.use("/api/events", eventRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/tasks", taskRoutes);
 
-// Log error details before passing to the error handler
+// Enhanced error logging for serverless environment
 app.use((err, req, res, next) => {
-  console.error('Error details:', {
+  const errorDetails = {
     message: err.message,
-    stack: err.stack,
+    name: err.name,
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
     path: req.path,
     method: req.method,
-    headers: req.headers
-  });
+    timestamp: new Date().toISOString()
+  };
+
+  console.error('Error occurred:', JSON.stringify(errorDetails, null, 2));
   next(err);
 });
 

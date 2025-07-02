@@ -1,6 +1,11 @@
 const ImageKit = require("imagekit");
 require("dotenv").config();
 
+// Add validation for ImageKit configuration
+if (!process.env.IMAGEKIT_PUBLIC_KEY || !process.env.IMAGEKIT_PRIVATE_KEY || !process.env.IMAGEKIT_URL_ENDPOINT) {
+  console.error('Missing required ImageKit configuration. Please check your environment variables.');
+}
+
 const imagekit = new ImageKit({
   publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
   privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
@@ -10,29 +15,37 @@ const imagekit = new ImageKit({
 // Function to upload files
 const uploadToImageKit = async (file) => {
   try {
+    if (!file || !file.buffer) {
+      throw new Error("Invalid file object provided to uploadToImageKit");
+    }
+
     const response = await imagekit.upload({
-      file: file.buffer.toString("base64"), // Convert file buffer to base64
-      fileName: file.originalname, // Original file name
-      folder: "/task_uploads", // Optional folder organization
-      useUniqueFileName: true // Ensure unique filenames
+      file: file.buffer.toString("base64"),
+      fileName: file.originalname,
+      folder: "/task_uploads",
+      useUniqueFileName: true
     });
-    console.log("ImageKit upload response:", response);
-    return response; // Return the URL of the uploaded file
+
+    return response;
   } catch (error) {
     console.error("ImageKit upload error:", error);
-    throw new Error("Failed to upload file to ImageKit");
+    throw new Error(`Failed to upload file to ImageKit: ${error.message}`);
   }
 };
 
 // Function to delete files (optional)
 const deleteFromImageKit = async (fileId) => {
   try {
-    console.log("fileid", fileId);
+    if (!fileId) {
+      console.warn("No fileId provided to deleteFromImageKit");
+      return;
+    }
+
     const response = await imagekit.deleteFile(fileId);
-    console.log("ImageKit delete response:", response);
+    return response;
   } catch (error) {
     console.error("ImageKit delete error:", error);
-    throw new Error("Failed to delete file from ImageKit");
+    console.warn(`Failed to delete file from ImageKit: ${error.message}`);
   }
 };
 

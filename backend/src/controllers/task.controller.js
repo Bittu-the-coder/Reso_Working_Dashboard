@@ -333,7 +333,38 @@ const updateTask = asyncHandler(async (req, res, next) => {
             const parsedAssignedTo = Array.isArray(assignedTo)
                 ? assignedTo
                 : JSON.parse(assignedTo);
+
+            // Get currently assigned users
+            const previouslyAssigned = task.assignedTo.map(id => id.toString());
+            const newlyAssigned = parsedAssignedTo.filter(id => !previouslyAssigned.includes(id.toString()));
+
             task.assignedTo = parsedAssignedTo;
+
+            // Only notify newly assigned users
+            if (newlyAssigned.length > 0) {
+                const users = await User.find({ _id: { $in: newlyAssigned } });
+
+                await Promise.all(
+                    users.map(async (user) => {
+                        user.notifications.push({
+                            message: `You have been assigned to task: ${title}`,
+                            type: "task",
+                        });
+
+                        await user.save();
+
+                        await notifyUserByEmail(
+                            user.id,
+                            "Task Assignment",
+                            `You have been assigned to task: <strong>${title}</strong><br>
+                            Description: ${description || "No description provided"}<br>
+                            Due Date: ${dueDate || "No due date set"}<br>
+                            Priority: ${priority || "Low"}`
+                        );
+                        console.log(`Notification sent to ${user.email} for task: ${title}`);
+                    })
+                );
+            }
         }
 
         // Handle steps
