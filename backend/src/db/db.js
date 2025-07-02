@@ -9,7 +9,6 @@ const connect = async () => {
   }
 
   try {
-    // Check for MongoDB URI
     if (!process.env.MONGO_URI) {
       throw new Error("MONGO_URI environment variable is not defined");
     }
@@ -18,8 +17,8 @@ const connect = async () => {
     const options = {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 5000, // Timeout after 5 seconds
-      socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
     };
 
     console.log("Connecting to MongoDB...");

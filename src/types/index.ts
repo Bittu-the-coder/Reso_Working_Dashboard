@@ -540,13 +540,11 @@ interface FileData {
 
 export interface CreateTeamData {
   title: string;
-  description: string;
-  dueDate: string;
-  priority: "low" | "medium" | "high";
-  teamId: string;
-  assignedTo: string[];
-  files: FileData[];
-  steps: TaskStep[];
+  description?: string;
+  dueDate?: string;
+  priority?: "low" | "medium" | "high";
+  assignedTo?: string[];
+  steps?: TaskStep[];
 }
 
 export interface UpdateTeamData {
