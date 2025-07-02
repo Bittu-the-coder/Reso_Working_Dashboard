@@ -87,10 +87,10 @@ export const useAuthStore = create<AuthState>()(
               headers: { Authorization: `Bearer ${token}` },
             })
             .catch((error) => {
-              // console.log(
-              //   "Logout API call failed, but user was still logged out locally:",
-              //   error.message
-              // );
+              console.log(
+                "Logout API call failed, but user was still logged out locally:",
+                error.message
+              );
             });
         }
       },
