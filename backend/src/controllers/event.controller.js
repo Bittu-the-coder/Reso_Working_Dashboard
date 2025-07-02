@@ -1,11 +1,11 @@
-const connect = require("../db/db");
-const Event = require("../models/Event.model");
-const Team = require("../models/team.model");
-const User = require("../models/User.model");
-const asyncHandler = require("../utils/asyncHandler");
-const { uploadToImageKit, deleteFromImageKit } = require("../utils/imageKit");
-const { extractImageKitFileId } = require("../utils/helpers");
-const { ErrorResponse, sendSuccess } = require("../utils/sendResponse");
+const connect = require("../db/db.js");
+const Event = require("../models/Event.model.js");
+const Team = require("../models/team.model.js");
+const User = require("../models/User.model.js");
+const asyncHandler = require("../utils/asyncHandler.js");
+const { uploadToImageKit, deleteFromImageKit } = require("../utils/imageKit.js");
+const { extractImageKitFileId } = require("../utils/helpers.js");
+const { ErrorResponse, sendSuccess } = require("../utils/sendResponse.js");
 
 // Create a new event
 const createEvent = asyncHandler(async (req, res, next) => {

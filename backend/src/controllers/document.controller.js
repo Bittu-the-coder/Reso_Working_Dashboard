@@ -1,8 +1,8 @@
-const connect = require("../db/db");
-const Document = require("../models/Document.model");
-const User = require("../models/User.model");
-const asyncHandler = require("../utils/asyncHandler");
-const { ErrorResponse, sendSuccess } = require("../utils/sendResponse");
+const connect = require("../db/db.js");
+const Document = require("../models/Document.model.js");
+const User = require("../models/User.model.js");
+const asyncHandler = require("../utils/asyncHandler.js");
+const { ErrorResponse, sendSuccess } = require("../utils/sendResponse.js");
 
 const createDocument = asyncHandler(async (req, res, next) => {
   const { title, link, department } = req.body;

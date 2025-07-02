@@ -1,10 +1,11 @@
-const Task = require("../models/Task.model");
-const Team = require("../models/team.model");
-const User = require("../models/User.model");
-const asyncHandler = require("../utils/asyncHandler");
-const { arraysEqual, notifyAssignedUsers } = require("../utils/helpers");
-const { uploadToImageKit, deleteFromImageKit } = require("../utils/imageKit");
-const { ErrorResponse, sendSuccess } = require("../utils/sendResponse");
+const Task = require("../models/Task.model.js");
+const Team = require("../models/team.model.js");
+const User = require("../models/User.model.js");
+const asyncHandler = require("../utils/asyncHandler.js");
+// const { arraysEqual, notifyAssignedUsers } = require("../utils/helpers.js");
+const { uploadToImageKit, deleteFromImageKit } = require("../utils/imageKit.js");
+const { ErrorResponse, sendSuccess } = require("../utils/sendResponse.js");
+const { notifyUserByEmail } = require("../controllers/user.controller.js");
 
 const createTasks = asyncHandler(async (req, res, next) => {
     const { title, description, dueDate, priority, assignedTo, steps } =

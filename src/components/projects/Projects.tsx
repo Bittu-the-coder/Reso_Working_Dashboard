@@ -7,6 +7,8 @@ type ProjectType = {
   _id: string;
   name: string;
   description: string;
+  progress: number;
+  members: string[];
 };
 
 interface ProjectsProps {

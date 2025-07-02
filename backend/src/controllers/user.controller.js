@@ -1,10 +1,11 @@
-const { sendTokenResponse } = require('../utils/jwt');
-const User = require("../models/User.model");
-const Team = require("../models/team.model");
-const connect = require("../db/db");
-const asyncHandler = require("../utils/asyncHandler");
-const { ErrorResponse, sendSuccess } = require("../utils/sendResponse");
-const { uploadToImageKit } = require('../utils/imageKit');
+const { sendTokenResponse } = require('../utils/jwt.js');
+const User = require("../models/User.model.js");
+const Team = require("../models/team.model.js");
+const connect = require("../db/db.js");
+const asyncHandler = require("../utils/asyncHandler.js");
+const { ErrorResponse, sendSuccess } = require("../utils/sendResponse.js");
+const { uploadToImageKit } = require('../utils/imageKit.js');
+const nodemailer = require('nodemailer');
 
 // Register user
 const registerUser = asyncHandler(async (req, res, next) => {
@@ -99,8 +100,8 @@ const updateUser = asyncHandler(async (req, res, next) => {
     if (!user) {
       return next(new ErrorResponse('User not found', 404));
     }
-
     const { name, username, email } = req.body;
+    console.log('Updating user:', name, username, email);
 
     if (req.file) {
       const avatarUrl = await uploadToImageKit(req.file);
@@ -120,7 +121,7 @@ const updateUser = asyncHandler(async (req, res, next) => {
       }
     }
 
-    if (name) user.name = name;
+    if (name) user.fullName = name;
     if (username) user.username = username;
     if (email) user.email = email;
 

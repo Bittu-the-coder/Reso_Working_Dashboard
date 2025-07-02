@@ -1,7 +1,7 @@
 import { useTheme } from "../../contexts/ThemeContext";
 import { motion } from "framer-motion";
 import { CheckSquare, Clock } from "lucide-react";
-import type { Task } from "../../types/task.types";
+import type { Task } from "../../types";
 
 interface RecentTasksProps {
   tasks: Task[];

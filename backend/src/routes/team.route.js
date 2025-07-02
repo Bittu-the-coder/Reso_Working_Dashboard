@@ -1,8 +1,8 @@
 const express = require('express');
-const { protect } = require('../middlewares/auth.middleware');
-const { createTeam, getTeam, addTeamMember, getTeamMembers, updateTeam, deleteTeam, getMyTeams, removeTeamMember, updateTeamMember, getTeamMemberById } = require('../controllers/team.controller');
+const { protect } = require('../middlewares/auth.middleware.js');
+const { createTeam, getTeam, addTeamMember, getTeamMembers, updateTeam, deleteTeam, getMyTeams, removeTeamMember, updateTeamMember, getTeamMemberById } = require('../controllers/team.controller.js');
 const router = express.Router();
-const upload = require('../middlewares/multer');
+const upload = require('../middlewares/multer.js');
 
 router.route('/').post(protect, upload.single("avatar"), createTeam)
   .get(protect, getMyTeams);

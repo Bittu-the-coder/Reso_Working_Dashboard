@@ -1,93 +1,8 @@
 import { create } from "zustand";
 import axios from "axios";
 import { API_URL } from "../utils/api";
-import type { TaskStep, Message } from "../types";
-import type { Task } from "../types/task.types";
-
-interface CreateTaskData {
-  title: string;
-  description?: string;
-  dueDate?: string;
-  priority?: string;
-  assignedTo?: string[];
-  steps?: TaskStep[];
-}
-
-interface UpdateTaskData {
-  title?: string;
-  description?: string;
-  dueDate?: string;
-  priority?: string;
-  assignedTo?: string[];
-  steps?: TaskStep[];
-}
-
-interface ApiResponse<T = void> {
-  success: boolean;
-  data?: T;
-  error?: string;
-}
-
-interface TaskStoreState {
-  tasks: Task[];
-  teamTasks: Task[];
-  currentTask: Task | null;
-  loading: boolean;
-  error: string | null;
-
-  // Task operations
-  createTask: (
-    teamId: string,
-    taskData: CreateTaskData,
-    files?: File[]
-  ) => Promise<ApiResponse<Task>>;
-  getTeamTasks: (teamId: string) => Promise<ApiResponse<Task[]>>;
-  getUserTasks: () => Promise<ApiResponse<Task[]>>;
-  getTaskById: (teamId: string, taskId: string) => Promise<ApiResponse<Task>>;
-  updateTask: (
-    teamId: string,
-    taskId: string,
-    taskData: UpdateTaskData,
-    files?: File[],
-    removedUploads?: string[]
-  ) => Promise<ApiResponse<Task>>;
-  updateTaskStatus: (
-    teamId: string,
-    taskId: string,
-    status: string,
-    stepId?: string,
-    completed?: boolean
-  ) => Promise<ApiResponse<Task>>;
-  deleteTask: (
-    teamId: { _id: string } | string,
-    taskId: string
-  ) => Promise<ApiResponse<void>>;
-
-  // Message operations
-  getTaskMessages: (
-    teamId: string,
-    taskId: string
-  ) => Promise<ApiResponse<Message[]>>;
-  addTaskMessage: (
-    teamId: string,
-    taskId: string,
-    message: string
-  ) => Promise<ApiResponse<Message>>;
-  updateTaskMessage: (
-    teamId: string,
-    taskId: string,
-    messageId: string,
-    message: string
-  ) => Promise<ApiResponse<Message>>;
-  deleteTaskMessage: (
-    teamId: string,
-    taskId: string,
-    messageId: string
-  ) => Promise<ApiResponse<void>>;
-
-  // Utility
-  clearCurrentTask: () => void;
-}
+import type { Message } from "../types";
+import type { Task, ApiResponse, TaskStoreState } from "../types";
 
 export const useTaskStore = create<TaskStoreState>((set, get) => ({
   tasks: [],
@@ -103,8 +18,8 @@ export const useTaskStore = create<TaskStoreState>((set, get) => ({
     return token;
   },
 
-  // Helper function to handle API errors
-  handleError: (error: any): ApiResponse => {
+  // Helper function to handle API errors - make it generic to support different return types
+  handleError: <T>(error: any): ApiResponse<T> => {
     const message =
       error.response?.data?.message || error.message || "An error occurred";
     set({ error: message, loading: false });
@@ -127,7 +42,7 @@ export const useTaskStore = create<TaskStoreState>((set, get) => ({
           } else if (Array.isArray(value)) {
             value.forEach((item) => formData.append(key, item));
           } else {
-            formData.append(key, value);
+            formData.append(key, String(value));
           }
         }
       });
@@ -157,7 +72,7 @@ export const useTaskStore = create<TaskStoreState>((set, get) => ({
       }));
 
       return { success: true, data: response.data.data };
-    } catch (error) {
+    } catch (error: any) {
       const errorMsg =
         error.response?.data?.error || error.message || "Failed to create task";
       set({ error: errorMsg, loading: false });
@@ -181,7 +96,7 @@ export const useTaskStore = create<TaskStoreState>((set, get) => ({
       set({ teamTasks: response.data.data.tasks, loading: false });
       return { success: true, data: response.data.data.tasks };
     } catch (error) {
-      return get().handleError(error);
+      return get().handleError<Task[]>(error);
     }
   },
 
@@ -197,7 +112,7 @@ export const useTaskStore = create<TaskStoreState>((set, get) => ({
       set({ tasks: response.data.data.tasks, loading: false });
       return { success: true, data: response.data.data.tasks };
     } catch (error) {
-      return get().handleError(error);
+      return get().handleError<Task[]>(error);
     }
   },
 
@@ -216,7 +131,7 @@ export const useTaskStore = create<TaskStoreState>((set, get) => ({
       set({ currentTask: response.data.data, loading: false });
       return { success: true, data: response.data.data };
     } catch (error) {
-      return get().handleError(error);
+      return get().handleError<Task>(error);
     }
   },
 
@@ -240,9 +155,9 @@ export const useTaskStore = create<TaskStoreState>((set, get) => ({
             // Stringify arrays that need to be parsed on backend
             formData.append(key, JSON.stringify(value));
           } else if (Array.isArray(value)) {
-            value.forEach((item) => formData.append(key, item));
+            value.forEach((item) => formData.append(key, String(item)));
           } else {
-            formData.append(key, value);
+            formData.append(key, String(value));
           }
         }
       });
@@ -291,7 +206,7 @@ export const useTaskStore = create<TaskStoreState>((set, get) => ({
 
       return { success: true, data: response.data.data };
     } catch (error) {
-      return get().handleError(error);
+      return get().handleError<Task>(error);
     }
   },
 
@@ -300,8 +215,8 @@ export const useTaskStore = create<TaskStoreState>((set, get) => ({
     teamId: string,
     taskId: string,
     status: string,
-    stepId: string,
-    completed: boolean
+    stepId?: string,
+    completed?: boolean
   ): Promise<ApiResponse<Task>> => {
     set({ loading: true, error: null });
     try {
@@ -326,7 +241,7 @@ export const useTaskStore = create<TaskStoreState>((set, get) => ({
 
       return { success: true, data: response.data.data };
     } catch (error) {
-      return get().handleError(error);
+      return get().handleError<Task>(error);
     }
   },
 
@@ -335,9 +250,16 @@ export const useTaskStore = create<TaskStoreState>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const token = get().getAuthToken();
-      await axios.delete(`${API_URL}/tasks/teams/${teamId}/tasks/${taskId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+
+      // Handle the case where teamId might be an object
+      const actualTeamId = typeof teamId === "string" ? teamId : teamId._id;
+
+      await axios.delete(
+        `${API_URL}/tasks/teams/${actualTeamId}/tasks/${taskId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       set((state) => ({
         tasks: state.tasks.filter((task) => task._id !== taskId),
@@ -348,7 +270,7 @@ export const useTaskStore = create<TaskStoreState>((set, get) => ({
 
       return { success: true };
     } catch (error) {
-      return get().handleError(error);
+      return get().handleError<void>(error);
     }
   },
 
@@ -364,9 +286,10 @@ export const useTaskStore = create<TaskStoreState>((set, get) => ({
       console.log("get message:", response);
 
       set((state) => {
-        if (!state.currentTask) return { loading: false };
+        if (!state.currentTask) return state;
 
         return {
+          ...state,
           currentTask: {
             ...state.currentTask,
             messages: response.data.data,
@@ -377,7 +300,7 @@ export const useTaskStore = create<TaskStoreState>((set, get) => ({
 
       return { success: true, data: response.data.data };
     } catch (error) {
-      return get().handleError(error);
+      return get().handleError<Message[]>(error);
     }
   },
 
@@ -397,9 +320,10 @@ export const useTaskStore = create<TaskStoreState>((set, get) => ({
       );
 
       set((state) => {
-        if (!state.currentTask) return { loading: false };
+        if (!state.currentTask) return state;
 
         return {
+          ...state,
           currentTask: {
             ...state.currentTask,
             messages: [
@@ -413,7 +337,7 @@ export const useTaskStore = create<TaskStoreState>((set, get) => ({
 
       return { success: true, data: response.data.data };
     } catch (error) {
-      return get().handleError(error);
+      return get().handleError<Message>(error);
     }
   },
 
@@ -443,21 +367,22 @@ export const useTaskStore = create<TaskStoreState>((set, get) => ({
         throw new Error(response.data.error || "Failed to update message");
       }
 
-      set((state) => ({
-        ...state,
-        currentTask:
-          state.currentTask && state.currentTask.messages
-            ? {
-                ...state.currentTask,
-                messages: state.currentTask.messages
-                  .map((msg) =>
-                    msg && msg._id === messageId ? response.data.data : msg
-                  )
-                  .filter((msg): msg is Message => msg !== undefined),
-              }
-            : state.currentTask,
-        loading: false,
-      }));
+      set((state) => {
+        if (!state.currentTask || !state.currentTask.messages) {
+          return state;
+        }
+
+        return {
+          ...state,
+          currentTask: {
+            ...state.currentTask,
+            messages: state.currentTask.messages
+              .map((msg) => (msg._id === messageId ? response.data.data : msg))
+              .filter((msg): msg is Message => msg !== undefined),
+          },
+          loading: false,
+        };
+      });
 
       return { success: true, data: response.data.data };
     } catch (error) {
@@ -496,18 +421,22 @@ export const useTaskStore = create<TaskStoreState>((set, get) => ({
         throw new Error(response.data.error || "Failed to delete message");
       }
 
-      set((state) => ({
-        ...state,
-        currentTask: state.currentTask
-          ? {
-              ...state.currentTask,
-              messages: state.currentTask.messages.filter(
-                (msg) => msg._id !== messageId
-              ),
-            }
-          : null,
-        loading: false,
-      }));
+      set((state) => {
+        if (!state.currentTask || !state.currentTask.messages) {
+          return state;
+        }
+
+        return {
+          ...state,
+          currentTask: {
+            ...state.currentTask,
+            messages: state.currentTask.messages.filter(
+              (msg) => msg._id !== messageId
+            ),
+          },
+          loading: false,
+        };
+      });
 
       return { success: true };
     } catch (error) {
@@ -973,6 +902,84 @@ export const useTaskStore = create<TaskStoreState>((set, get) => ({
 //         currentTask:
 //           state.currentTask && state.currentTask.messages
 //             ? {
+//                 ...state.currentTask,
+//                 messages: state.currentTask.messages
+//                   .map((msg) =>
+//                     msg && msg._id === messageId ? response.data.data : msg
+//                   )
+//                   .filter((msg): msg is TaskMessage => msg !== undefined),
+//               }
+//             : state.currentTask,
+//         loading: false,
+//       }));
+
+//       return { success: true, data: response.data.data };
+//     } catch (error) {
+//       set({
+//         loading: false,
+//         error: error instanceof Error ? error.message : "Update failed",
+//       });
+//       return {
+//         success: false,
+//         error:
+//           error instanceof Error ? error.message : "Failed to update message",
+//       };
+//     }
+//   },
+
+//   // Delete a message from a task
+//   deleteTaskMessage: async (
+//     teamId: string,
+//     taskId: string,
+//     messageId: string
+//   ): Promise<ApiResponse<void>> => {
+//     try {
+//       set({ loading: true, error: null });
+
+//       const token = get().getAuthToken();
+//       if (!token) {
+//         throw new Error("Authentication token not available");
+//       }
+
+//       const response = await axios.delete<ApiResponse<void>>(
+//         `${API_URL}/tasks/teams/${teamId}/tasks/${taskId}/messages/${messageId}`,
+//         { headers: { Authorization: `Bearer ${token}` } }
+//       );
+
+//       if (!response.data.success) {
+//         throw new Error(response.data.error || "Failed to delete message");
+//       }
+
+//       set((state) => ({
+//         ...state,
+//         currentTask: state.currentTask
+//           ? {
+//               ...state.currentTask,
+//               messages: state.currentTask.messages.filter(
+//                 (msg) => msg._id !== messageId
+//               ),
+//             }
+//           : null,
+//         loading: false,
+//       }));
+
+//       return { success: true };
+//     } catch (error) {
+//       set({
+//         loading: false,
+//         error: error instanceof Error ? error.message : "Deletion failed",
+//       });
+//       return {
+//         success: false,
+//         error:
+//           error instanceof Error ? error.message : "Failed to delete message",
+//       };
+//     }
+//   },
+
+//   // Clear the current task from state
+//   clearCurrentTask: () => set({ currentTask: null }),
+// }));
 //                 ...state.currentTask,
 //                 messages: state.currentTask.messages
 //                   .map((msg) =>

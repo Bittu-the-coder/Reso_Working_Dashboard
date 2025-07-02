@@ -1,6 +1,6 @@
 const express = require('express');
-const { getAllDocument, createDocument, updateDocument, removeDocument, getDocumentById, getAllDocsIrrespectiveOfTeam } = require('../controllers/document.controller');
-const { protect } = require('../middlewares/auth.middleware');
+const { getAllDocument, createDocument, updateDocument, removeDocument, getDocumentById, getAllDocsIrrespectiveOfTeam } = require('../controllers/document.controller.js');
+const { protect } = require('../middlewares/auth.middleware.js');
 const router = express.Router();
 
 router.route('/teams/documents').get(protect, getAllDocsIrrespectiveOfTeam)

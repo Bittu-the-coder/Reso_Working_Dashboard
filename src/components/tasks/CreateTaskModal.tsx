@@ -2,12 +2,7 @@ import React, { useState, useEffect } from "react";
 import { X, Upload, Check, ChevronDown } from "lucide-react";
 import { useTaskStore } from "../../store/useTaskStore";
 import toast from "react-hot-toast";
-import type { Team } from "../../types";
-
-interface Step {
-  title: string;
-  isCompleted: boolean;
-}
+import type { TaskStep, Team } from "../../types";
 
 interface FileData {
   file: File;
@@ -24,7 +19,7 @@ interface FormData {
   teamId: string;
   assignedTo: string[];
   files: FileData[];
-  steps: Step[];
+  steps: TaskStep[];
 }
 
 interface CreateTaskModalProps {
@@ -322,12 +317,12 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                     >
                       <input
                         type="checkbox"
-                        id={`member-${member.userId._id}`}
+                        id={`member-${member.userId.toString()}`}
                         checked={formData.assignedTo.includes(
-                          member.userId._id
+                          member.userId.toString()
                         )}
                         onChange={(e) => {
-                          const userId = member.userId._id;
+                          const userId = member.userId.toString();
                           setFormData({
                             ...formData,
                             assignedTo: e.target.checked
@@ -340,16 +335,9 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                         className="mr-2"
                       />
                       <label
-                        htmlFor={`member-${member.userId._id}`}
+                        htmlFor={`member-${member.userId.toString()}`}
                         className="flex items-center"
                       >
-                        <div
-                          className={`flex items-center rounded-md justify-center mr-2 ${
-                            isDarkMode ? "bg-gray-600" : "bg-gray-200"
-                          }`}
-                        >
-                          {member.name}
-                        </div>
                         <span>{member.name}</span>
                       </label>
                     </div>

@@ -1,4 +1,4 @@
-const { generateToken } = require("./jwt");
+const { generateToken } = require("./jwt.js");
 
 class SuccessResponse {
   constructor(data, message = 'Success', statusCode = 200, token) {

@@ -1,13 +1,13 @@
-const Team = require("../models/team.model");
-const Document = require("../models/Document.model");
-const Event = require("../models/Event.model");
-const Project = require("../models/Project.model");
-const asyncHandler = require("../utils/asyncHandler");
-const { ErrorResponse, sendSuccess } = require("../utils/sendResponse");
-const User = require("../models/User.model");
-const { uploadToImageKit } = require("../utils/imageKit");
-const { sendTokenResponse } = require("../utils/jwt");
-const { notifyUserByEmail } = require("./user.controller");
+const Team = require("../models/team.model.js");
+const Document = require("../models/Document.model.js");
+const Event = require("../models/Event.model.js");
+const Project = require("../models/Project.model.js");
+const asyncHandler = require("../utils/asyncHandler.js");
+const { ErrorResponse, sendSuccess } = require("../utils/sendResponse.js");
+const User = require("../models/User.model.js");
+const { uploadToImageKit } = require("../utils/imageKit.js");
+// const { sendTokenResponse } = require("../utils/jwt.js");
+const { notifyUserByEmail } = require("./user.controller.js");
 
 const createTeam = asyncHandler(async (req, res, next) => {
     const { name, description, department } = req.body;
@@ -381,6 +381,29 @@ const removeTeamMember = asyncHandler(async (req, res, next) => {
 
         if (invitedMemberIndex !== -1) {
             team.invitations.splice(invitedMemberIndex, 1);
+        }
+        // update the user also
+        const userId = team.members[memberIndex]
+            ? team.members[memberIndex].userId
+            : invitedMemberIndex !== -1
+                ? team.invitations[invitedMemberIndex].userId
+                : undefined;
+
+        const user = await User.findById(userId);
+        if (user) {
+            // Remove the team from user's teams
+            user.teams = user.teams.filter(
+                (team) => team.teamId.toString() !== teamId.toString()
+            );
+
+            // Remove notifications related to this team
+            user.notifications = user.notifications.filter(
+                (notification) =>
+                    notification.type !== "invitation" ||
+                    notification.teamId.toString() !== teamId.toString()
+            );
+
+            await user.save();
         }
 
         await team.save();

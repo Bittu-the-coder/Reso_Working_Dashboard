@@ -1,8 +1,8 @@
 const express = require('express');
-const { createTasks, removeTask, getAllTasksFromTeam, getAllTeamsTasks, getTaskById, updateTask, updateTaskStatus, getMessagesFromSpecificTask, addMessageToSpecificTask, deleteMessageInSpecificTask, updateMessageInSpecificTask } = require('../controllers/task.controller');
-const upload = require('../middlewares/multer');
+const { createTasks, removeTask, getAllTasksFromTeam, getAllTeamsTasks, getTaskById, updateTask, updateTaskStatus, getMessagesFromSpecificTask, addMessageToSpecificTask, deleteMessageInSpecificTask, updateMessageInSpecificTask } = require('../controllers/task.controller.js');
+const upload = require('../middlewares/multer.js');
 
-const { protect } = require('../middlewares/auth.middleware');
+const { protect } = require('../middlewares/auth.middleware.js');
 const router = express.Router();
 
 router.route('/teams/:teamId/tasks')

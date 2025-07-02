@@ -10,9 +10,9 @@ const {
   deleteProject,
   updateMilestoneStatus,
   updateProjectBudget
-} = require("../controllers/project.controller");
-const { protect } = require("../middlewares/auth.middleware");
-const upload = require("../middlewares/multer");
+} = require("../controllers/project.controller.js");
+const { protect } = require("../middlewares/auth.middleware.js");
+const upload = require("../middlewares/multer.js");
 
 // Apply authentication middleware to all routes
 router.use(protect);

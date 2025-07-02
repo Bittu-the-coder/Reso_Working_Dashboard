@@ -2,18 +2,7 @@ import React, { useState, useEffect } from "react";
 import { X, Check, ChevronDown, Upload, FileIcon } from "lucide-react";
 import toast from "react-hot-toast";
 import { useTaskStore } from "../../store/useTaskStore";
-
-interface TeamMember {
-  userId: string;
-  name: string;
-  email?: string;
-}
-
-interface Team {
-  _id: string;
-  name: string;
-  members: TeamMember[];
-}
+import type { Team, Task, UpdateTaskData } from "../../types";
 
 interface TaskStep {
   title: string;
@@ -28,29 +17,11 @@ interface FileUpload {
   fileType?: string;
 }
 
-interface Task {
-  _id: string;
-  title: string;
-  description?: string;
-  dueDate?: string;
-  priority?: string;
-  teamId?: {
-    _id: string;
-    name: string;
-  };
-  assignedTo?: Array<{
-    _id: string;
-    name: string;
-  }>;
-  steps?: TaskStep[];
-  uploads?: FileUpload[];
-}
-
 interface FormData {
   title: string;
   description: string;
   dueDate: string;
-  priority: string;
+  priority: "low" | "medium" | "high"; // Changed from string to union type
   teamId: string;
   assignedTo: string[];
   steps: TaskStep[];
@@ -68,7 +39,7 @@ interface EditTaskModalProps {
   task: Task;
   teams: Team[];
   onClose: () => void;
-  onUpdate?: () => void;
+  onUpdate?: (taskData: UpdateTaskData) => Promise<void>;
   isDarkMode?: boolean;
 }
 
@@ -105,17 +76,17 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
         dueDate: task.dueDate
           ? new Date(task.dueDate).toISOString().split("T")[0]
           : "",
-        priority: task.priority || "medium",
-        teamId: task.teamId?._id || "",
-        assignedTo: task.assignedTo?.map((user) => user._id) || [],
+        priority: (task.priority as "low" | "medium" | "high") || "medium",
+        teamId: task.teamId || "",
+        assignedTo: task.assignedTo?.map((user) => user) || [],
         steps: task.steps || [],
         files: [],
         existingUploads: task.uploads || [],
         removedUploads: [],
       });
 
-      if (task.teamId?._id) {
-        const team = teams.find((t) => t._id === task.teamId?._id);
+      if (task.teamId) {
+        const team = teams.find((t) => t._id === task.teamId);
         setSelectedTeam(team || null);
       }
     }
@@ -134,11 +105,11 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
     if (!validateForm()) return;
 
     try {
-      const taskData = {
+      const taskData: UpdateTaskData = {
         title: formData.title,
         description: formData.description,
         dueDate: formData.dueDate,
-        priority: formData.priority,
+        priority: formData.priority, // Now correctly typed as "low" | "medium" | "high"
         assignedTo: formData.assignedTo,
         steps: formData.steps.map((step) => ({
           title: step.title,
@@ -161,7 +132,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
       if (response.success) {
         toast.success("Task updated successfully!");
         onClose();
-        onUpdate?.();
+        if (onUpdate) onUpdate(taskData);
       } else {
         toast.error(response.error || "Failed to update task");
       }
@@ -379,20 +350,24 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
               >
                 {selectedTeam.members.map((member) => (
                   <div
-                    key={member.userId}
+                    key={member.userId.toString()}
                     className="flex items-center mb-2 last:mb-0"
                   >
                     <input
                       type="checkbox"
                       id={`member-${member.userId}`}
-                      checked={formData.assignedTo.includes(member.userId)}
+                      checked={formData.assignedTo.includes(
+                        member.userId.toString()
+                      )}
                       onChange={(e) => {
                         const userId = member.userId;
                         setFormData({
                           ...formData,
                           assignedTo: e.target.checked
-                            ? [...formData.assignedTo, userId]
-                            : formData.assignedTo.filter((id) => id !== userId),
+                            ? [...formData.assignedTo, userId.toString()]
+                            : formData.assignedTo.filter(
+                                (id) => id !== userId.toString()
+                              ),
                         });
                       }}
                       className="mr-2"
@@ -438,7 +413,12 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
                 <button
                   key={level}
                   type="button"
-                  onClick={() => setFormData({ ...formData, priority: level })}
+                  onClick={() =>
+                    setFormData({
+                      ...formData,
+                      priority: level as "low" | "medium" | "high",
+                    })
+                  }
                   className={`px-3 py-1 rounded-full text-sm capitalize flex items-center ${
                     formData.priority === level
                       ? isDarkMode

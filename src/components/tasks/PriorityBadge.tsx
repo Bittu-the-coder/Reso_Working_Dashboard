@@ -3,7 +3,7 @@ import React from "react";
 type Priority = "High" | "Medium" | "Low" | string;
 
 interface PriorityBadgeProps {
-  priority: Priority;
+  priority?: Priority;
   darkMode?: boolean;
   className?: string;
 }

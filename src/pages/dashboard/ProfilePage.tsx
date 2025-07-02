@@ -139,12 +139,14 @@ const ProfilePage = () => {
     e.preventDefault();
     setLoading(true);
     try {
+      console.log("Submitting profile data:", profile);
       const result = await updateUser({
         name: profile.name,
         email: profile.email,
         username: profile.username,
         avatar: profile.avatar,
       });
+      console.log("Update result:", result);
 
       if (result.success) {
         setEditMode(false);
@@ -588,70 +590,79 @@ const ProfilePage = () => {
             </h2>
             {notifications.length > 0 ? (
               <div className="space-y-4">
-                {notifications.map((notification) => (
-                  <div
-                    key={notification._id}
-                    className={`flex items-center justify-between p-4 rounded-lg border ${
-                      notification.isRead
-                        ? isDarkMode
-                          ? "bg-gray-700 border-gray-600"
-                          : "bg-gray-50 border-gray-200"
-                        : isDarkMode
-                        ? "bg-blue-900/20 border-blue-700"
-                        : "bg-blue-50 border-blue-200"
-                    }`}
-                  >
-                    <div className="flex-1">
-                      <p className={`text-sm ${darkModeClasses.text.primary}`}>
-                        {notification.message}
-                      </p>
-                      <p
-                        className={`text-xs ${darkModeClasses.text.muted} mt-1`}
-                      >
-                        {new Date(notification.createdAt).toLocaleString()}
-                      </p>
-                      <span
-                        className={`flex items-center gap-1 ${darkModeClasses.text.secondary} mt-1`}
-                      >
-                        {notification.type === "task" ? (
-                          <>
-                            <CheckSquare size={14} /> Task
-                          </>
-                        ) : notification.type === "invitation" ? (
-                          <>
-                            <UserPlus size={14} /> Invitation
-                          </>
-                        ) : (
-                          <>
-                            <Bell size={14} /> Notification
-                          </>
+                {/* Sort notifications by date descending */}
+                {[...notifications]
+                  .sort(
+                    (a, b) =>
+                      new Date(b.createdAt).getTime() -
+                      new Date(a.createdAt).getTime()
+                  )
+                  .map((notification) => (
+                    <div
+                      key={notification._id}
+                      className={`flex items-center justify-between p-4 rounded-lg border ${
+                        notification.isRead
+                          ? isDarkMode
+                            ? "bg-gray-700 border-gray-600"
+                            : "bg-gray-50 border-gray-200"
+                          : isDarkMode
+                          ? "bg-blue-900/20 border-blue-700"
+                          : "bg-blue-50 border-blue-200"
+                      }`}
+                    >
+                      <div className="flex-1">
+                        <p
+                          className={`text-sm ${darkModeClasses.text.primary}`}
+                        >
+                          {notification.message}
+                        </p>
+                        <p
+                          className={`text-xs ${darkModeClasses.text.muted} mt-1`}
+                        >
+                          {new Date(notification.createdAt).toLocaleString()}
+                        </p>
+                        <span
+                          className={`flex items-center gap-1 ${darkModeClasses.text.secondary} mt-1`}
+                        >
+                          {notification.type === "task" ? (
+                            <>
+                              <CheckSquare size={14} /> Task
+                            </>
+                          ) : notification.type === "invitation" ? (
+                            <>
+                              <UserPlus size={14} /> Invitation
+                            </>
+                          ) : (
+                            <>
+                              <Bell size={14} /> Notification
+                            </>
+                          )}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        {!notification.isRead && (
+                          <button
+                            onClick={() =>
+                              handleNotificationAction(notification._id, "read")
+                            }
+                            className="p-1 text-blue-600 hover:text-blue-700 transition-colors"
+                            title="Mark as read"
+                          >
+                            <Check size={16} />
+                          </button>
                         )}
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      {!notification.isRead && (
                         <button
                           onClick={() =>
-                            handleNotificationAction(notification._id, "read")
+                            handleNotificationAction(notification._id, "delete")
                           }
-                          className="p-1 text-blue-600 hover:text-blue-700 transition-colors"
-                          title="Mark as read"
+                          className="p-1 text-red-600 hover:text-red-700 transition-colors"
+                          title="Delete notification"
                         >
-                          <Check size={16} />
+                          <X size={16} />
                         </button>
-                      )}
-                      <button
-                        onClick={() =>
-                          handleNotificationAction(notification._id, "delete")
-                        }
-                        className="p-1 text-red-600 hover:text-red-700 transition-colors"
-                        title="Delete notification"
-                      >
-                        <X size={16} />
-                      </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             ) : (
               <p className={`${darkModeClasses.text.muted} text-center py-8`}>

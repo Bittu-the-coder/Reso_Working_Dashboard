@@ -5,8 +5,9 @@ import { useTheme } from "../../contexts/ThemeContext";
 interface Project {
   _id: string;
   name: string;
+  description: string;
   progress: number;
-  members: number;
+  members: string[];
 }
 
 interface ProjectCardProps {

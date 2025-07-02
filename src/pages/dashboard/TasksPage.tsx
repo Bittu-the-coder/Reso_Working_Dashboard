@@ -17,7 +17,7 @@ import { useTeamStore } from "../../store/useTeamStore";
 import { toast } from "react-hot-toast";
 import CreateTaskModal from "../../components/tasks/CreateTaskModal";
 import { useAuthStore } from "../../store/useAuthStore";
-import type { Task } from "../../types/task.types";
+import type { Task } from "../../types";
 
 interface Filters {
   team: string;
@@ -106,8 +106,10 @@ const TasksPage: React.FC = () => {
       ? teamTasks.filter(
           (task) =>
             task.createdBy === user?._id ||
-            (user?._id && task.assignedTo?.includes(user._id)) ||
-            false
+            (user?._id &&
+              task.assignedTo?.some(
+                (id) => id?.toString() === user._id?.toString()
+              ))
         )
       : tasks;
     console.log("Filtered Tasks:", result);
@@ -137,7 +139,9 @@ const TasksPage: React.FC = () => {
       if (!selectedTask) return;
 
       const response = await updateTaskStatus(
-        selectedTask.teamId,
+        typeof selectedTask.teamId === "string"
+          ? selectedTask.teamId
+          : selectedTask.teamId?._id,
         taskId,
         status
       );
@@ -466,8 +470,9 @@ const TasksPage: React.FC = () => {
                           Created by:{" "}
                           {teams
                             .find((t) => t._id === task.teamId)
-                            ?.members.find((m) => m.userId === task.createdBy)
-                            ?.name || "Unknown"}
+                            ?.members.find(
+                              (m) => String(m.userId) === String(task.createdBy)
+                            )?.name || "Unknown"}
                         </span>
                       </div>
                     </div>
@@ -483,9 +488,9 @@ const TasksPage: React.FC = () => {
                           Assigned to:
                         </span>
                         <div className="flex items-center -space-x-2">
-                          {task.assignedTo.slice(0, 3).map((userId) => (
+                          {task.assignedTo.slice(0, 3).map((user) => (
                             <div
-                              key={userId}
+                              key={typeof user === "string" ? user : user._id}
                               className={`w-8 h-8 rounded-full flex items-center justify-center ${
                                 isDarkMode ? "bg-gray-700" : "bg-gray-200"
                               } border-2 ${
@@ -493,11 +498,16 @@ const TasksPage: React.FC = () => {
                               }`}
                             >
                               <span className="text-xs font-medium">
-                                {teams
-                                  .find((t) => t._id === task.teamId)
-                                  ?.members.find((m) => m.userId === userId)
-                                  ?.name?.charAt(0)
-                                  ?.toUpperCase() || "?"}
+                                {typeof user === "string"
+                                  ? teams
+                                      .find((t) => t._id === task.teamId)
+                                      ?.members.find(
+                                        (m) => m.userId?._id === user
+                                      )
+                                      ?.name?.charAt(0)
+                                      ?.toUpperCase() || "U"
+                                  : user?.fullName?.charAt(0)?.toUpperCase() ||
+                                    "U"}
                               </span>
                             </div>
                           ))}

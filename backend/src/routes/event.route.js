@@ -8,9 +8,9 @@ const {
   updateEvent,
   deleteEvent,
   respondToEvent
-} = require("../controllers/event.controller");
-const upload = require("../middlewares/multer");
-const { protect } = require("../middlewares/auth.middleware");
+} = require("../controllers/event.controller.js");
+const upload = require("../middlewares/multer.js");
+const { protect } = require("../middlewares/auth.middleware.js");
 
 // Apply authentication middleware to all routes
 router.use(protect);

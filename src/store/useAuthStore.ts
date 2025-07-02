@@ -13,22 +13,7 @@ import type {
 } from "../types";
 import { API_URL } from "../utils/api";
 
-interface AuthStoreState extends AuthState {
-  register: (userData: RegisterUserData) => Promise<ResponseResult>;
-  login: (credentials: LoginCredentials) => Promise<ResponseResult>;
-  logout: () => void;
-  getMe: () => Promise<ResponseResult>;
-  updateUser: (userData: UpdateUserData) => Promise<ResponseResult>;
-  updatePassword: (passwords: PasswordUpdateData) => Promise<ResponseResult>;
-  getAllNotifications: () => Promise<NotificationResponseResult>;
-  checkNotifications: (
-    notificationId: string
-  ) => Promise<NotificationResponseResult>;
-  deleteNotification: (notificationId: string) => Promise<ResponseResult>;
-  getAllUsers: () => Promise<UsersResponseResult>;
-}
-
-export const useAuthStore = create<AuthStoreState>()(
+export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
       user: null,
@@ -36,6 +21,7 @@ export const useAuthStore = create<AuthStoreState>()(
       error: null,
       loading: false,
       notifications: [],
+      users: [],
 
       // Register user
       register: async (userData: RegisterUserData): Promise<ResponseResult> => {
@@ -88,13 +74,25 @@ export const useAuthStore = create<AuthStoreState>()(
 
       // Logout user
       logout: (): void => {
+        const token = get().token || localStorage.getItem("authToken");
+
+        // Clear state and localStorage first
         set({ user: null, token: null });
         localStorage.removeItem("authToken");
-        axios
-          .get(`${API_URL}/users/logout`, {
-            headers: { Authorization: `Bearer ${get().token}` },
-          })
-          .catch(console.error);
+
+        // Only attempt to call logout endpoint if we have a valid token
+        if (token && token !== "null") {
+          axios
+            .get(`${API_URL}/users/logout`, {
+              headers: { Authorization: `Bearer ${token}` },
+            })
+            .catch((error) => {
+              console.log(
+                "Logout API call failed, but user was still logged out locally:",
+                error.message
+              );
+            });
+        }
       },
 
       // Get current user
@@ -119,13 +117,14 @@ export const useAuthStore = create<AuthStoreState>()(
       // Update user
       updateUser: async (userData: UpdateUserData): Promise<ResponseResult> => {
         set({ loading: true, error: null });
+        console.log("Updating user with data:", userData);
         try {
           const token = get().token || localStorage.getItem("authToken");
           if (!token) throw new Error("No authentication token found");
           const formData = new FormData();
-          formData.append("name", userData.name);
-          formData.append("username", userData.username);
-          formData.append("email", userData.email);
+          if (userData.name) formData.append("name", userData.name);
+          if (userData.username) formData.append("username", userData.username);
+          if (userData.email) formData.append("email", userData.email);
           if (userData.avatar) {
             formData.append("avatar", userData.avatar);
           }
@@ -522,6 +521,18 @@ export const useAuthStore = create<AuthStoreState>()(
 //           return { success: true, users: response.data.data };
 //         } catch (error: any) {
 //           const message =
+//             error.response?.data?.message || "Failed to fetch users";
+//           set({ error: message, loading: false });
+//           return { success: false, error: message };
+//         }
+//       },
+//     }),
+//     {
+//       name: "auth-storage",
+//       partialize: (state) => ({ token: state.token, user: state.user }),
+//     }
+//   )
+// );
 //             error.response?.data?.message || "Failed to fetch users";
 //           set({ error: message, loading: false });
 //           return { success: false, error: message };

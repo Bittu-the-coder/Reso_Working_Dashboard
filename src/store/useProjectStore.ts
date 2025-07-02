@@ -341,6 +341,12 @@ export const useProjectStore = create<ProjectStoreState>((set, get) => ({
         { headers: { Authorization: `Bearer ${token}` } }
       );
       set((state) => ({
+        projects: state.projects.map((project) =>
+          project._id === projectId ? response.data.data : project
+        ),
+        teamProjects: state.teamProjects.map((project) =>
+          project._id === projectId ? response.data.data : project
+        ),
         currentProject: response.data.data,
         loading: false,
       }));
@@ -368,6 +374,12 @@ export const useProjectStore = create<ProjectStoreState>((set, get) => ({
         { headers: { Authorization: `Bearer ${token}` } }
       );
       set((state) => ({
+        projects: state.projects.map((project) =>
+          project._id === projectId ? response.data.data : project
+        ),
+        teamProjects: state.teamProjects.map((project) =>
+          project._id === projectId ? response.data.data : project
+        ),
         currentProject: response.data.data,
         loading: false,
       }));

@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
-const User = require("../models/User.model");
-const { ErrorResponse } = require("../utils/sendResponse");
-const asyncHandler = require("../utils/asyncHandler");
+const User = require("../models/User.model.js");
+const { ErrorResponse } = require("../utils/sendResponse.js");
+const asyncHandler = require("../utils/asyncHandler.js");
 
 // Protect routes
 exports.protect = asyncHandler(async (req, res, next) => {
@@ -9,7 +9,11 @@ exports.protect = asyncHandler(async (req, res, next) => {
 
   // Check headers for Bearer token
   if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
-    token = req.headers.authorization.split(" ")[1];
+    // Extract token and make sure it's not "null" or "undefined" as strings
+    const authToken = req.headers.authorization.split(" ")[1];
+    if (authToken && authToken !== "null" && authToken !== "undefined") {
+      token = authToken;
+    }
   }
   // Check cookies
   else if (req.cookies?.token) {
@@ -23,9 +27,6 @@ exports.protect = asyncHandler(async (req, res, next) => {
   try {
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // Add more detailed logging
-    console.log('Token verification successful:', decoded);
 
     // Get user from token
     const user = await User.findById(decoded.id);

@@ -1,5 +1,5 @@
-const Task = require("../models/Task.model");
-const User = require("../models/User.model");
+const Task = require("../models/Task.model.js");
+const User = require("../models/User.model.js");
 
 function arraysEqual(a, b) {
   return a.length === b.length && a.every((val, index) => val === b[index]);

@@ -11,15 +11,17 @@ const {
     deleteNotificationById,
     getAllNotification,
     notifyUserByEmail,
-} = require("../controllers/user.controller");
-const { protect } = require("../middlewares/auth.middleware");
-const upload = require("../middlewares/multer");
+} = require("../controllers/user.controller.js");
+const { protect } = require("../middlewares/auth.middleware.js");
+const upload = require("../middlewares/multer.js");
 const router = express.Router();
 
 router.route("/register").post(registerUser);
 router.route("/login").post(loginUser);
 router.route("/me").get(protect, getMe);
-router.route("/logout").get(protect, logoutUser);
+
+// Make logout endpoint unprotected to avoid token verification issues
+router.route("/logout").get(logoutUser);
 router.route("/update").put(protect, upload.single("avatar"), updateUser);
 router.route("/updatepassword").put(protect, updatePassword);
 

@@ -14,7 +14,9 @@ export interface User {
 export interface Message {
   _id: string;
   message: string;
-  user: string | User;
+  sender?: string;
+  user?: string | User;
+  timestamp?: string;
   createdAt: string;
   updatedAt?: string;
 }
@@ -25,13 +27,17 @@ export interface AuthState {
   token: string | null;
   error: string | null;
   loading: boolean;
+  users?: User[];
+  notifications: Notification[];
   register: (userData: RegisterUserData) => Promise<ResponseResult>;
   login: (credentials: LoginCredentials) => Promise<ResponseResult>;
   logout: () => void;
   getMe: () => Promise<ResponseResult>;
   updateUser: (userData: UpdateUserData) => Promise<ResponseResult>;
   updatePassword: (passwords: PasswordUpdateData) => Promise<ResponseResult>;
-  checkNotifications: () => Promise<NotificationResponseResult>;
+  checkNotifications: (
+    notificationId: string
+  ) => Promise<NotificationResponseResult>;
   deleteNotification: (notificationId: string) => Promise<ResponseResult>;
   getAllNotifications: () => Promise<NotificationResponseResult>;
   getAllUsers: () => Promise<UsersResponseResult>;
@@ -59,9 +65,10 @@ export interface TeamMember {
   name: string;
   email: string;
   department: string;
-  userId: userId | string;
+  userId: userId;
   role: string;
   joinedAt?: string;
+  isAcceptedInvite?: boolean;
 }
 
 export interface TeamInvitation {
@@ -102,21 +109,44 @@ export interface TeamState {
 }
 
 // Task related types
+
+export interface TaskTeam {
+  _id: string;
+  name: string;
+}
+
+export interface TaskUser {
+  _id: string;
+  name: string;
+  email: string;
+}
+
 export interface Task {
   _id: string;
   title: string;
   description?: string;
-  dueDate?: string;
-  priority: "low" | "medium" | "high";
   status: string;
-  assignedTo: string[] | User[];
-  steps?: TaskStep[];
-  uploads?: string[];
+  priority?: string;
+  dueDate?: Date;
+  createdAt: string;
   createdBy: string | User;
-  teamId: string | Team;
-  messages?: TaskMessage[];
-  createdAt?: string;
-  updatedAt?: string;
+  teamId:
+    | {
+        _id: string;
+        name: string;
+      }
+    | string;
+  team?: TaskTeam;
+  assignedTo?: User[] | string[];
+  messages?: Message[];
+  steps?: TaskStep[];
+  uploads?: Array<{
+    fileId: string;
+    url: string;
+    name: string;
+    size?: string;
+    fileType?: string;
+  }>;
 }
 
 export interface TaskStep {
@@ -125,10 +155,83 @@ export interface TaskStep {
   _id?: string;
 }
 
-export interface TaskMessage {
+export interface ApiResponse<T = void> {
+  success: boolean;
+  data?: T;
+  error?: string;
+}
+
+export interface TaskStoreState {
+  tasks: Task[];
+  teamTasks: Task[];
+  currentTask: Task | null;
+  loading: boolean;
+  error: string | null;
+
+  // Helper methods
+  getAuthToken: () => string;
+  handleError: <T>(error: any) => ApiResponse<T>;
+
+  // Task operations
+  createTask: (
+    teamId: string,
+    taskData: CreateTaskData,
+    files?: File[]
+  ) => Promise<ApiResponse<Task>>;
+  getTeamTasks: (teamId: string) => Promise<ApiResponse<Task[]>>;
+  getUserTasks: () => Promise<ApiResponse<Task[]>>;
+  getTaskById: (teamId: string, taskId: string) => Promise<ApiResponse<Task>>;
+  updateTask: (
+    teamId: string,
+    taskId: string,
+    taskData: UpdateTaskData,
+    files?: File[],
+    removedUploads?: string[]
+  ) => Promise<ApiResponse<Task>>;
+  updateTaskStatus: (
+    teamId: string,
+    taskId: string,
+    status: string,
+    stepId?: string,
+    completed?: boolean
+  ) => Promise<ApiResponse<Task>>;
+  deleteTask: (
+    teamId: { _id: string } | string,
+    taskId: string
+  ) => Promise<ApiResponse<void>>;
+
+  // Message operations
+  getTaskMessages: (
+    teamId: string,
+    taskId: string
+  ) => Promise<ApiResponse<Message[]>>;
+  addTaskMessage: (
+    teamId: string,
+    taskId: string,
+    message: string
+  ) => Promise<ApiResponse<Message>>;
+  updateTaskMessage: (
+    teamId: string,
+    taskId: string,
+    messageId: string,
+    message: string
+  ) => Promise<ApiResponse<Message>>;
+  deleteTaskMessage: (
+    teamId: string,
+    taskId: string,
+    messageId: string
+  ) => Promise<ApiResponse<void>>;
+
+  // Utility
+  clearCurrentTask: () => void;
+}
+
+export interface Message {
   _id: string;
   message: string;
-  user: string | User;
+  sender?: string;
+  user?: string | User;
+  timestamp?: string;
   createdAt: string;
   updatedAt?: string;
 }
@@ -139,48 +242,57 @@ export interface TaskState {
   currentTask: Task | null;
   loading: boolean;
   error: string | null;
+
+  // Helper methods
+  getAuthToken: () => string;
+  handleError: <T>(error: any) => ApiResponse<T>;
+
   createTask: (
     teamId: string,
     taskData: CreateTaskData,
-    files?: FileList
-  ) => Promise<TaskResponseResult>;
-  getTeamTasks: (teamId: string) => Promise<ResponseResult>;
-  getUserTasks: () => Promise<ResponseResult>;
-  getTaskById: (teamId: string, taskId: string) => Promise<ResponseResult>;
+    files?: File[]
+  ) => Promise<ApiResponse<Task>>;
+  getTeamTasks: (teamId: string) => Promise<ApiResponse<Task[]>>;
+  getUserTasks: () => Promise<ApiResponse<Task[]>>;
+  getTaskById: (teamId: string, taskId: string) => Promise<ApiResponse<Task>>;
   updateTask: (
     teamId: string,
     taskId: string,
     taskData: UpdateTaskData,
-    files?: FileList,
+    files?: File[],
     removedUploads?: string[]
-  ) => Promise<ResponseResult>;
+  ) => Promise<ApiResponse<Task>>;
   updateTaskStatus: (
     teamId: string,
     taskId: string,
     status: string,
-    steps?: TaskStep[]
-  ) => Promise<ResponseResult>;
-  deleteTask: (teamId: string, taskId: string) => Promise<ResponseResult>;
+    stepId?: string,
+    completed?: boolean
+  ) => Promise<ApiResponse<Task>>;
+  deleteTask: (
+    teamId: { _id: string } | string,
+    taskId: string
+  ) => Promise<ApiResponse<void>>;
   getTaskMessages: (
     teamId: string,
     taskId: string
-  ) => Promise<MessagesResponseResult>;
+  ) => Promise<ApiResponse<Message[]>>;
   addTaskMessage: (
     teamId: string,
     taskId: string,
     message: string
-  ) => Promise<MessageResponseResult>;
+  ) => Promise<ApiResponse<Message>>;
   updateTaskMessage: (
     teamId: string,
     taskId: string,
     messageId: string,
     message: string
-  ) => Promise<MessageResponseResult>;
+  ) => Promise<ApiResponse<Message>>;
   deleteTaskMessage: (
     teamId: string,
     taskId: string,
     messageId: string
-  ) => Promise<ResponseResult>;
+  ) => Promise<ApiResponse<void>>;
   clearCurrentTask: () => void;
 }
 
@@ -571,11 +683,11 @@ export interface EventResponseResult extends ResponseResult {
 }
 
 export interface MessageResponseResult extends ResponseResult {
-  message?: TaskMessage;
+  message?: Message;
 }
 
 export interface MessagesResponseResult extends ResponseResult {
-  messages?: TaskMessage[];
+  messages?: Message[];
 }
 
 export interface MembersResponseResult extends ResponseResult {

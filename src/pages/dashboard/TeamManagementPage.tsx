@@ -360,6 +360,28 @@ const TeamManagementPage: React.FC = () => {
                           ? "Admin"
                           : "Member"}
                       </span>
+                      {/* accept status pending */}
+                      {member.isAcceptedInvite === false ? (
+                        <span
+                          className={`ml-2 px-2 py-0.5 rounded-full text-xs ${
+                            isDarkMode
+                              ? "bg-yellow-900/30 text-yellow-300"
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}
+                        >
+                          Pending
+                        </span>
+                      ) : (
+                        <span
+                          className={`ml-2 px-2 py-0.5 rounded-full text-xs ${
+                            isDarkMode
+                              ? "bg-green-900/30 text-green-300"
+                              : "bg-green-100 text-green-800"
+                          }`}
+                        >
+                          Verified
+                        </span>
+                      )}
                     </div>
                     <p
                       className={`text-sm ${
