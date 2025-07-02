@@ -77,12 +77,10 @@ const CreateTeamModal: React.FC<CreateTeamModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!formData.name.trim()) {
       setError("Team name is required");
       return;
     }
-
     try {
       // Convert to the expected CreateTeamData format
       const teamData: CreateTeamData = {
@@ -91,7 +89,6 @@ const CreateTeamModal: React.FC<CreateTeamModalProps> = ({
         description: formData.description,
         avatar: formData.avatar || undefined,
       };
-
       await onSubmit(teamData);
       onClose();
     } catch (err: any) {

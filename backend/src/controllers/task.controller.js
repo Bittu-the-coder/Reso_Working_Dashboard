@@ -21,6 +21,7 @@ const createTasks = asyncHandler(async (req, res, next) => {
         steps,
         teamId,
     });
+    console.log("Request files:", req.files);
 
     // Validate required fields
     if (!title || !teamId) {
@@ -260,6 +261,7 @@ const updateTask = asyncHandler(async (req, res, next) => {
             steps,
             removedUploads,
         });
+        console.log("Request files:", req.files);
 
         const task = await Task.findById(taskId);
         if (!task) {

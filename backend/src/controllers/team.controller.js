@@ -12,6 +12,11 @@ const { notifyUserByEmail } = require("./user.controller.js");
 
 const createTeam = asyncHandler(async (req, res, next) => {
     const { name, description, department } = req.body;
+    console.log("Creating team with data:", {
+        name,
+        description,
+        department,
+    }, req.file)
 
     try {
         const existingTeam = await Team.findOne({ name });
@@ -41,10 +46,12 @@ const createTeam = asyncHandler(async (req, res, next) => {
         };
 
         // Handle file upload if exists
+
         if (req.file) {
             const upload = await uploadToImageKit(req.file);
             teamData.avatar = upload.url;
         }
+
 
         // Create team
         const team = await Team.create(teamData);
@@ -396,14 +403,6 @@ const removeTeamMember = asyncHandler(async (req, res, next) => {
             user.teams = user.teams.filter(
                 (team) => team.teamId.toString() !== teamId.toString()
             );
-
-            // Remove notifications related to this team
-            user.notifications = user.notifications.filter(
-                (notification) =>
-                    notification.type !== "invitation" ||
-                    notification.teamId.toString() !== teamId.toString()
-            );
-
             await user.save();
         }
 

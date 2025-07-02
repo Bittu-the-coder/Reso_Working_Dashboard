@@ -100,18 +100,37 @@ const updateUser = asyncHandler(async (req, res, next) => {
     if (!user) {
       return next(new ErrorResponse('User not found', 404));
     }
-    const { name, username, email } = req.body;
-    console.log('Updating user:', name, username, email);
 
+    const { name, username, email } = req.body;
+
+    // Enhanced debugging
+    console.log('Updating user:', name, username, email);
+    console.log('Request headers:', req.headers);
+    console.log('Request body:', req.body);
+    console.log('Request file:', req.file);
+
+    // Handle file upload if present
     if (req.file) {
-      const avatarUrl = await uploadToImageKit(req.file);
-      user.avatar = avatarUrl.url;
+      console.log('Processing file upload:', req.file.originalname);
+      try {
+        const avatarUrl = await uploadToImageKit(req.file);
+        console.log('ImageKit upload successful:', avatarUrl);
+        user.avatar = avatarUrl.url;
+      } catch (uploadError) {
+        console.error('Error uploading to ImageKit:', uploadError);
+        return next(new ErrorResponse('Error uploading avatar', 500));
+      }
+    } else {
+      console.log('No file detected in request');
     }
+
+    // Update other user fields
     if (email && email !== user.email) {
       const emailExists = await User.findOne({ email });
       if (emailExists) {
         return next(new ErrorResponse('Email already in use', 400));
       }
+      user.email = email;
     }
 
     if (username && username !== user.username) {
@@ -119,11 +138,10 @@ const updateUser = asyncHandler(async (req, res, next) => {
       if (usernameExists) {
         return next(new ErrorResponse('Username already in use', 400));
       }
+      user.username = username;
     }
 
     if (name) user.fullName = name;
-    if (username) user.username = username;
-    if (email) user.email = email;
 
     await user.save();
 

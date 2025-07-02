@@ -25,6 +25,7 @@ const uploadToImageKit = async (file) => {
       folder: "/task_uploads",
       useUniqueFileName: true
     });
+    console.log("ImageKit upload response:", response);
 
     return response;
   } catch (error) {

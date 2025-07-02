@@ -117,7 +117,7 @@ export const useAuthStore = create<AuthState>()(
       // Update user
       updateUser: async (userData: UpdateUserData): Promise<ResponseResult> => {
         set({ loading: true, error: null });
-        // console.log("Updating user with data:", userData);
+        console.log("Updating user with data:", userData);
         try {
           const token = get().token || localStorage.getItem("authToken");
           if (!token) throw new Error("No authentication token found");
@@ -125,21 +125,22 @@ export const useAuthStore = create<AuthState>()(
           if (userData.name) formData.append("name", userData.name);
           if (userData.username) formData.append("username", userData.username);
           if (userData.email) formData.append("email", userData.email);
-          if (userData.avatar) {
+          if (userData.avatar && userData.avatar instanceof File) {
             formData.append("avatar", userData.avatar);
+            console.log("Avatar appended:", userData.avatar.name);
           }
 
           // Debug: Log FormData contents
-          // for (const [key, value] of formData.entries()) {
-          //   console.log(key, value);
-          // }
-
+          for (const [key, value] of formData.entries()) {
+            console.log(`${key}:`, value);
+          }
           const response = await axios.put(
             `${API_URL}/users/update`,
             formData,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
+                "Content-Type": "multipart/form-data",
               },
             }
           );

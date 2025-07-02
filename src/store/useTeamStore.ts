@@ -30,9 +30,31 @@ export const useTeamStore = create<TeamStoreState>((set, get) => ({
     try {
       const token = get().auth.token || localStorage.getItem("authToken");
       if (!token) throw new Error("No authentication token found");
-      const response = await axios.post(`${API_URL}/teams`, teamData, {
-        headers: { Authorization: `Bearer ${token}` },
+
+      // Create FormData object
+      const formData = new FormData();
+
+      // Append all fields
+      formData.append("name", teamData.name);
+      if (teamData.department) {
+        formData.append("department", teamData.department);
+      }
+      if (teamData.description) {
+        formData.append("description", teamData.description);
+      }
+
+      // Append the avatar file if it exists
+      if (teamData.avatar) {
+        formData.append("avatar", teamData.avatar);
+      }
+
+      const response = await axios.post(`${API_URL}/teams`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
       });
+
       set((state) => ({
         teams: [...state.teams, response.data.data],
         loading: false,

@@ -2,7 +2,6 @@ const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 
-
 const documentsRoutes = require("./routes/document.route.js");
 const eventRoutes = require("./routes/event.route.js");
 const projectRoutes = require("./routes/project.route.js");
@@ -15,13 +14,22 @@ require("dotenv").config();
 
 const app = express();
 
+// Configure allowed origins
+const allowedOrigins = [
+  "https://reso-working-dashboard.vercel.app",
+  "http://localhost:3000",
+  "http://localhost:5173"
+];
+
 // Enhanced CORS configuration
 const corsOptions = {
-  origin: [
-    "https://reso-working-dashboard.vercel.app",
-    "http://localhost:3000",
-    "http://localhost:5173",
-  ],
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   credentials: true,
   allowedHeaders: [
@@ -37,43 +45,23 @@ const corsOptions = {
     "Date",
     "X-Api-Version"
   ],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 };
 
+// Validate ImageKit configuration
 if (!process.env.IMAGEKIT_PUBLIC_KEY || !process.env.IMAGEKIT_PRIVATE_KEY || !process.env.IMAGEKIT_URL_ENDPOINT) {
   console.error('Missing required ImageKit configuration');
 }
 
+// Apply CORS middleware
 app.use(cors(corsOptions));
+
 // Body parser with size limits
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 app.use(express.static("public"));
-
-// Handle OPTIONS preflight requests directly to prevent redirect issues
-// This is a more compatible way of handling all OPTIONS requests
-app.use((req, res, next) => {
-  if (req.method === "OPTIONS") {
-    // Add CORS headers specifically for OPTIONS requests
-    res.header("Access-Control-Allow-Origin", "https://reso-working-dashboard.vercel.app");
-    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,PATCH,OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-CSRF-Token, Accept-Version, Content-Length, Content-MD5, Date, X-Api-Version");
-    res.header("Access-Control-Allow-Credentials", "true");
-    return res.status(204).end();
-  }
-  next();
-});
-
-app.use('/api', (req, res, next) => {
-  res.set({
-    'Access-Control-Allow-Credentials': 'true',
-    'Access-Control-Allow-Origin': 'https://reso-working-dashboard.vercel.app',
-    'Access-Control-Allow-Methods': 'GET,OPTIONS,PATCH,DELETE,POST,PUT',
-    'Access-Control-Allow-Headers': 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Origin, Authorization'
-  });
-  next();
-});
-
 
 // Health check endpoint with more debug info
 app.get('/api/health', (req, res) => {
@@ -98,18 +86,12 @@ app.get("/", (req, res) => {
 });
 
 // Connect to MongoDB with better error handling
-try {
-  connect().then(() => {
-    console.log("Database connection initialized");
-  }).catch(err => {
-    console.error("Failed to initialize database connection:", err);
-  });
-} catch (error) {
-  console.error("Error in database connection setup:", error);
-}
+connect()
+  .then(() => console.log("Database connection initialized"))
+  .catch(err => console.error("Failed to initialize database connection:", err));
 
+// API routes
 app.use("/api/users", userRoutes);
-// User routes are now merged with auth routes
 app.use("/api/teams", teamRoutes);
 app.use("/api/documents", documentsRoutes);
 app.use("/api/events", eventRoutes);
@@ -142,5 +124,4 @@ if (process.env.NODE_ENV !== "production") {
   });
 }
 
-// Export the Express app for serverless use
 module.exports = app;
