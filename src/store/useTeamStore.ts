@@ -49,7 +49,7 @@ export const useTeamStore = create<TeamStoreState>((set, get) => ({
   getMyTeams: async (): Promise<ResponseResult> => {
     set({ loading: true, error: null });
     try {
-      console.log(get());
+      // console.log(get());
       const token = get().auth.token || localStorage.getItem("authToken");
       if (!token) throw new Error("No authentication token found");
 
@@ -75,7 +75,7 @@ export const useTeamStore = create<TeamStoreState>((set, get) => ({
       const response = await axios.get(`${API_URL}/teams/${teamId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("Team details:", response.data.data);
+      // console.log("Team details:", response.data.data);
       set({ currentTeam: response.data.data, loading: false });
       return { success: true };
     } catch (error: any) {

@@ -111,7 +111,7 @@ const TeamManagementPage: React.FC = () => {
 
   const handleRemoveMember = async (memberId: string) => {
     if (!currentTeam) return;
-    console.log("Removing member:", memberId);
+    // console.log("Removing member:", memberId);
     try {
       await removeTeamMember(currentTeam._id, memberId);
       toast.success("Member removed from team");
@@ -228,7 +228,7 @@ const TeamManagementPage: React.FC = () => {
         member.role === "admin"
     ) || isOwner;
 
-  console.log("is owner, is Admin ", isOwner, isAdmin);
+  // console.log("is owner, is Admin ", isOwner, isAdmin);
   return (
     <div className="space-y-6">
       <motion.div

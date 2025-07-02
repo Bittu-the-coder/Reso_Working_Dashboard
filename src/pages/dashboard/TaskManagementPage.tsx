@@ -85,21 +85,21 @@ const TaskManagementPage = () => {
     fetchData();
   }, [taskId, getTaskById]);
 
-  const currentTeam = teams.find(
-    (team) =>
-      team._id ===
-      (typeof currentTask?.teamId === "string"
-        ? currentTask?.teamId
-        : currentTask?.teamId?._id)
-  );
+  // const currentTeam = teams.find(
+  //   (team) =>
+  //     team._id ===
+  //     (typeof currentTask?.teamId === "string"
+  //       ? currentTask?.teamId
+  //       : currentTask?.teamId?._id)
+  // );
 
-  console.log(
-    "Current Team:",
-    currentTeam,
-    "Current Task:",
-    currentTask?.createdBy,
-    currentTask?.assignedTo
-  );
+  // console.log(
+  //   "Current Team:",
+  //   currentTeam,
+  //   "Current Task:",
+  //   currentTask?.createdBy,
+  //   currentTask?.assignedTo
+  // );
 
   const handleBack = () => {
     navigate("/dashboard/tasks");

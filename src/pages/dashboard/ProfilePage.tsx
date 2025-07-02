@@ -94,7 +94,7 @@ const ProfilePage = () => {
       try {
         setLoading(true);
         const response = await getAllNotifications();
-        console.log("Notice res", response);
+        // console.log("Notice res", response);
         if (response.success && response.notifications) {
           setNotifications(response.notifications);
         }
@@ -112,7 +112,7 @@ const ProfilePage = () => {
   // Initialize form with user data
   useEffect(() => {
     if (user) {
-      console.log("User data:", user);
+      // console.log("User data:", user);
       setProfile({
         name: user.fullName || "",
         email: user.email || "",
@@ -139,14 +139,14 @@ const ProfilePage = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      console.log("Submitting profile data:", profile);
+      // console.log("Submitting profile data:", profile);
       const result = await updateUser({
         name: profile.name,
         email: profile.email,
         username: profile.username,
         avatar: profile.avatar,
       });
-      console.log("Update result:", result);
+      // console.log("Update result:", result);
 
       if (result.success) {
         setEditMode(false);

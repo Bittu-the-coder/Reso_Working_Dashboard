@@ -57,7 +57,7 @@ export const useAuthStore = create<AuthState>()(
             email,
             password,
           });
-          console.log("login response", response);
+          // console.log("login response", response);
           set({
             token: response.data.token,
             user: response.data.data,
@@ -87,10 +87,10 @@ export const useAuthStore = create<AuthState>()(
               headers: { Authorization: `Bearer ${token}` },
             })
             .catch((error) => {
-              console.log(
-                "Logout API call failed, but user was still logged out locally:",
-                error.message
-              );
+              // console.log(
+              //   "Logout API call failed, but user was still logged out locally:",
+              //   error.message
+              // );
             });
         }
       },
@@ -117,7 +117,7 @@ export const useAuthStore = create<AuthState>()(
       // Update user
       updateUser: async (userData: UpdateUserData): Promise<ResponseResult> => {
         set({ loading: true, error: null });
-        console.log("Updating user with data:", userData);
+        // console.log("Updating user with data:", userData);
         try {
           const token = get().token || localStorage.getItem("authToken");
           if (!token) throw new Error("No authentication token found");
@@ -130,9 +130,9 @@ export const useAuthStore = create<AuthState>()(
           }
 
           // Debug: Log FormData contents
-          for (const [key, value] of formData.entries()) {
-            console.log(key, value);
-          }
+          // for (const [key, value] of formData.entries()) {
+          //   console.log(key, value);
+          // }
 
           const response = await axios.put(
             `${API_URL}/users/update`,
@@ -183,7 +183,7 @@ export const useAuthStore = create<AuthState>()(
             headers: { Authorization: `Bearer ${token}` },
           });
 
-          console.log("get notifications", response);
+          // console.log("get notifications", response);
           return {
             success: true,
             notifications: response.data.data,
@@ -202,7 +202,7 @@ export const useAuthStore = create<AuthState>()(
         set({ loading: true, error: null });
         try {
           const token = get().token || localStorage.getItem("authToken");
-          console.log("token", token);
+          // console.log("token", token);
           if (!token) throw new Error("No authentication token found");
           const response = await axios.get(
             `${API_URL}/users/checknotification/${notificationId}`,
@@ -210,7 +210,7 @@ export const useAuthStore = create<AuthState>()(
               headers: { Authorization: `Bearer ${token}` },
             }
           );
-          console.log("check notifications", response);
+          // console.log("check notifications", response);
           set({ loading: false });
           return { success: true, notifications: response.data.data };
         } catch (error: any) {

@@ -56,7 +56,7 @@ const TasksPage: React.FC = () => {
   const { user, getMe } = useAuthStore();
   const navigate = useNavigate();
 
-  console.log("All Teams:", teams);
+  // console.log("All Teams:", teams);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -112,7 +112,7 @@ const TasksPage: React.FC = () => {
               ))
         )
       : tasks;
-    console.log("Filtered Tasks:", result);
+    // console.log("Filtered Tasks:", result);
 
     if (filters.status) {
       result = result.filter((task) => task.status === filters.status);

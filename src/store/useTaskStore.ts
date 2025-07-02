@@ -226,7 +226,7 @@ export const useTaskStore = create<TaskStoreState>((set, get) => ({
         { status, stepId, completed },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      console.log("Update Task Status Response:", response.data);
+      // console.log("Update Task Status Response:", response.data);
 
       set((state) => ({
         tasks: state.tasks.map((task) =>
@@ -283,7 +283,7 @@ export const useTaskStore = create<TaskStoreState>((set, get) => ({
         `${API_URL}/tasks/teams/${teamId}/tasks/${taskId}/messages`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      console.log("get message:", response);
+      // console.log("get message:", response);
 
       set((state) => {
         if (!state.currentTask) return state;
@@ -361,7 +361,7 @@ export const useTaskStore = create<TaskStoreState>((set, get) => ({
         { message },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      console.log("update message response:", response);
+      // console.log("update message response:", response);
 
       if (!response.data.success) {
         throw new Error(response.data.error || "Failed to update message");
