@@ -1,7 +1,7 @@
 const connect = require("../db/db.js");
-const Project = require("../models/Project.model.js");
+const Project = require("../models/project.model.js");
 const Team = require("../models/team.model.js");
-const User = require("../models/User.model.js");
+const User = require("../models/user.model.js");
 const asyncHandler = require("../utils/asyncHandler.js");
 const { uploadToImageKit, deleteFromImageKit } = require("../utils/imageKit.js");
 const { extractImageKitFileId } = require("../utils/helpers.js");

@@ -1,14 +1,41 @@
 const express = require("express");
 const cors = require("cors");
-const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
+const path = require('path');
+const fs = require('fs');
+
+// Add file existence check utility
+const checkFileExists = (filePath) => {
+  try {
+    if (fs.existsSync(filePath)) {
+      console.log(`✅ File exists: ${filePath}`);
+    } else {
+      console.error(`❌ File not found: ${filePath}`);
+    }
+  } catch (err) {
+    console.error(`Error checking file ${filePath}:`, err);
+  }
+};
+
+// Check critical model files
+const modelsPath = path.join(__dirname, 'models');
+console.log('Models directory:', modelsPath);
+try {
+  if (fs.existsSync(modelsPath)) {
+    const files = fs.readdirSync(modelsPath);
+    console.log('Available model files:', files);
+  }
+} catch (err) {
+  console.error('Error reading models directory:', err);
+}
+
 const documentsRoutes = require("./routes/document.route.js");
 const eventRoutes = require("./routes/event.route.js");
 const projectRoutes = require("./routes/project.route.js");
 const taskRoutes = require("./routes/task.route.js");
 const userRoutes = require("./routes/user.route.js");
 const teamRoutes = require("./routes/team.route.js");
-const connect = require('./db/db.js')
+const connect = require('./db/db.js');
 const errorHandler = require("./middlewares/error.middleware.js");
 require("dotenv").config();
 
@@ -54,9 +81,26 @@ app.use((req, res, next) => {
 
 
 
-// Health check endpoint
+// Health check endpoint with more debug info
 app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'ok' });
+  const debugInfo = {
+    status: 'ok',
+    environment: process.env.NODE_ENV,
+    nodeVersion: process.version,
+    timestamp: new Date().toISOString(),
+    workingDirectory: process.cwd(),
+  };
+  res.status(200).json(debugInfo);
+});
+
+// Enhanced root endpoint with debug information
+app.get("/", (req, res) => {
+  res.send(`
+    <h1>Welcome to the Reso Working Dashboard API</h1>
+    <p>Server is running in ${process.env.NODE_ENV || 'development'} mode</p>
+    <p>Current time: ${new Date().toISOString()}</p>
+    <a href="/api/health">Check API Health</a>
+  `);
 });
 
 // Connect to MongoDB with better error handling
@@ -70,9 +114,6 @@ try {
   console.error("Error in database connection setup:", error);
 }
 
-app.get("/", (req, res) => {
-  res.send("Welcome to the Reso Working Dashboard API");
-});
 app.use("/api/users", userRoutes);
 // User routes are now merged with auth routes
 app.use("/api/teams", teamRoutes);

@@ -6,8 +6,15 @@ import type { CreateTeamData } from "../../types";
 
 interface CreateTeamModalProps {
   onClose: () => void;
-  onSubmit: (formData: CreateTeamData) => Promise<void>;
+  onSubmit: (teamData: CreateTeamData) => Promise<void>;
   isCreating: boolean;
+}
+
+interface TeamFormData {
+  name: string;
+  department: string;
+  description: string;
+  avatar?: File | null;
 }
 
 const CreateTeamModal: React.FC<CreateTeamModalProps> = ({
@@ -18,15 +25,13 @@ const CreateTeamModal: React.FC<CreateTeamModalProps> = ({
   const { isDarkMode } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Form state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<TeamFormData>({
     name: "",
     department: "",
     description: "",
+    avatar: null,
   });
 
-  // File state
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,21 +47,18 @@ const CreateTeamModal: React.FC<CreateTeamModalProps> = ({
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
 
-      // Validate file type
       if (!file.type.match("image.*")) {
         setError("Please select an image file (JPEG, PNG)");
         return;
       }
 
-      // Validate file size (2MB max)
       if (file.size > 2 * 1024 * 1024) {
         setError("File size must be less than 2MB");
         return;
       }
 
-      setAvatarFile(file);
+      setFormData((prev) => ({ ...prev, avatar: file }));
 
-      // Create preview
       const reader = new FileReader();
       reader.onload = () => {
         setAvatarPreview(reader.result as string);
@@ -66,7 +68,7 @@ const CreateTeamModal: React.FC<CreateTeamModalProps> = ({
   };
 
   const handleRemoveImage = () => {
-    setAvatarFile(null);
+    setFormData((prev) => ({ ...prev, avatar: null }));
     setAvatarPreview(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -81,23 +83,47 @@ const CreateTeamModal: React.FC<CreateTeamModalProps> = ({
       return;
     }
 
-    const formDataObj = new FormData();
-    formDataObj.append("name", formData.name);
-    formDataObj.append("department", formData.department);
-    formDataObj.append("description", formData.description);
-
-    // Append all files with field name 'upload'
-    if (avatarFile) {
-      formDataObj.append("avatar", avatarFile); // Note: field name must match multer's expectation
-    }
-
     try {
-      await onSubmit(formDataObj);
+      // Convert to the expected CreateTeamData format
+      const teamData: CreateTeamData = {
+        name: formData.name,
+        department: formData.department,
+        description: formData.description,
+        avatar: formData.avatar || undefined,
+      };
+
+      await onSubmit(teamData);
       onClose();
     } catch (err: any) {
       setError(`Failed to create team. Please try again. ${err.message || ""}`);
     }
   };
+
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+
+  //   if (!formData.name.trim()) {
+  //     setError("Team name is required");
+  //     return;
+  //   }
+
+  //   const formDataObj = new FormData();
+  //   formDataObj.append("name", formData.name);
+  //   formDataObj.append("department", formData.department);
+  //   formDataObj.append("description", formData.description);
+
+  //   // Append all files with field name 'upload'
+  //   if (avatarFile) {
+  //     formDataObj.append("avatar", avatarFile); // Note: field name must match multer's expectation
+  //   }
+
+  //   try {
+  //     await onSubmit(formDataObj);
+  //     onClose();
+  //   } catch (err: any) {
+  //     setError(`Failed to create team. Please try again. ${err.message || ""}`);
+  //   }
+  // };
 
   return (
     <div className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50 p-4">

@@ -1,6 +1,7 @@
 const connect = require("../db/db.js");
-const Document = require("../models/Document.model.js");
-const User = require("../models/User.model.js");
+const Document = require("../models/document.model.js");
+// Fix the User model import - ensure correct capitalization
+const User = require("../models/user.model.js");
 const asyncHandler = require("../utils/asyncHandler.js");
 const { ErrorResponse, sendSuccess } = require("../utils/sendResponse.js");
 
@@ -92,10 +93,26 @@ const updateDocument = asyncHandler(async (req, res, next) => {
   }
 });
 
+// Modified function to handle potential errors with team population
 const getAllDocsIrrespectiveOfTeam = asyncHandler(async (req, res, next) => {
   try {
-    const user = await User.findById(req.user._id).populate("teams");
-    const documents = await Document.find({ teamId: { $in: user.teams.map(team => team._id) } });
+    // Safer implementation that handles potential User model issues
+    let documents = [];
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return next(new ErrorResponse("User not found", 404));
+    }
+
+    // Extract team IDs without requiring populate
+    const teamIds = (user.teams || []).map(team =>
+      typeof team === 'object' ? team.teamId : team
+    ).filter(id => id); // Filter out any null/undefined values
+
+    if (teamIds.length > 0) {
+      documents = await Document.find({ teamId: { $in: teamIds } });
+    }
+
     sendSuccess(res, { documents }, "Documents fetched successfully");
   } catch (error) {
     console.error("Error while fetching documents:", error);

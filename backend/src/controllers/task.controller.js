@@ -1,6 +1,6 @@
-const Task = require("../models/Task.model.js");
+const Task = require("../models/task.model.js");
 const Team = require("../models/team.model.js");
-const User = require("../models/User.model.js");
+const User = require("../models/user.model.js");
 const asyncHandler = require("../utils/asyncHandler.js");
 // const { arraysEqual, notifyAssignedUsers } = require("../utils/helpers.js");
 const { uploadToImageKit, deleteFromImageKit } = require("../utils/imageKit.js");

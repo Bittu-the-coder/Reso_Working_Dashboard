@@ -1,10 +1,11 @@
 const Team = require("../models/team.model.js");
-const Document = require("../models/Document.model.js");
-const Event = require("../models/Event.model.js");
-const Project = require("../models/Project.model.js");
+const Document = require("../models/document.model.js");
+const Task = require("../models/task.model.js");
+const Event = require("../models/event.model.js");
+const Project = require("../models/project.model.js");
 const asyncHandler = require("../utils/asyncHandler.js");
 const { ErrorResponse, sendSuccess } = require("../utils/sendResponse.js");
-const User = require("../models/User.model.js");
+const User = require("../models/user.model.js");
 const { uploadToImageKit } = require("../utils/imageKit.js");
 // const { sendTokenResponse } = require("../utils/jwt.js");
 const { notifyUserByEmail } = require("./user.controller.js");
