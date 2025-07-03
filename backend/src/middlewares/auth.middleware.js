@@ -25,7 +25,7 @@ exports.protect = asyncHandler(async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // Add more detailed logging
-    console.log('Token verification successful:', decoded);
+    // console.log('Token verification successful:', decoded);
 
     // Get user from token
     const user = await User.findById(decoded.id);

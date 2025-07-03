@@ -30,6 +30,18 @@ const fileFilter = (req, file, cb) => {
     "text/plain",
     "text/csv",
     "application/json",
+
+    // Code files
+    "text/javascript",
+    "text/css",
+    "text/html",
+    "application/javascript",
+    "application/x-javascript",
+    "text/x-python",
+    "text/x-java-source",
+    "text/x-c",
+    "text/x-cpp",
+    "application/xml"
   ];
 
   if (allowedMimeTypes.includes(file.mimetype)) {

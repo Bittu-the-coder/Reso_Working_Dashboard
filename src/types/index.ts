@@ -523,7 +523,7 @@ export interface UpdateUserData {
   name?: string;
   username?: string;
   email?: string;
-  avatar?: File | string | null;
+  avatar?: File;
 }
 
 export interface PasswordUpdateData {
