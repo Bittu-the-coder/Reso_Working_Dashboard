@@ -251,7 +251,7 @@ export const LoginPage: React.FC = () => {
                 }`}
               ></div>
             </div>
-            <div className="relative flex justify-center">
+            {/* <div className="relative flex justify-center">
               <span
                 className={`px-2 text-sm ${
                   isDarkMode
@@ -261,10 +261,10 @@ export const LoginPage: React.FC = () => {
               >
                 Or continue with
               </span>
-            </div>
+            </div>*/}
           </div>
 
-          <div className="flex justify-center">
+          {/* <div className="flex justify-center">
             <motion.button
               type="button"
               className={`py-2.5 w-full px-4 rounded-lg border ${
@@ -299,7 +299,7 @@ export const LoginPage: React.FC = () => {
               </svg>
               Google
             </motion.button>
-          </div>
+          </div> */}
         </form>
       </motion.div>
     </motion.div>

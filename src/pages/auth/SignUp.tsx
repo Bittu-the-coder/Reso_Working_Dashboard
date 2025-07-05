@@ -305,7 +305,7 @@ export const SignUpPage: React.FC = () => {
             >
               <div className="border-t w-full"></div>
             </div>
-            <div className="relative flex justify-center text-sm">
+            {/* <div className="relative flex justify-center text-sm">
               <span
                 className={`px-4 ${
                   isDarkMode
@@ -315,10 +315,10 @@ export const SignUpPage: React.FC = () => {
               >
                 Or sign up with
               </span>
-            </div>
+            </div> */}
           </div>
 
-          <div className="flex justify-center">
+          {/* <div className="flex justify-center">
             <motion.button
               type="button"
               className={`py-2.5 w-full px-4 rounded-lg border ${
@@ -353,7 +353,7 @@ export const SignUpPage: React.FC = () => {
               </svg>
               Google
             </motion.button>
-          </div>
+          </div> */}
         </form>
       </motion.div>
     </motion.div>
