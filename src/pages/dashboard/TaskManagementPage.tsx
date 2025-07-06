@@ -70,20 +70,20 @@ const TaskManagementPage = () => {
     loadTeams();
   }, [getMyTeams]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (taskId) {
-        try {
-          await getTaskById(taskId, taskId);
-        } catch (error) {
-          console.error("Error fetching task:", error);
-          toast.error("Failed to fetch task details");
-        }
-      }
-    };
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     if (taskId) {
+  //       try {
+  //         await getTaskById(taskId, taskId);
+  //       } catch (error) {
+  //         console.error("Error fetching task:", error);
+  //         toast.error("Failed to fetch task details");
+  //       }
+  //     }
+  //   };
 
-    fetchData();
-  }, [taskId, getTaskById]);
+  //   fetchData();
+  // }, [taskId, getTaskById]);
 
   // const currentTeam = teams.find(
   //   (team) =>
@@ -101,6 +101,38 @@ const TaskManagementPage = () => {
   //   currentTask?.assignedTo
   // );
 
+  // Add to your TaskManagementPage component
+  useEffect(() => {
+    // Save taskId to localStorage when it changes
+    if (taskId) {
+      localStorage.setItem("lastViewedTask", taskId);
+    }
+    // Clean up on unmount
+    return () => {
+      localStorage.removeItem("lastViewedTask");
+    };
+  }, [taskId]);
+
+  // Modify your initial fetch logic
+  useEffect(() => {
+    const fetchData = async () => {
+      const taskToLoad = taskId || localStorage.getItem("lastViewedTask");
+      if (taskToLoad) {
+        try {
+          await getTaskById(taskToLoad, taskToLoad);
+        } catch (error) {
+          console.error("Error fetching task:", error);
+          toast.error("Failed to fetch task details");
+          localStorage.removeItem("lastViewedTask");
+          navigate("/dashboard/tasks");
+        }
+      } else {
+        navigate("/dashboard/tasks");
+      }
+    };
+
+    fetchData();
+  }, [taskId, getTaskById, navigate]);
   const handleBack = () => {
     navigate("/dashboard/tasks");
   };

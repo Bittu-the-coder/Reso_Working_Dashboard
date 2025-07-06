@@ -32,7 +32,7 @@ export const useTaskStore = create<TaskStoreState>((set, get) => ({
     try {
       const token = get().getAuthToken();
       const formData = new FormData();
-      console.log("Task data", taskData, "Temp uploads", uploads);
+      // console.log("Task data", taskData, "Temp uploads", uploads);
       // Append all task data
       Object.entries(taskData).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
@@ -147,7 +147,7 @@ export const useTaskStore = create<TaskStoreState>((set, get) => ({
     try {
       const token = get().getAuthToken();
       const formData = new FormData();
-      console.log("Task data", taskData, "Temp uploads", files);
+      // console.log("Task data", taskData, "Temp uploads", files);
       // Append all task data - use the same pattern as createTask
       Object.entries(taskData).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {

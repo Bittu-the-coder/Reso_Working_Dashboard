@@ -127,11 +127,9 @@ export const useAuthStore = create<AuthState>()(
           if (userData.avatar) {
             formData.append("avatar", userData.avatar);
           }
-
-          // Debug: Log FormData contents
-          for (const [key, value] of formData.entries()) {
-            console.log(key, value);
-          }
+          // for (const [key, value] of formData.entries()) {
+          //   console.log(key, value);
+          // }
 
           const response = await axios.put(
             `${API_URL}/users/update`,

@@ -8,8 +8,10 @@ const { ErrorResponse, sendSuccess } = require("../utils/sendResponse.js");
 const { notifyUserByEmail } = require("../controllers/user.controller.js");
 
 const createTasks = asyncHandler(async (req, res, next) => {
-    const { title, description, dueDate, priority, assignedTo, steps } =
+    const { title, description, dueDate, priority, steps } =
         req.body;
+    let assignedTo = Array.isArray(req.body.assignedTo) ? req.body.assignedTo :
+        (req.body.assignedTo ? [req.body.assignedTo] : []);
     const teamId = req.params.teamId;
 
     console.log("Creating task with data:", {

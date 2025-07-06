@@ -410,6 +410,8 @@ const TasksPage: React.FC = () => {
           filteredTasks.map((task) => {
             const statusInfo = getStatusInfo(task.status);
             const priorityColor = getPriorityColor(task.priority || "Medium");
+            const label = statusInfo.label;
+            const icon = statusInfo.icon;
             return (
               <motion.div
                 key={task._id}
@@ -439,9 +441,10 @@ const TasksPage: React.FC = () => {
                       {task.title}
                     </h3>
                     <span
-                      className={`px-2 py-1 text-xs font-medium rounded ${priorityColor}`}
+                      className={`px-2 py-1 flex gap-1 text-xs font-medium rounded ${priorityColor}`}
                     >
-                      {task.priority}
+                      {icon}
+                      {label}
                     </span>
                   </div>
                   {task.description && (
