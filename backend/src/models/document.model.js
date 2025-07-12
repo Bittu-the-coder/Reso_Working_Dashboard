@@ -12,6 +12,12 @@ const DocumentSchema = new mongoose.Schema({
   link: {
     type: String,
     required: [true, 'Please add a link'],
+    validate: {
+      validator: function (v) {
+        return /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/.test(v);
+      },
+      message: props => `${props.value} is not a valid URL!`
+    }
   },
   department: {
     type: String,
