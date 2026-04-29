@@ -17,6 +17,7 @@ const app = express();
 // Configure allowed origins
 const allowedOrigins = [
   "https://reso-working-dashboard.vercel.app",
+  "https://reso-working-dashboard-delta.vercel.app",
   "http://localhost:3000",
   "http://localhost:5173",
   "http://localhost:5174"
