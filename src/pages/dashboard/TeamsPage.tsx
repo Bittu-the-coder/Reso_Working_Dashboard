@@ -1,13 +1,36 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Users, Plus, Mail, Crown, Shield, User } from "lucide-react";
+import { Users, Plus, Mail, Crown, Shield, User, Settings2 } from "lucide-react";
 import { useTheme } from "../../contexts/ThemeContext";
 import { toast } from "react-hot-toast";
 import { useTeamStore } from "../../store/useTeamStore";
 import CreateTeamModal from "../../components/teams/CreateTeamModal";
+import { GlowingCard, TextGenerateEffect } from "../../components/ui/aceternity";
 
 import type { CreateTeamData, Team, TeamMember } from "../../types";
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      type: "spring",
+      stiffness: 100,
+    },
+  },
+};
 
 const TeamsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -42,245 +65,182 @@ const TeamsPage: React.FC = () => {
   const getRoleIcon = (role: string): React.ReactNode => {
     switch (role.toLowerCase()) {
       case "owner":
-        return <Crown className="w-4 h-4 text-yellow-500" aria-hidden="true" />;
+        return <Crown className="w-3.5 h-3.5 text-amber-500" />;
       case "admin":
-        return <Shield className="w-4 h-4 text-blue-500" aria-hidden="true" />;
+        return <Shield className="w-3.5 h-3.5 text-blue-500" />;
       default:
-        return <User className="w-4 h-4 text-gray-500" aria-hidden="true" />;
+        return <User className="w-3.5 h-3.5 text-slate-400" />;
     }
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div
-          className={`animate-spin rounded-full h-8 w-8 border-b-2 ${
-            isDarkMode ? "border-blue-400" : "border-blue-600"
-          }`}
-          aria-label="Loading"
-        ></div>
+        <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDarkMode ? "border-blue-400" : "border-blue-600"}`} />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <div className="flex items-center space-x-2">
-          <Users
-            className={`w-6 h-6 ${
-              isDarkMode ? "text-blue-400" : "text-blue-600"
-            }`}
-            aria-hidden="true"
-          />
-          <h1
-            className={`text-2xl font-bold ${
-              isDarkMode ? "text-gray-200" : "text-gray-900"
-            }`}
-          >
-            Teams
-          </h1>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <div className="flex items-center gap-3">
+            <div className={`p-2 rounded-lg ${isDarkMode ? "bg-blue-900/30 text-blue-400" : "bg-blue-50 text-blue-600"}`}>
+              <Users size={24} />
+            </div>
+            <TextGenerateEffect 
+              words="Team Management" 
+              className={`text-3xl font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`} 
+            />
+          </div>
+          <p className={`mt-2 ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}>
+            Collaborate with your research partners and manage group access.
+          </p>
         </div>
-        <button
+        
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={() => setShowCreateModal(true)}
-          className={`${
-            isDarkMode
-              ? "bg-blue-700 hover:bg-blue-800"
-              : "bg-blue-600 hover:bg-blue-700"
-          } text-white px-4 py-2 rounded-lg flex items-center space-x-2`}
-          aria-label="Create new team"
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold shadow-lg shadow-blue-500/20 transition-all"
         >
-          <Plus className="w-4 h-4" aria-hidden="true" />
-          <span>Create Team</span>
-        </button>
+          <Plus size={18} />
+          Create Team
+        </motion.button>
       </div>
 
       {/* Teams Grid */}
-      <section aria-labelledby="teams-list-heading">
-        <h2 id="teams-list-heading" className="sr-only">
-          Your Teams
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {teams.length > 0 ? (
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          initial="hidden"
+          animate="visible"
+          variants={containerVariants}
+        >
           {teams.map((team: Team) => (
-            <motion.div
-              key={team._id}
-              className={`${
-                isDarkMode
-                  ? "bg-gray-800 border-gray-700 hover:bg-gray-750"
-                  : "bg-white border-gray-200 hover:shadow-lg"
-              } border rounded-lg p-6 transition-all cursor-pointer`}
-              onClick={() => handleTeamClick(team._id)}
-              whileHover={{ scale: 1.02 }}
-              role="button"
-              tabIndex={0}
-              aria-label={`Team ${team.name}`}
-              onKeyDown={(e: React.KeyboardEvent) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  handleTeamClick(team._id);
-                }
-              }}
-            >
-              <div className="flex items-start space-x-4 mb-5">
-                <div className="flex-shrink-0 self-center justify-center">
-                  {team.avatar ? (
-                    <img
-                      src={team.avatar}
-                      alt={`${team.name} logo`}
-                      className="w-14 h-14 rounded-lg object-cover border-2 border-opacity-20 shadow-sm"
-                      style={{
-                        borderColor: isDarkMode ? "#3b82f6" : "#2563eb",
-                      }}
-                    />
-                  ) : (
-                    <div
-                      className={`w-14 h-14 rounded-lg flex items-center justify-center ${
-                        isDarkMode ? "bg-gray-700" : "bg-blue-100"
-                      }`}
-                    >
-                      <Users
-                        className={`w-7 h-7 ${
-                          isDarkMode ? "text-blue-400" : "text-blue-600"
-                        }`}
+            <motion.div key={team._id} variants={itemVariants}>
+              <GlowingCard
+                className={`h-full cursor-pointer group transition-all ${
+                  isDarkMode
+                    ? "!bg-slate-900 !border-slate-800"
+                    : "!bg-white !border-slate-200"
+                }`}
+                onClick={() => handleTeamClick(team._id)}
+              >
+                <div className="flex items-start gap-4 mb-6 relative z-10">
+                  <div className="flex-shrink-0">
+                    {team.avatar ? (
+                      <img
+                        src={team.avatar}
+                        alt={team.name}
+                        className="w-16 h-16 rounded-2xl object-cover ring-2 ring-blue-500/20"
                       />
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-center">
-                    <h3
-                      className={`text-lg font-bold truncate ${
-                        isDarkMode ? "text-gray-100" : "text-gray-800"
-                      }`}
-                    >
+                    ) : (
+                      <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${isDarkMode ? "bg-slate-800" : "bg-slate-100"}`}>
+                        <Users className={`w-8 h-8 ${isDarkMode ? "text-slate-500" : "text-slate-400"}`} />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className={`text-xl font-bold truncate ${isDarkMode ? "text-white" : "text-slate-900"}`}>
                       {team.name}
                     </h3>
-                  </div>
-                  {team.description && (
-                    <p
-                      className={`text-sm mt-1 line-clamp-2 ${
-                        isDarkMode ? "text-gray-400" : "text-gray-600"
-                      }`}
-                    >
-                      {team.description}
+                    <p className={`text-sm mt-1 line-clamp-2 ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}>
+                      {team.description || "No description provided."}
                     </p>
-                  )}
+                  </div>
                 </div>
-              </div>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between text-sm">
-                  <span
-                    className={`${
-                      isDarkMode ? "text-gray-400" : "text-gray-600"
-                    }`}
-                  >
-                    Members
-                  </span>
-                  <span
-                    className={`font-medium ${isDarkMode ? "text-white" : ""}`}
-                  >
-                    {team.members.length}
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  {team.members.slice(0, 3).map((member: TeamMember) => (
-                    <div
-                      key={member._id}
-                      className="flex items-center space-x-2"
-                    >
+
+                <div className="space-y-4 relative z-10">
+                  <div className="flex items-center justify-between">
+                    <span className={`text-xs font-semibold uppercase tracking-wider ${isDarkMode ? "text-slate-500" : "text-slate-400"}`}>
+                      Active Members
+                    </span>
+                    <span className={`text-xs font-bold ${isDarkMode ? "text-blue-400" : "text-blue-600"}`}>
+                      {team.members.length}
+                    </span>
+                  </div>
+
+                  <div className="flex -space-x-2 overflow-hidden">
+                    {team.members.slice(0, 5).map((member, idx) => (
                       <div
-                        className={`w-6 h-6 ${
-                          isDarkMode ? "bg-gray-700" : "bg-gray-300"
-                        } rounded-full flex items-center justify-center`}
+                        key={member._id}
+                        className={`inline-block h-8 w-8 rounded-full ring-2 ${isDarkMode ? "ring-slate-900 bg-slate-800" : "ring-white bg-slate-100"} flex items-center justify-center text-[10px] font-bold overflow-hidden`}
+                        title={`${member.name} (${member.role})`}
                       >
-                        <span
-                          className={`text-xs font-medium ${
-                            isDarkMode ? "text-gray-300" : "text-gray-700"
-                          }`}
-                        >
-                          {member.name.charAt(0).toUpperCase()}
-                        </span>
+                        {member.avatar ? (
+                          <img src={member.avatar} alt={member.name} className="h-full w-full object-cover" />
+                        ) : (
+                          <span className={isDarkMode ? "text-slate-400" : "text-slate-500"}>
+                            {member.name.charAt(0).toUpperCase()}
+                          </span>
+                        )}
                       </div>
-                      <span
-                        className={`text-sm ${
-                          isDarkMode ? "text-gray-300" : "text-gray-700"
-                        }`}
-                      >
-                        {member.name}
-                      </span>
-                      {getRoleIcon(member.role)}
-                    </div>
-                  ))}
-                  {team.members.length > 3 && (
-                    <div
-                      className={`text-xs ${
-                        isDarkMode ? "text-gray-400" : "text-gray-500"
+                    ))}
+                    {team.members.length > 5 && (
+                      <div className={`inline-block h-8 w-8 rounded-full ring-2 ${isDarkMode ? "ring-slate-900 bg-slate-800" : "ring-white bg-slate-100"} flex items-center justify-center text-[10px] font-bold text-slate-500`}>
+                        +{team.members.length - 5}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="pt-4 border-t border-slate-100 dark:border-slate-800/50 flex gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleTeamClick(team._id);
+                      }}
+                      className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-xl text-sm font-semibold transition-all ${
+                        isDarkMode
+                          ? "bg-slate-800 text-slate-200 hover:bg-slate-700"
+                          : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                       }`}
                     >
-                      +{team.members.length - 3} more members
-                    </div>
-                  )}
+                      <Settings2 size={16} />
+                      Manage
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // Handle invite logic if needed
+                        toast.success("Invite feature coming soon!");
+                      }}
+                      className={`p-2 rounded-xl border transition-all ${
+                        isDarkMode
+                          ? "border-slate-700 text-slate-400 hover:bg-slate-800"
+                          : "border-slate-200 text-slate-500 hover:bg-slate-50"
+                      }`}
+                      title="Invite Member"
+                    >
+                      <Plus size={18} />
+                    </button>
+                  </div>
                 </div>
-                <button
-                  onClick={(e: React.MouseEvent) => {
-                    e.stopPropagation();
-                    handleTeamClick(team._id);
-                  }}
-                  className={`w-full ${
-                    isDarkMode
-                      ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  } py-2 rounded-lg flex items-center justify-center space-x-2 text-sm`}
-                  aria-label={`Manage team ${team.name}`}
-                >
-                  <Mail className="w-4 h-4" aria-hidden="true" />
-                  <span>Manage Team</span>
-                </button>
-              </div>
+              </GlowingCard>
             </motion.div>
           ))}
-        </div>
-      </section>
-      {teams.length === 0 && !loading && (
-        <div
-          className={`text-center p-10 rounded-lg border ${
-            isDarkMode
-              ? "border-gray-700 bg-gray-800"
-              : "border-gray-200 bg-gray-50"
-          }`}
-        >
-          <Users
-            className={`w-16 h-16 mx-auto mb-4 ${
-              isDarkMode ? "text-gray-600" : "text-gray-400"
-            }`}
-            aria-hidden="true"
-          />
-          <h3
-            className={`text-lg font-medium mb-2 ${
-              isDarkMode ? "text-white" : "text-gray-900"
-            }`}
-          >
-            No Teams Yet
-          </h3>
-          <p
-            className={`mb-6 ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}
-          >
-            Create your first team to collaborate with others
+        </motion.div>
+      ) : (
+        <div className={`text-center py-20 rounded-3xl border-2 border-dashed ${isDarkMode ? "border-slate-800 bg-slate-900/20" : "border-slate-200 bg-slate-50"}`}>
+          <div className={`mx-auto w-16 h-16 rounded-2xl flex items-center justify-center mb-4 ${isDarkMode ? "bg-slate-800 text-slate-500" : "bg-white text-slate-300"}`}>
+            <Users size={32} />
+          </div>
+          <h3 className={`text-xl font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>No Teams Yet</h3>
+          <p className={`mt-2 max-w-xs mx-auto ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}>
+            Create your first team to start collaborating on projects and research.
           </p>
           <button
             onClick={() => setShowCreateModal(true)}
-            className={`${
-              isDarkMode
-                ? "bg-blue-700 hover:bg-blue-800"
-                : "bg-blue-600 hover:bg-blue-700"
-            } text-white px-6 py-2 rounded-lg inline-flex items-center gap-2`}
-            aria-label="Create your first team"
+            className="mt-6 flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold mx-auto"
           >
-            <Plus className="w-4 h-4" aria-hidden="true" />
-            Create Team
+            <Plus size={20} />
+            Create Your First Team
           </button>
         </div>
       )}
+
       {/* Create Team Modal */}
       {showCreateModal && (
         <CreateTeamModal
@@ -294,299 +254,3 @@ const TeamsPage: React.FC = () => {
 };
 
 export default TeamsPage;
-
-// import React, { useState, useEffect } from "react";
-// import { useNavigate } from "react-router-dom";
-// import { motion } from "framer-motion";
-// import { Users, Plus, Mail, Crown, Shield, User, Pencil } from "lucide-react";
-// import { useTheme } from "../../contexts/ThemeContext";
-// import { toast } from "react-hot-toast";
-// import { useTeamStore } from "../../store/useTeamStore";
-// import CreateTeamModal from "../../components/teams/CreateTeamModal";
-
-// const TeamsPage: React.FC = () => {
-//   const navigate = useNavigate();
-//   const { isDarkMode } = useTheme();
-//   const [showCreateModal, setShowCreateModal] = useState(false);
-//   const [isCreatingTeam, setIsCreatingTeam] = useState(false);
-
-//   const { teams, loading, error, getMyTeams, createTeam } = useTeamStore();
-
-//   useEffect(() => {
-//     getMyTeams();
-//   }, [getMyTeams]);
-
-//   const handleCreateTeam = async (formData: FormData) => {
-//     setIsCreatingTeam(true);
-//     try {
-//       // Create team with FormData
-//       await createTeam(formData);
-//       setShowCreateModal(false);
-//       toast.success("Team created successfully");
-//     } catch (error) {
-//       console.error("Failed to create team:", error);
-//       toast.error("Failed to create team");
-//     } finally {
-//       setIsCreatingTeam(false);
-//     }
-//   };
-
-//   const handleTeamClick = (teamId: string) => {
-//     navigate(`/dashboard/teams/${teamId}`);
-//   };
-
-//   const getRoleIcon = (role: string) => {
-//     switch (role.toLowerCase()) {
-//       case "owner":
-//         return <Crown className="w-4 h-4 text-yellow-500" aria-hidden="true" />;
-//       case "admin":
-//         return <Shield className="w-4 h-4 text-blue-500" aria-hidden="true" />;
-//       default:
-//         return <User className="w-4 h-4 text-gray-500" aria-hidden="true" />;
-//     }
-//   };
-
-//   if (loading) {
-//     return (
-//       <div className="flex items-center justify-center h-64">
-//         <div
-//           className={`animate-spin rounded-full h-8 w-8 border-b-2 ${
-//             isDarkMode ? "border-blue-400" : "border-blue-600"
-//           }`}
-//           aria-label="Loading"
-//         ></div>
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="space-y-6">
-//       {/* Header */}
-//       <div className="flex justify-between items-center">
-//         <div className="flex items-center space-x-2">
-//           <Users
-//             className={`w-6 h-6 ${
-//               isDarkMode ? "text-blue-400" : "text-blue-600"
-//             }`}
-//             aria-hidden="true"
-//           />
-//           <h1
-//             className={`text-2xl font-bold ${
-//               isDarkMode ? "text-gray-200" : "text-gray-900"
-//             }`}
-//           >
-//             Teams
-//           </h1>
-//         </div>
-//         <button
-//           onClick={() => setShowCreateModal(true)}
-//           className={`${
-//             isDarkMode
-//               ? "bg-blue-700 hover:bg-blue-800"
-//               : "bg-blue-600 hover:bg-blue-700"
-//           } text-white px-4 py-2 rounded-lg flex items-center space-x-2`}
-//           aria-label="Create new team"
-//         >
-//           <Plus className="w-4 h-4" aria-hidden="true" />
-//           <span>Create Team</span>
-//         </button>
-//       </div>
-//       {/* Teams Grid */}
-//       <section aria-labelledby="teams-list-heading">
-//         <h2 id="teams-list-heading" className="sr-only">
-//           Your Teams
-//         </h2>
-//         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-//           {teams.map((team) => (
-//             <motion.div
-//               key={team._id}
-//               className={`${
-//                 isDarkMode
-//                   ? "bg-gray-800 border-gray-700 hover:bg-gray-750"
-//                   : "bg-white border-gray-200 hover:shadow-lg"
-//               } border rounded-lg p-6 transition-all cursor-pointer`}
-//               onClick={() => handleTeamClick(team._id)}
-//               whileHover={{ scale: 1.02 }}
-//               role="button"
-//               tabIndex={0}
-//               aria-label={`Team ${team.name}`}
-//               onKeyDown={(e) => {
-//                 if (e.key === "Enter" || e.key === " ") {
-//                   handleTeamClick(team._id);
-//                 }
-//               }}
-//             >
-//               <div className="flex items-start space-x-4 mb-5">
-//                 <div className="flex-shrink-0 self-center justify-center">
-//                   {team.avatar ? (
-//                     <img
-//                       src={team.avatar}
-//                       alt={`${team.name} logo`}
-//                       className="w-14 h-14 rounded-lg object-cover border-2 border-opacity-20 shadow-sm"
-//                       style={{
-//                         borderColor: isDarkMode ? "#3b82f6" : "#2563eb",
-//                       }}
-//                     />
-//                   ) : (
-//                     <div
-//                       className={`w-14 h-14 rounded-lg flex items-center justify-center ${
-//                         isDarkMode ? "bg-gray-700" : "bg-blue-100"
-//                       }`}
-//                     >
-//                       <Users
-//                         className={`w-7 h-7 ${
-//                           isDarkMode ? "text-blue-400" : "text-blue-600"
-//                         }`}
-//                       />
-//                     </div>
-//                   )}
-//                 </div>
-//                 <div className="flex-1 min-w-0">
-//                   <div className="flex justify-between items-center">
-//                     <h3
-//                       className={`text-lg font-bold truncate ${
-//                         isDarkMode ? "text-gray-100" : "text-gray-800"
-//                       }`}
-//                     >
-//                       {team.name}
-//                     </h3>
-//                   </div>
-//                   {team.description && (
-//                     <p
-//                       className={`text-sm mt-1 line-clamp-2 ${
-//                         isDarkMode ? "text-gray-400" : "text-gray-600"
-//                       }`}
-//                     >
-//                       {team.description}
-//                     </p>
-//                   )}
-//                 </div>
-//               </div>
-//               <div className="space-y-3">
-//                 <div className="flex items-center justify-between text-sm">
-//                   <span
-//                     className={`${
-//                       isDarkMode ? "text-gray-400" : "text-gray-600"
-//                     }`}
-//                   >
-//                     Members
-//                   </span>
-//                   <span
-//                     className={`font-medium ${isDarkMode ? "text-white" : ""}`}
-//                   >
-//                     {team.members.length}
-//                   </span>
-//                 </div>
-//                 <div className="space-y-2">
-//                   {team.members.slice(0, 3).map((member) => (
-//                     <div
-//                       key={member._id}
-//                       className="flex items-center space-x-2"
-//                     >
-//                       <div
-//                         className={`w-6 h-6 ${
-//                           isDarkMode ? "bg-gray-700" : "bg-gray-300"
-//                         } rounded-full flex items-center justify-center`}
-//                       >
-//                         <span
-//                           className={`text-xs font-medium ${
-//                             isDarkMode ? "text-gray-300" : "text-gray-700"
-//                           }`}
-//                         >
-//                           {member.name.charAt(0).toUpperCase()}
-//                         </span>
-//                       </div>
-//                       <span
-//                         className={`text-sm ${
-//                           isDarkMode ? "text-gray-300" : "text-gray-700"
-//                         }`}
-//                       >
-//                         {member.name}
-//                       </span>
-//                       {getRoleIcon(member.role)}
-//                     </div>
-//                   ))}
-//                   {team.members.length > 3 && (
-//                     <div
-//                       className={`text-xs ${
-//                         isDarkMode ? "text-gray-400" : "text-gray-500"
-//                       }`}
-//                     >
-//                       +{team.members.length - 3} more members
-//                     </div>
-//                   )}
-//                 </div>
-//                 <button
-//                   onClick={(e) => {
-//                     e.stopPropagation();
-//                     handleTeamClick(team._id);
-//                   }}
-//                   className={`w-full ${
-//                     isDarkMode
-//                       ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
-//                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-//                   } py-2 rounded-lg flex items-center justify-center space-x-2 text-sm`}
-//                   aria-label={`Manage team ${team.name}`}
-//                 >
-//                   <Mail className="w-4 h-4" aria-hidden="true" />
-//                   <span>Manage Team</span>
-//                 </button>
-//               </div>
-//             </motion.div>
-//           ))}
-//         </div>
-//       </section>
-//       {teams.length === 0 && !loading && (
-//         <div
-//           className={`text-center p-10 rounded-lg border ${
-//             isDarkMode
-//               ? "border-gray-700 bg-gray-800"
-//               : "border-gray-200 bg-gray-50"
-//           }`}
-//         >
-//           <Users
-//             className={`w-16 h-16 mx-auto mb-4 ${
-//               isDarkMode ? "text-gray-600" : "text-gray-400"
-//             }`}
-//             aria-hidden="true"
-//           />
-//           <h3
-//             className={`text-lg font-medium mb-2 ${
-//               isDarkMode ? "text-white" : "text-gray-900"
-//             }`}
-//           >
-//             No Teams Yet
-//           </h3>
-//           <p
-//             className={`mb-6 ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}
-//           >
-//             Create your first team to collaborate with others
-//           </p>
-//           <button
-//             onClick={() => setShowCreateModal(true)}
-//             className={`${
-//               isDarkMode
-//                 ? "bg-blue-700 hover:bg-blue-800"
-//                 : "bg-blue-600 hover:bg-blue-700"
-//             } text-white px-6 py-2 rounded-lg inline-flex items-center gap-2`}
-//             aria-label="Create your first team"
-//           >
-//             <Plus className="w-4 h-4" aria-hidden="true" />
-//             Create Team
-//           </button>
-//         </div>
-//       )}
-//       {/* Create Team Modal */}
-//       {showCreateModal && (
-//         <CreateTeamModal
-//           onClose={() => setShowCreateModal(false)}
-//           onSubmit={handleCreateTeam}
-//           isDarkMode={isDarkMode}
-//           isCreating={isCreatingTeam}
-//         />
-//       )}
-//     </div>
-//   );
-// };
-
-// export default TeamsPage;

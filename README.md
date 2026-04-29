@@ -74,7 +74,7 @@ Create a `.env` file in the backend directory with the following variables:
 
 ```
 NODE_ENV=development
-PORT=5000
+PORT=3030
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret
 JWT_EXPIRE=30d
@@ -85,10 +85,14 @@ IMAGEKIT_PRIVATE_KEY=your_imagekit_private_key
 IMAGEKIT_URL_ENDPOINT=your_imagekit_url_endpoint
 
 # Email configuration
-SMTP_HOST=your_smtp_host
-EMAIL_USER=your_email_user
-EMAIL_PASS=your_email_password
-EMAIL_FROM=noreply@resodashboard.com
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your_email_user
+SMTP_PASS=your_email_password
+EMAIL_FROM="Working Dashboard <noreply@resodashboard.com>"
+
+# Frontend URL (for CORS)
+FRONTEND_URL=http://localhost:5173
 ```
 
 #### Frontend
@@ -96,7 +100,7 @@ EMAIL_FROM=noreply@resodashboard.com
 Create a `.env` file in the project root with:
 
 ```
-VITE_API_URL=http://localhost:5000/api
+VITE_API_URL=http://localhost:3030/api
 ```
 
 ### Installation

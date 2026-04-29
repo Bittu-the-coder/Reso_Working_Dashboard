@@ -95,6 +95,18 @@ const createEvent = asyncHandler(async (req, res, next) => {
       }));
     }
 
+    // Always include creator in attendees if not already present
+    const isCreatorIncluded = processedAttendees.some(
+      (a) => a.userId.toString() === req.user._id.toString()
+    );
+
+    if (!isCreatorIncluded) {
+      processedAttendees.push({
+        userId: req.user._id,
+        status: "accepted",
+      });
+    }
+
     // Create new event
     const event = new Event({
       teamId,
@@ -210,7 +222,12 @@ const getAllUserEvents = asyncHandler(async (req, res, next) => {
   try {
 
 
-    let query = { 'attendees.userId': req.user._id };
+    let query = {
+      $or: [
+        { "attendees.userId": req.user._id },
+        { createdBy: req.user._id }
+      ]
+    };
 
     if (status) {
       query['attendees.status'] = status;

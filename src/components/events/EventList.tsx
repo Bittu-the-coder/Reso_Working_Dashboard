@@ -1,142 +1,132 @@
-import { useTheme } from "../../contexts/ThemeContext";
 import { motion } from "framer-motion";
-import { CalendarCheck, Calendar } from "lucide-react";
+import { CalendarDays, CheckCircle2, Clock, MapPin, Trash2 } from "lucide-react";
+import { useTheme } from "../../contexts/ThemeContext";
+import { GlowingCard } from "../ui/aceternity";
 
 interface Event {
-  id: string | number;
+  _id: string;
   title: string;
-  date: string;
+  eventDate: string;
   description: string;
+  location?: string;
+  priority?: string;
 }
 
 interface EventListProps {
   events: Event[];
+  onDelete: (id: string) => void;
+  onRespond?: (id: string, status: "accepted" | "declined") => void;
 }
 
-const EventList = ({ events }: EventListProps) => {
+const EventList = ({ events, onDelete, onRespond }: EventListProps) => {
   const { isDarkMode } = useTheme();
 
+  const getPriorityColor = (priority?: string) => {
+    switch (priority?.toLowerCase()) {
+      case "high": return "text-rose-500 bg-rose-500/10";
+      case "medium": return "text-amber-500 bg-amber-500/10";
+      default: return "text-blue-500 bg-blue-500/10";
+    }
+  };
+
   return (
-    <motion.div
-      className={`${
-        isDarkMode
-          ? "bg-gray-800/80 border-gray-700"
-          : "bg-white/80 border-blue-100"
-      } backdrop-blur-lg p-6 rounded-2xl shadow-lg border relative overflow-hidden`}
-      whileHover={{
-        boxShadow: `0 8px 30px ${
-          isDarkMode ? "rgba(79, 70, 229, 0.2)" : "rgba(59, 130, 246, 0.15)"
-        }`,
-      }}
-    >
-      <div className="flex items-center gap-3 mb-6 z-10 relative">
-        <div
-          className={`p-2 ${
-            isDarkMode ? "bg-indigo-900" : "bg-indigo-100"
-          } rounded-lg`}
-        >
-          <CalendarCheck
-            className={`w-5 h-5 ${
-              isDarkMode ? "text-indigo-400" : "text-indigo-600"
-            }`}
-          />
+    <div className="space-y-6">
+      <div className="flex items-center gap-3 mb-2">
+        <div className={`p-2 rounded-lg ${isDarkMode ? "bg-slate-800 text-blue-400" : "bg-slate-100 text-blue-600"}`}>
+          <CalendarDays size={20} />
         </div>
-        <h3
-          className={`text-xl font-bold ${
-            isDarkMode ? "text-indigo-300" : "text-indigo-900"
-          }`}
-        >
+        <h3 className={`text-xl font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>
           Upcoming Events
         </h3>
       </div>
 
-      <motion.div className="space-y-4 z-10 relative">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {events.length > 0 ? (
           events
-            .sort(
-              (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-            )
-            .map((event) => (
+            .sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime())
+            .map((event, index) => (
               <motion.div
-                key={event.id}
-                className={`${
-                  isDarkMode
-                    ? "bg-gradient-to-r from-gray-700 to-gray-750 border-gray-600"
-                    : "bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-100"
-                } border p-4 rounded-xl shadow-sm`}
-                whileHover={{
-                  y: -5,
-                  boxShadow: `0 4px 20px ${
-                    isDarkMode
-                      ? "rgba(79, 70, 229, 0.2)"
-                      : "rgba(79, 70, 229, 0.15)"
-                  }`,
-                  transition: { type: "spring", stiffness: 300, damping: 20 },
-                }}
+                key={event._id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
               >
-                <div className="flex flex-wrap justify-between items-start mb-2">
-                  <h4
-                    className={`font-bold ${
-                      isDarkMode ? "text-indigo-300" : "text-indigo-900"
-                    }`}
-                  >
-                    {event.title}
-                  </h4>
-                  <div
-                    className={`flex items-center gap-1 px-3 py-1 ${
-                      isDarkMode
-                        ? "bg-gray-600/50 border-gray-500"
-                        : "bg-white/50 border-indigo-100"
-                    } backdrop-blur-sm rounded-full border shadow-sm`}
-                  >
-                    <Calendar
-                      className={`w-4 h-4 ${
-                        isDarkMode ? "text-indigo-400" : "text-indigo-600"
-                      }`}
-                    />
-                    <span
-                      className={`text-xs font-medium ${
-                        isDarkMode ? "text-indigo-300" : "text-indigo-800"
-                      }`}
-                    >
-                      {event.date}
-                    </span>
+                <GlowingCard className={`${isDarkMode ? "!bg-slate-900 !border-slate-800" : "!bg-white !border-slate-200"} p-6 group`}>
+                  <div className="relative z-10">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h4 className={`text-lg font-bold ${isDarkMode ? "text-white" : "text-slate-900"} group-hover:text-blue-500 transition-colors`}>
+                            {event.title}
+                          </h4>
+                          {event.priority && (
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${getPriorityColor(event.priority)}`}>
+                              {event.priority}
+                            </span>
+                          )}
+                        </div>
+                        <p className={`text-sm line-clamp-2 ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}>
+                          {event.description}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => onDelete(event._id)}
+                        className={`p-2 rounded-lg transition-all ${isDarkMode ? "hover:bg-rose-500/10 text-slate-500 hover:text-rose-500" : "hover:bg-rose-50 text-slate-400 hover:text-rose-500"}`}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+
+                    <div className="space-y-3 border-t border-slate-200 dark:border-slate-800 pt-4">
+                      <div className="flex items-center gap-6">
+                        <div className="flex items-center gap-2">
+                          <CalendarDays size={14} className="text-blue-500" />
+                          <span className={`text-xs font-medium ${isDarkMode ? "text-slate-300" : "text-slate-700"}`}>
+                            {new Date(event.eventDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Clock size={14} className="text-blue-500" />
+                          <span className={`text-xs font-medium ${isDarkMode ? "text-slate-300" : "text-slate-700"}`}>
+                            {new Date(event.eventDate).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+                      </div>
+
+                      {event.location && (
+                        <div className="flex items-center gap-2">
+                          <MapPin size={14} className="text-blue-500" />
+                          <span className={`text-xs font-medium ${isDarkMode ? "text-slate-300" : "text-slate-700"}`}>
+                            {event.location}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {onRespond && (
+                      <div className="flex gap-2 mt-5">
+                        <button
+                          onClick={() => onRespond(event._id, "accepted")}
+                          className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-blue-600 text-white text-xs font-bold transition-all shadow-lg shadow-blue-500/20"
+                        >
+                          <CheckCircle2 size={14} />
+                          Attend
+                        </button>
+                      </div>
+                    )}
                   </div>
-                </div>
-                <p
-                  className={`${
-                    isDarkMode ? "text-gray-300" : "text-indigo-800"
-                  }`}
-                >
-                  {event.description}
-                </p>
+                </GlowingCard>
               </motion.div>
             ))
         ) : (
-          <motion.div
-            className={`text-center py-8 ${
-              isDarkMode ? "text-gray-400" : "text-gray-500"
-            }`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-          >
-            <Calendar
-              className={`w-10 h-10 mx-auto mb-2 ${
-                isDarkMode ? "text-gray-500" : "text-gray-400"
-              }`}
-            />
-            <p>No events scheduled yet. Add your first event above!</p>
-          </motion.div>
+          <div className="col-span-full text-center py-16 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+            <CalendarDays size={40} className="mx-auto mb-4 text-slate-300 dark:text-slate-700" />
+            <p className={`text-lg font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>No events found</p>
+            <p className="text-sm text-slate-500 mt-1">Schedule your first event to get started.</p>
+          </div>
         )}
-      </motion.div>
-
-      <div
-        className={`absolute -bottom-6 -right-6 w-32 h-32 ${
-          isDarkMode ? "bg-indigo-800" : "bg-indigo-200"
-        } rounded-full opacity-20`}
-      />
-    </motion.div>
+      </div>
+    </div>
   );
 };
 

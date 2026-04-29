@@ -1,156 +1,142 @@
+import { CalendarDays, Save, X } from "lucide-react";
 import { useTheme } from "../../contexts/ThemeContext";
-import { motion } from "framer-motion";
-import { Calendar, Plus } from "lucide-react";
+import { GlowingCard } from "../ui/aceternity";
 
-interface Event {
+interface EventData {
   title: string;
   date: string;
   description: string;
+  location?: string;
+  priority?: string;
 }
 
 interface EventFormProps {
-  newEvent: Event;
-  setNewEvent: (event: Event) => void;
+  newEvent: EventData;
+  setNewEvent: (event: EventData) => void;
   handleAddEvent: (e: React.FormEvent) => void;
+  onCancel?: () => void;
 }
 
 const EventForm = ({
   newEvent,
   setNewEvent,
   handleAddEvent,
+  onCancel
 }: EventFormProps) => {
   const { isDarkMode } = useTheme();
 
   return (
-    <motion.div
-      className={`${
-        isDarkMode
-          ? "bg-gray-800/80 border-gray-700"
-          : "bg-white/80 border-blue-100"
-      } backdrop-blur-lg p-6 rounded-2xl shadow-lg border relative overflow-hidden`}
-      whileHover={{
-        boxShadow: `0 8px 30px ${
-          isDarkMode ? "rgba(59, 130, 246, 0.2)" : "rgba(59, 130, 246, 0.15)"
-        }`,
-      }}
-    >
-      <div className="flex items-center gap-3 mb-6 z-10 relative">
-        <div
-          className={`p-2 ${
-            isDarkMode ? "bg-purple-900" : "bg-purple-100"
-          } rounded-lg`}
-        >
-          <Plus
-            className={`w-5 h-5 ${
-              isDarkMode ? "text-purple-400" : "text-purple-600"
-            }`}
-          />
+    <GlowingCard className={`${isDarkMode ? "!bg-slate-900 !border-slate-800" : "!bg-white !border-slate-200"} p-8`}>
+      <div className="flex items-center justify-between mb-8 relative z-10">
+        <div className="flex items-center gap-3">
+          <div className={`p-2 rounded-lg ${isDarkMode ? "bg-slate-800 text-blue-400" : "bg-slate-100 text-blue-600"}`}>
+            <CalendarDays size={24} />
+          </div>
+          <h3 className={`text-xl font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>
+            Create New Event
+          </h3>
         </div>
-        <h3
-          className={`text-xl font-bold ${
-            isDarkMode ? "text-purple-300" : "text-purple-900"
-          }`}
-        >
-          Add New Event
-        </h3>
+        {onCancel && (
+          <button onClick={onCancel} className="text-slate-500 hover:text-slate-700 transition-colors">
+            <X size={20} />
+          </button>
+        )}
       </div>
 
-      <form onSubmit={handleAddEvent} className="space-y-4 z-10 relative">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label
-              htmlFor="event-title"
-              className={`block text-sm font-medium ${
-                isDarkMode ? "text-gray-300" : "text-gray-700"
-              } mb-2`}
-            >
-              Event Title
-            </label>
-            <input
-              type="text"
-              id="event-title"
-              className={`w-full ${
-                isDarkMode
-                  ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                  : "bg-white border-gray-200 text-gray-800 placeholder-gray-400"
-              } border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-shadow`}
-              value={newEvent.title}
-              onChange={(e) =>
-                setNewEvent({ ...newEvent, title: e.target.value })
-              }
-              placeholder="Enter event title"
-              required
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="event-date"
-              className={`block text-sm font-medium ${
-                isDarkMode ? "text-gray-300" : "text-gray-700"
-              } mb-2`}
-            >
-              Date
-            </label>
-            <input
-              type="date"
-              id="event-date"
-              className={`w-full ${
-                isDarkMode
-                  ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                  : "bg-white border-gray-200 text-gray-800 placeholder-gray-400"
-              } border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-shadow`}
-              value={newEvent.date}
-              onChange={(e) =>
-                setNewEvent({ ...newEvent, date: e.target.value })
-              }
-              required
-            />
-          </div>
-        </div>
-        <div>
-          <label
-            htmlFor="event-description"
-            className={`block text-sm font-medium ${
-              isDarkMode ? "text-gray-300" : "text-gray-700"
-            } mb-2`}
-          >
-            Description
+      <form onSubmit={handleAddEvent} className="space-y-6 relative z-10">
+        <div className="space-y-2">
+          <label className={`text-xs font-bold uppercase tracking-wider ${isDarkMode ? "text-slate-500" : "text-slate-400"}`}>
+            Event Title
           </label>
-          <textarea
-            id="event-description"
-            rows={3}
-            className={`w-full ${
+          <input
+            type="text"
+            className={`w-full px-4 py-2.5 rounded-xl border text-sm font-medium outline-none transition-all ${
               isDarkMode
-                ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                : "bg-white border-gray-200 text-gray-800 placeholder-gray-400"
-            } border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-shadow`}
-            value={newEvent.description}
-            onChange={(e) =>
-              setNewEvent({ ...newEvent, description: e.target.value })
-            }
-            placeholder="Enter event description"
+                ? "bg-slate-800 border-slate-700 text-white focus:border-blue-500"
+                : "bg-slate-50 border-slate-200 text-slate-900 focus:border-blue-500"
+            }`}
+            value={newEvent.title}
+            onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
+            placeholder="e.g. Quarterly Team Sync"
             required
           />
         </div>
-        <div className="flex justify-end">
-          <motion.button
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <label className={`text-xs font-bold uppercase tracking-wider ${isDarkMode ? "text-slate-500" : "text-slate-400"}`}>
+              Date & Time
+            </label>
+            <input
+              type="datetime-local"
+              className={`w-full px-4 py-2.5 rounded-xl border text-sm font-medium outline-none transition-all ${
+                isDarkMode
+                  ? "bg-slate-800 border-slate-700 text-white focus:border-blue-500"
+                  : "bg-slate-50 border-slate-200 text-slate-900 focus:border-blue-500"
+              }`}
+              value={newEvent.date}
+              onChange={(e) => setNewEvent({ ...newEvent, date: e.target.value })}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <label className={`text-xs font-bold uppercase tracking-wider ${isDarkMode ? "text-slate-500" : "text-slate-400"}`}>
+              Location
+            </label>
+            <input
+              type="text"
+              className={`w-full px-4 py-2.5 rounded-xl border text-sm font-medium outline-none transition-all ${
+                isDarkMode
+                  ? "bg-slate-800 border-slate-700 text-white focus:border-blue-500"
+                  : "bg-slate-50 border-slate-200 text-slate-900 focus:border-blue-500"
+              }`}
+              value={newEvent.location || ""}
+              onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })}
+              placeholder="e.g. Conference Room A or Zoom"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className={`text-xs font-bold uppercase tracking-wider ${isDarkMode ? "text-slate-500" : "text-slate-400"}`}>
+            Description
+          </label>
+          <textarea
+            rows={4}
+            className={`w-full px-4 py-2.5 rounded-xl border text-sm font-medium outline-none transition-all ${
+              isDarkMode
+                ? "bg-slate-800 border-slate-700 text-white focus:border-blue-500"
+                : "bg-slate-50 border-slate-200 text-slate-900 focus:border-blue-500"
+            }`}
+            value={newEvent.description}
+            onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
+            placeholder="Provide a brief overview of the event..."
+            required
+          />
+        </div>
+
+        <div className="flex gap-4 pt-4">
+          <button
             type="submit"
-            className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-indigo-600 hover:to-purple-600 text-white px-5 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold shadow-lg shadow-blue-500/20 transition-all"
           >
-            <Calendar className="w-5 h-5" />
-            Add Event
-          </motion.button>
+            <Save size={18} />
+            Create Event
+          </button>
+          {onCancel && (
+            <button
+              type="button"
+              onClick={onCancel}
+              className={`px-8 py-3 rounded-xl font-bold border transition-all ${
+                isDarkMode ? "bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200" : "bg-white border-slate-200 text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              Cancel
+            </button>
+          )}
         </div>
       </form>
-
-      <div
-        className={`absolute -bottom-6 -right-6 w-32 h-32 ${
-          isDarkMode ? "bg-purple-800" : "bg-purple-200"
-        } rounded-full opacity-20`}
-      />
-    </motion.div>
+    </GlowingCard>
   );
 };
 

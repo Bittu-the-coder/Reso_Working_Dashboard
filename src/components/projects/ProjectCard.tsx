@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
-import { Users, ChevronRight } from "lucide-react";
+import { CalendarDays, ChevronRight, Trash2, Users } from "lucide-react";
 import { useTheme } from "../../contexts/ThemeContext";
+import { GlowingCard } from "../ui/aceternity";
 
 interface Project {
   _id: string;
@@ -8,6 +9,8 @@ interface Project {
   description: string;
   progress: number;
   members: string[];
+  startDate?: string;
+  endDate?: string;
 }
 
 interface ProjectCardProps {
@@ -23,111 +26,75 @@ const ProjectCard = ({
 }: ProjectCardProps) => {
   const { isDarkMode } = useTheme();
 
-  const progressColorClass = (progress: number): string => {
-    if (progress < 30) return "from-red-500 to-red-600";
-    if (progress < 70) return "from-yellow-500 to-orange-500";
-    return "from-green-500 to-emerald-500";
+  const getProgressColor = (progress: number) => {
+    if (progress < 30) return "bg-rose-500";
+    if (progress < 70) return "bg-amber-500";
+    return "bg-emerald-500";
   };
 
   return (
-    <motion.div
-      className={`border rounded-xl p-5 shadow-sm relative overflow-hidden ${
-        isDarkMode
-          ? "border-gray-600 bg-gradient-to-r from-gray-700/80 to-gray-800/80"
-          : "border-blue-100 bg-gradient-to-r from-blue-50/80 to-indigo-50/80"
-      }`}
-      whileHover={{
-        y: -5,
-        boxShadow: `0 8px 30px ${
-          isDarkMode ? "rgba(59, 130, 246, 0.2)" : "rgba(59, 130, 246, 0.15)"
-        }`,
-      }}
-    >
-      <div className="flex justify-between items-start">
-        <h4
-          className={`text-lg font-bold ${
-            isDarkMode ? "text-blue-300" : "text-blue-900"
-          }`}
-        >
-          {project.name}
-        </h4>
-      </div>
-      <div className="mt-4">
-        <div className="flex justify-between text-sm mb-1">
-          <span
-            className={`font-medium ${
-              isDarkMode ? "text-blue-400" : "text-blue-700"
-            }`}
-          >
-            Progress
-          </span>
-          <span
-            className={`font-bold ${
-              isDarkMode ? "text-blue-300" : "text-blue-900"
-            }`}
-          >
-            {project.progress}%
-          </span>
+    <GlowingCard className={`${isDarkMode ? "!bg-slate-900 !border-slate-800" : "!bg-white !border-slate-200"} p-5 group`}>
+      <div className="relative z-10">
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            <h4 className={`text-lg font-bold ${isDarkMode ? "text-white" : "text-slate-900"} group-hover:text-blue-500 transition-colors`}>
+              {project.name}
+            </h4>
+            <p className={`text-xs mt-1 line-clamp-1 ${isDarkMode ? "text-slate-500" : "text-slate-500"}`}>
+              {project.description}
+            </p>
+          </div>
         </div>
-        <div
-          className={`w-full ${
-            isDarkMode ? "bg-gray-700" : "bg-gray-200"
-          } rounded-full h-2.5`}
-        >
-          <motion.div
-            className={`h-2.5 rounded-full bg-gradient-to-r ${progressColorClass(
-              project.progress
-            )}`}
-            style={{ width: `${project.progress}%` }}
-          ></motion.div>
-        </div>
-      </div>
-      <div className="flex items-center mt-3 pt-3">
-        <div
-          className={`p-1.5 ${
-            isDarkMode ? "bg-gray-600" : "bg-blue-100"
-          } rounded mr-2`}
-        >
-          <Users
-            className={`w-3 h-3 ${
-              isDarkMode ? "text-blue-300" : "text-blue-600"
-            }`}
-          />
-        </div>
-        <span
-          className={`text-xs ${
-            isDarkMode ? "text-gray-300" : "text-gray-600"
-          }`}
-        >
-          {project.members} team members
-        </span>
-        <div className="ml-auto flex gap-2">
-          <motion.button
-            className={`flex items-center gap-1 text-xs ${
-              isDarkMode
-                ? "text-blue-400 hover:text-blue-300"
-                : "text-blue-600 hover:text-blue-800"
-            }`}
-            whileHover={{ x: 3 }}
-            onClick={() => onViewDetails(project)}
-          >
-            View Details <ChevronRight className="w-3 h-3" />
-          </motion.button>
-          <motion.button
-            className={`flex items-center gap-1 text-xs ${
-              isDarkMode
-                ? "text-red-400 hover:text-red-300"
-                : "text-red-600 hover:text-red-800"
-            }`}
-            whileHover={{ x: 3 }}
-            onClick={() => onDelete(project._id)}
-          >
-            Delete
-          </motion.button>
+
+        <div className="space-y-4">
+          <div>
+            <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider mb-1.5">
+              <span className={isDarkMode ? "text-slate-500" : "text-slate-400"}>Progress</span>
+              <span className={isDarkMode ? "text-slate-300" : "text-slate-700"}>{project.progress}%</span>
+            </div>
+            <div className={`w-full ${isDarkMode ? "bg-slate-800" : "bg-slate-100"} rounded-full h-1.5 overflow-hidden`}>
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${project.progress}%` }}
+                className={`h-full rounded-full ${getProgressColor(project.progress)}`}
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between pt-2">
+            <div className="flex items-center gap-3">
+              <div className={`flex items-center gap-1 text-[11px] font-medium ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}>
+                <Users size={14} className="text-blue-500" />
+                <span>{project.members.length}</span>
+              </div>
+              {project.endDate && (
+                <div className={`flex items-center gap-1 text-[11px] font-medium ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}>
+                  <CalendarDays size={14} className="text-blue-500" />
+                  <span>{new Date(project.endDate).toLocaleDateString()}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex gap-2 pt-2">
+            <button
+              onClick={() => onViewDetails(project)}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-blue-600/10 hover:bg-blue-600 text-blue-500 hover:text-white text-xs font-bold transition-all"
+            >
+              Details
+              <ChevronRight size={14} />
+            </button>
+            <button
+              onClick={() => onDelete(project._id)}
+              className="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white transition-all"
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
         </div>
       </div>
-    </motion.div>
+    </GlowingCard>
   );
 };
 
-export default ProjectCard;
+export default ProjectCard

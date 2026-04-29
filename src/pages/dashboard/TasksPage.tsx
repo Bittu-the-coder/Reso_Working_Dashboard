@@ -1,22 +1,26 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
+  AlertCircle,
+  CalendarDays,
+  CheckCircle2,
+  ChevronRight,
+  Clock,
   FileText,
+  Filter,
   Plus,
   Search,
-  CheckCircle,
-  Clock,
-  AlertCircle,
   Users,
-  Calendar,
+  X,
 } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+import CreateTaskModal from "../../components/tasks/CreateTaskModal";
+import { GlowingCard, TextGenerateEffect } from "../../components/ui/aceternity";
 import { useTheme } from "../../contexts/ThemeContext";
+import { useAuthStore } from "../../store/useAuthStore";
 import { useTaskStore } from "../../store/useTaskStore";
 import { useTeamStore } from "../../store/useTeamStore";
-import { toast } from "react-hot-toast";
-import CreateTaskModal from "../../components/tasks/CreateTaskModal";
-import { useAuthStore } from "../../store/useAuthStore";
 import type { Task } from "../../types";
 
 interface Filters {
@@ -33,6 +37,24 @@ interface StatusInfo {
   label: string;
 }
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+  },
+};
+
 const TasksPage: React.FC = () => {
   const { isDarkMode } = useTheme();
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -42,7 +64,6 @@ const TasksPage: React.FC = () => {
     priority: "",
     search: "",
   });
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   const {
     tasks,
@@ -56,49 +77,20 @@ const TasksPage: React.FC = () => {
   const { user, getMe } = useAuthStore();
   const navigate = useNavigate();
 
-  // console.log("All Teams:", teams);
+  useEffect(() => {
+    const init = async () => {
+      if (!user) await getMe();
+      await getMyTeams();
+    };
+    init();
+  }, [user, getMe, getMyTeams]);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      if (!user) {
-        try {
-          await getMe();
-        } catch (error) {
-          console.error("Error fetching user:", error);
-        }
-      }
-    };
-    fetchUser();
-  }, [user, getMe]);
-
-  useEffect(() => {
-    const loadTeams = async () => {
-      try {
-        await getMyTeams();
-      } catch (error) {
-        toast.error("Failed to load teams");
-        console.error("Error loading teams:", error);
-      }
-    };
-
-    loadTeams();
-  }, [getMyTeams]);
-
-  useEffect(() => {
-    const loadTasks = async () => {
-      try {
-        if (filters.team) {
-          await getTeamTasks(filters.team);
-        } else {
-          await getUserTasks();
-        }
-      } catch (error) {
-        toast.error("Failed to load tasks");
-        console.error("Error loading tasks:", error);
-      }
-    };
-
-    loadTasks();
+    if (filters.team) {
+      getTeamTasks(filters.team);
+    } else {
+      getUserTasks();
+    }
   }, [filters.team, getTeamTasks, getUserTasks]);
 
   const filteredTasks = React.useMemo(() => {
@@ -112,14 +104,13 @@ const TasksPage: React.FC = () => {
               ))
         )
       : tasks;
-    // console.log("Filtered Tasks:", result);
 
     if (filters.status) {
       result = result.filter((task) => task.status === filters.status);
     }
 
     if (filters.priority) {
-      result = result.filter((task) => task.priority === filters.priority);
+      result = result.filter((task) => task.priority.toLowerCase() === filters.priority.toLowerCase());
     }
 
     if (filters.search) {
@@ -134,467 +125,247 @@ const TasksPage: React.FC = () => {
     return result;
   }, [tasks, teamTasks, filters, user?._id]);
 
-  const handleUpdateTaskStatus = async (taskId: string, status: string) => {
+  const handleUpdateTaskStatus = async (taskId: string, status: string, task: Task) => {
     try {
-      if (!selectedTask) return;
+      const teamId = typeof task.teamId === "string" ? task.teamId : task.teamId?._id;
+      if (!teamId) return;
 
-      const response = await updateTaskStatus(
-        typeof selectedTask.teamId === "string"
-          ? selectedTask.teamId
-          : selectedTask.teamId?._id,
-        taskId,
-        status
-      );
+      const response = await updateTaskStatus(teamId, taskId, status);
 
       if (response.success) {
-        toast.success("Task status updated!");
-        setSelectedTask({ ...selectedTask, status });
+        toast.success("Status updated");
       } else {
         throw new Error(response.error);
       }
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to update task"
-      );
+      toast.error(error instanceof Error ? error.message : "Update failed");
     }
-  };
-
-  const handleTaskClick = (task: Task) => {
-    navigate(`/dashboard/tasks/${task._id}`);
   };
 
   const getStatusInfo = (status: string): StatusInfo => {
     switch (status.toLowerCase()) {
       case "done":
         return {
-          bgClass: isDarkMode
-            ? "bg-green-900/30 border-green-800"
-            : "bg-green-50 border-green-100",
-          textClass: isDarkMode ? "text-green-300" : "text-green-800",
-          icon: (
-            <CheckCircle
-              className={`w-4 h-4 ${
-                isDarkMode ? "text-green-400" : "text-green-600"
-              }`}
-            />
-          ),
-          label: "Done",
+          bgClass: isDarkMode ? "bg-emerald-900/30" : "bg-emerald-50",
+          textClass: isDarkMode ? "text-emerald-400" : "text-emerald-700",
+          icon: <CheckCircle2 size={14} />,
+          label: "Completed",
         };
       case "in_progress":
         return {
-          bgClass: isDarkMode
-            ? "bg-blue-900/30 border-blue-800"
-            : "bg-blue-50 border-blue-100",
-          textClass: isDarkMode ? "text-blue-300" : "text-blue-800",
-          icon: (
-            <Clock
-              className={`w-4 h-4 ${
-                isDarkMode ? "text-blue-400" : "text-blue-600"
-              }`}
-            />
-          ),
+          bgClass: isDarkMode ? "bg-blue-900/30" : "bg-blue-50",
+          textClass: isDarkMode ? "text-blue-400" : "text-blue-700",
+          icon: <Clock size={14} />,
           label: "In Progress",
         };
       default:
         return {
-          bgClass: isDarkMode
-            ? "bg-amber-900/30 border-amber-800"
-            : "bg-amber-50 border-amber-100",
-          textClass: isDarkMode ? "text-amber-300" : "text-amber-800",
-          icon: (
-            <AlertCircle
-              className={`w-4 h-4 ${
-                isDarkMode ? "text-amber-400" : "text-amber-600"
-              }`}
-            />
-          ),
-          label: "To Do",
+          bgClass: isDarkMode ? "bg-slate-800/50" : "bg-slate-100",
+          textClass: isDarkMode ? "text-slate-400" : "text-slate-600",
+          icon: <AlertCircle size={14} />,
+          label: "Pending",
         };
     }
   };
 
-  const getPriorityColor = (priority: string): string => {
-    switch (priority) {
-      case "High":
-        return isDarkMode
-          ? "text-red-400 bg-red-900/30"
-          : "text-red-600 bg-red-50";
-      case "Medium":
-        return isDarkMode
-          ? "text-yellow-400 bg-yellow-900/30"
-          : "text-yellow-600 bg-yellow-50";
-      case "Low":
-        return isDarkMode
-          ? "text-green-400 bg-green-900/30"
-          : "text-green-600 bg-green-50";
+  const getPriorityStyles = (priority: string) => {
+    switch (priority.toLowerCase()) {
+      case "high":
+        return isDarkMode ? "text-rose-400 bg-rose-900/20" : "text-rose-600 bg-rose-50";
+      case "medium":
+        return isDarkMode ? "text-amber-400 bg-amber-900/20" : "text-amber-600 bg-amber-50";
       default:
-        return isDarkMode
-          ? "text-gray-400 bg-gray-800/50"
-          : "text-gray-600 bg-gray-50";
+        return isDarkMode ? "text-blue-400 bg-blue-900/20" : "text-blue-600 bg-blue-50";
     }
   };
 
-  if (loading && !tasks.length) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div
-          className={`animate-spin rounded-full h-8 w-8 border-b-2 ${
-            isDarkMode ? "border-blue-400" : "border-blue-600"
-          }`}
-        ></div>
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center space-x-2">
-          <FileText
-            className={`w-6 h-6 ${
-              isDarkMode ? "text-blue-400" : "text-blue-600"
-            }`}
-          />
-          <h1
-            className={`text-2xl font-bold ${
-              isDarkMode ? "text-white" : "text-gray-900"
-            }`}
-          >
-            Collaborative Tasks
-          </h1>
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <div className="flex items-center gap-3">
+            <div className={`p-2 rounded-lg ${isDarkMode ? "bg-blue-900/30 text-blue-400" : "bg-blue-50 text-blue-600"}`}>
+              <FileText size={24} />
+            </div>
+            <TextGenerateEffect
+              words="Collaborative Tasks"
+              className={`text-3xl font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}
+            />
+          </div>
+          <p className={`mt-2 ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}>
+            Manage research tasks, track progress, and coordinate with your team.
+          </p>
         </div>
-        <button
+
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={() => setShowCreateModal(true)}
-          className={`${
-            isDarkMode
-              ? "bg-blue-600 hover:bg-blue-700"
-              : "bg-blue-600 hover:bg-blue-700"
-          } text-white px-4 py-2 rounded-lg flex items-center space-x-2`}
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold shadow-lg shadow-blue-500/20 transition-all"
         >
-          <Plus className="w-4 h-4" />
-          <span>Create Task</span>
-        </button>
+          <Plus size={18} />
+          New Task
+        </motion.button>
       </div>
 
-      <div
-        className={`${
-          isDarkMode
-            ? "bg-gray-800 border-gray-700"
-            : "bg-white border-gray-200"
-        } border rounded-lg p-4`}
-      >
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          <div>
-            <label
-              className={`block text-sm font-medium ${
-                isDarkMode ? "text-gray-300" : "text-gray-700"
-              } mb-1`}
-            >
-              Search
-            </label>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                value={filters.search}
-                onChange={(e) =>
-                  setFilters({ ...filters, search: e.target.value })
-                }
-                className={`pl-10 w-full ${
-                  isDarkMode
-                    ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500"
-                    : "border-gray-300 focus:ring-blue-500"
-                } border rounded-lg px-3 py-2 focus:outline-none focus:ring-2`}
-                placeholder="Search tasks..."
-              />
+      {/* Filters Bar */}
+      <div className={`p-4 rounded-2xl border ${isDarkMode ? "bg-slate-900/50 border-slate-800" : "bg-white border-slate-200"} backdrop-blur-sm`}>
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex-1 min-w-[200px] relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+            <input
+              type="text"
+              placeholder="Search tasks..."
+              value={filters.search}
+              onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+              className={`w-full pl-10 pr-4 py-2 rounded-xl text-sm border focus:ring-2 focus:ring-blue-500 transition-all outline-none ${
+                isDarkMode ? "bg-slate-800 border-slate-700 text-white" : "bg-slate-50 border-slate-200"
+              }`}
+            />
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+              <Users size={16} className="text-slate-400" />
+              <select
+                value={filters.team}
+                onChange={(e) => setFilters({ ...filters, team: e.target.value })}
+                className="bg-slate-800 text-sm font-medium outline-none cursor-pointer"
+              >
+                <option value="">All Teams</option>
+                {teams.map((team) => (
+                  <option key={team._id} value={team._id}>{team.name}</option>
+                ))}
+              </select>
             </div>
-          </div>
 
-          <div>
-            <label
-              className={`block text-sm font-medium ${
-                isDarkMode ? "text-gray-300" : "text-gray-700"
-              } mb-1`}
-            >
-              Team
-            </label>
-            <select
-              value={filters.team}
-              onChange={(e) => setFilters({ ...filters, team: e.target.value })}
-              className={`w-full ${
-                isDarkMode
-                  ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500"
-                  : "border-gray-300 focus:ring-blue-500"
-              } border rounded-lg px-3 py-2 focus:outline-none focus:ring-2`}
-            >
-              <option value="">All Teams</option>
-              {teams.map((team) => (
-                <option key={team._id} value={team._id}>
-                  {team.name}
-                </option>
-              ))}
-            </select>
-          </div>
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+              <Filter size={16} className="text-slate-400" />
+              <select
+                value={filters.status}
+                onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+                className="bg-slate-800 text-sm font-medium outline-none cursor-pointer"
+              >
+                <option value="">All Status</option>
+                <option value="todo">To Do</option>
+                <option value="in_progress">In Progress</option>
+                <option value="done">Done</option>
+              </select>
+            </div>
 
-          <div>
-            <label
-              className={`block text-sm font-medium ${
-                isDarkMode ? "text-gray-300" : "text-gray-700"
-              } mb-1`}
-            >
-              Status
-            </label>
-            <select
-              value={filters.status}
-              onChange={(e) =>
-                setFilters({ ...filters, status: e.target.value })
-              }
-              className={`w-full ${
-                isDarkMode
-                  ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500"
-                  : "border-gray-300 focus:ring-blue-500"
-              } border rounded-lg px-3 py-2 focus:outline-none focus:ring-2`}
-            >
-              <option value="">All Status</option>
-              <option value="todo">To Do</option>
-              <option value="in_progress">In Progress</option>
-              <option value="done">Done</option>
-            </select>
-          </div>
-
-          <div>
-            <label
-              className={`block text-sm font-medium ${
-                isDarkMode ? "text-gray-300" : "text-gray-700"
-              } mb-1`}
-            >
-              Priority
-            </label>
-            <select
-              value={filters.priority}
-              onChange={(e) =>
-                setFilters({ ...filters, priority: e.target.value })
-              }
-              className={`w-full ${
-                isDarkMode
-                  ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500"
-                  : "border-gray-300 focus:ring-blue-500"
-              } border rounded-lg px-3 py-2 focus:outline-none focus:ring-2`}
-            >
-              <option value="">All Priority</option>
-              <option value="high">High</option>
-              <option value="medium">Medium</option>
-              <option value="low">Low</option>
-            </select>
-          </div>
-
-          <div className="flex items-end">
             <button
-              onClick={() =>
-                setFilters({ team: "", status: "", priority: "", search: "" })
-              }
-              className={`w-full ${
-                isDarkMode
-                  ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              } px-3 py-2 rounded-lg`}
+              onClick={() => setFilters({ team: "", status: "", priority: "", search: "" })}
+              className={`p-2 rounded-xl transition-all ${isDarkMode ? "hover:bg-slate-800 text-slate-400" : "hover:bg-slate-100 text-slate-500"}`}
+              title="Clear Filters"
             >
-              Clear Filters
+              <X size={20} />
             </button>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredTasks.length > 0 ? (
-          filteredTasks.map((task) => {
-            const statusInfo = getStatusInfo(task.status);
-            const priorityColor = getPriorityColor(task.priority || "Medium");
-            const label = statusInfo.label;
-            const icon = statusInfo.icon;
+      {/* Tasks Grid */}
+      {loading ? (
+        <div className="flex items-center justify-center h-64">
+          <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${isDarkMode ? "border-blue-400" : "border-blue-600"}`} />
+        </div>
+      ) : filteredTasks.length > 0 ? (
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          initial="hidden"
+          animate="visible"
+          variants={containerVariants}
+        >
+          {filteredTasks.map((task) => {
+            const status = getStatusInfo(task.status);
             return (
-              <motion.div
-                key={task._id}
-                className={`${
-                  isDarkMode
-                    ? "bg-gray-800 border-gray-700 hover:bg-gray-750"
-                    : "bg-white border-gray-200 hover:shadow-lg"
-                } border rounded-lg p-6 transition-all cursor-pointer`}
-                onClick={() => handleTaskClick(task)}
-                whileHover={{ scale: 1.02 }}
-                role="button"
-                tabIndex={0}
-                aria-label={`Task ${task.title}`}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    handleTaskClick(task);
-                  }
-                }}
-              >
-                <div className="space-y-4">
-                  <div className="flex items-start justify-between">
-                    <h3
-                      className={`text-lg font-semibold ${
-                        isDarkMode ? "text-white" : "text-gray-900"
-                      } line-clamp-2`}
-                    >
-                      {task.title}
-                    </h3>
-                    <span
-                      className={`px-2 py-1 flex gap-1 text-xs font-medium rounded ${priorityColor}`}
-                    >
-                      {icon}
-                      {label}
+              <motion.div key={task._id} variants={itemVariants}>
+                <GlowingCard
+                  className={`h-full cursor-pointer flex flex-col ${
+                    isDarkMode
+                      ? "!bg-slate-900 !border-slate-800"
+                      : "!bg-white !border-slate-200"
+                  }`}
+                  onClick={() => navigate(`/dashboard/tasks/${task._id}`)}
+                >
+                  <div className="flex justify-between items-start mb-4 relative z-10">
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${getPriorityStyles(task.priority || "Medium")}`}>
+                      {task.priority || "Medium"}
+                    </span>
+                    <span className={`flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider ${status.textClass}`}>
+                      {status.icon}
+                      {status.label}
                     </span>
                   </div>
-                  {task.description && (
-                    <p
-                      className={`text-sm ${
-                        isDarkMode ? "text-gray-300" : "text-gray-600"
-                      } line-clamp-2`}
-                    >
-                      {task.description}
-                    </p>
-                  )}
-                  <div className="space-y-3">
-                    {/* Team Info Section */}
-                    <div
-                      className={`flex items-center space-x-2 text-sm ${
-                        isDarkMode ? "text-gray-300" : "text-gray-600"
-                      }`}
-                    >
-                      <Users className="w-4 h-4" />
-                      <div className="flex flex-col">
-                        <span className="font-medium">
-                          {teams.find((t) => t._id === task.teamId)?.name ||
-                            "No team"}
-                        </span>
-                        <span className="text-xs">
-                          Created by:{" "}
-                          {teams
-                            .find((t) => t._id === task.teamId)
-                            ?.members.find(
-                              (m) => String(m.userId) === String(task.createdBy)
-                            )?.name || "Unknown"}
-                        </span>
+
+                  <h3 className={`text-lg font-bold mb-2 line-clamp-2 relative z-10 ${isDarkMode ? "text-white" : "text-slate-900"}`}>
+                    {task.title}
+                  </h3>
+
+                  <p className={`text-sm line-clamp-2 mb-6 relative z-10 flex-1 ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}>
+                    {task.description || "No description provided."}
+                  </p>
+
+                  <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800/50 relative z-10">
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-1.5 text-slate-500">
+                        <CalendarDays size={14} />
+                        {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : "No deadline"}
+                      </div>
+                      <div className="flex items-center -space-x-1.5">
+                        {task.assignedTo?.slice(0, 3).map((userId, idx) => (
+                          <div
+                            key={idx}
+                            className={`h-6 w-6 rounded-full border-2 ${isDarkMode ? "border-slate-900 bg-slate-800" : "border-white bg-slate-100"} flex items-center justify-center text-[8px] font-bold`}
+                          >
+                            U
+                          </div>
+                        ))}
                       </div>
                     </div>
 
-                    {/* Assigned Users Section */}
-                    {task.assignedTo && task.assignedTo.length > 0 && (
-                      <div className="flex flex-col space-y-2">
-                        <span
-                          className={`text-xs ${
-                            isDarkMode ? "text-gray-400" : "text-gray-500"
-                          }`}
-                        >
-                          Assigned to:
-                        </span>
-                        <div className="flex items-center -space-x-2">
-                          {task.assignedTo.slice(0, 3).map((user) => (
-                            <div
-                              key={typeof user === "string" ? user : user._id}
-                              className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                                isDarkMode ? "bg-gray-700" : "bg-gray-200"
-                              } border-2 ${
-                                isDarkMode ? "border-gray-800" : "border-white"
-                              }`}
-                            >
-                              <span className="text-xs font-medium">
-                                {teams
-                                  .find((t) => t._id === task.teamId)
-                                  ?.members.find((m) => m.userId === user)
-                                  ?.name?.charAt(0)
-                                  ?.toUpperCase() || "?"}
-                              </span>
-                            </div>
-                          ))}
-                          {task.assignedTo.length > 3 && (
-                            <div
-                              className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                                isDarkMode ? "bg-gray-700" : "bg-gray-200"
-                              } border-2 ${
-                                isDarkMode ? "border-gray-800" : "border-white"
-                              }`}
-                            >
-                              <span
-                                className={`text-xs ${
-                                  isDarkMode ? "text-gray-300" : "text-gray-700"
-                                }`}
-                              >
-                                +{task.assignedTo.length - 3}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Due Date Section */}
-                    {task.dueDate && (
-                      <div
-                        className={`flex items-center space-x-2 text-sm ${
-                          isDarkMode ? "text-gray-300" : "text-gray-600"
+                    <div className="flex items-center justify-between gap-2">
+                      <select
+                        value={task.status}
+                        onClick={(e) => e.stopPropagation()}
+                        onChange={(e) => handleUpdateTaskStatus(task._id, e.target.value, task)}
+                        className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-lg outline-none cursor-pointer transition-all border ${
+                          isDarkMode ? "bg-slate-800 border-slate-700 text-slate-300" : "bg-slate-50 border-slate-200 text-slate-600"
                         }`}
                       >
-                        <Calendar className="w-4 h-4" />
-                        <span>
-                          Due:{" "}
-                          {new Date(task.dueDate).toLocaleString("en-US", {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                          })}
-                        </span>
-                      </div>
-                    )}
+                        <option value="todo">Pending</option>
+                        <option value="in_progress">Working</option>
+                        <option value="done">Completed</option>
+                      </select>
+
+                      <button className={`p-1.5 rounded-lg transition-all ${isDarkMode ? "hover:bg-slate-800 text-slate-400" : "hover:bg-slate-100 text-slate-500"}`}>
+                        <ChevronRight size={16} />
+                      </button>
+                    </div>
                   </div>
-                  <div
-                    className={`flex items-center justify-between pt-2 border-t ${
-                      isDarkMode ? "border-gray-700" : "border-gray-100"
-                    }`}
-                  >
-                    <span
-                      className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${statusInfo.bgClass} ${statusInfo.textClass} border`}
-                    >
-                      {statusInfo.icon}
-                      {statusInfo.label}
-                    </span>
-                    <select
-                      value={task.status}
-                      onClick={(e) => e.stopPropagation()}
-                      onChange={(e) =>
-                        handleUpdateTaskStatus(task._id, e.target.value)
-                      }
-                      className={`text-xs border ${
-                        isDarkMode
-                          ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500"
-                          : "border-gray-300 focus:ring-blue-500"
-                      } rounded px-2 py-1 focus:outline-none focus:ring-1`}
-                    >
-                      <option value="To Do">To Do</option>
-                      <option value="In Progress">In Progress</option>
-                      <option value="Done">Done</option>
-                    </select>
-                  </div>
-                </div>
+                </GlowingCard>
               </motion.div>
             );
-          })
-        ) : (
-          <div
-            className={`col-span-full flex flex-col items-center justify-center p-8 ${
-              isDarkMode ? "text-gray-400" : "text-gray-500"
-            }`}
-          >
-            <FileText className="w-12 h-12 mb-3 opacity-50" />
-            <h3 className="text-lg font-semibold mb-1">No tasks found</h3>
-            <p className="text-sm">
-              Try adjusting your filters or create a new task
-            </p>
+          })}
+        </motion.div>
+      ) : (
+        <div className={`text-center py-20 rounded-3xl border-2 border-dashed ${isDarkMode ? "border-slate-800 bg-slate-900/20" : "border-slate-200 bg-slate-50"}`}>
+          <div className={`mx-auto w-16 h-16 rounded-2xl flex items-center justify-center mb-4 ${isDarkMode ? "bg-slate-800 text-slate-500" : "bg-white text-slate-300"}`}>
+            <FileText size={32} />
           </div>
-        )}
-      </div>
+          <h3 className={`text-xl font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>No Tasks Found</h3>
+          <p className={`mt-2 max-w-xs mx-auto ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}>
+            We couldn't find any tasks matching your current filters.
+          </p>
+          <button
+            onClick={() => setFilters({ team: "", status: "", priority: "", search: "" })}
+            className="mt-6 text-sm font-semibold text-blue-500 hover:text-blue-600"
+          >
+            Clear all filters
+          </button>
+        </div>
+      )}
 
       {showCreateModal && (
         <CreateTaskModal

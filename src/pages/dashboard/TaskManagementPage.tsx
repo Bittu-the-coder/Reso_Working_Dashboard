@@ -119,7 +119,7 @@ const TaskManagementPage = () => {
       const taskToLoad = taskId || localStorage.getItem("lastViewedTask");
       if (taskToLoad) {
         try {
-          await getTaskById(taskToLoad, taskToLoad);
+          await getTaskById(taskToLoad);
         } catch (error) {
           console.error("Error fetching task:", error);
           toast.error("Failed to fetch task details");

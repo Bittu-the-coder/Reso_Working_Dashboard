@@ -241,7 +241,12 @@ const getAllUserProjects = asyncHandler(async (req, res, next) => {
   try {
 
 
-    let query = { 'members.userId': req.user._id };
+    let query = {
+      $or: [
+        { 'members.userId': req.user._id },
+        { createdBy: req.user._id }
+      ]
+    };
 
     if (status) {
       query.status = status;

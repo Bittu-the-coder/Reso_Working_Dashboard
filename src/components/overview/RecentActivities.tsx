@@ -1,9 +1,9 @@
 import { useTheme } from "../../contexts/ThemeContext";
-import { motion } from "framer-motion";
 import { Calendar } from "lucide-react";
+import { GlowingCard } from "../ui/aceternity";
 
 interface Event {
-  id: string | number;
+  _id: string | number;
   title: string;
   date: string;
   description: string;
@@ -17,81 +17,80 @@ const RecentActivities = ({ events }: RecentActivitiesProps) => {
   const { isDarkMode } = useTheme();
 
   return (
-    <motion.div
+    <GlowingCard
       className={`${
         isDarkMode
-          ? "bg-gray-800/80 border-gray-700"
-          : "bg-white/80 border-blue-100"
-      } backdrop-blur-lg p-6 rounded-2xl shadow-lg border relative overflow-hidden`}
-      whileHover={{
-        boxShadow: `0 8px 30px ${
-          isDarkMode ? "rgba(59, 130, 246, 0.2)" : "rgba(59, 130, 246, 0.15)"
-        }`,
-      }}
+          ? "!bg-slate-900 !border-slate-800"
+          : "!bg-white !border-slate-200"
+      } p-6 h-full`}
     >
-      <div className="flex items-center gap-3 mb-6 z-10 relative">
+      <div className="flex items-center gap-3 mb-6 relative z-10">
         <div
           className={`p-2 ${
-            isDarkMode ? "bg-indigo-900" : "bg-indigo-100"
+            isDarkMode ? "bg-indigo-900/40 text-indigo-400" : "bg-indigo-50 text-indigo-600"
           } rounded-lg`}
         >
-          <Calendar
-            className={`w-5 h-5 ${
-              isDarkMode ? "text-indigo-400" : "text-indigo-600"
-            }`}
-          />
+          <Calendar size={20} />
         </div>
         <h3
           className={`text-xl font-bold ${
-            isDarkMode ? "text-indigo-300" : "text-indigo-900"
+            isDarkMode ? "text-white" : "text-slate-900"
           }`}
         >
           Recent Activities
         </h3>
       </div>
-      <div className="space-y-3">
-        {events
-          .sort(
-            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-          )
-          .slice(0, 3)
-          .map((event) => (
-            <motion.div
-              key={event.id}
-              className={`bg-gradient-to-r ${
-                isDarkMode
-                  ? "from-blue-900/40 to-indigo-900/40 border-blue-800"
-                  : "from-blue-50 to-indigo-50 border-blue-100"
-              } p-4 rounded-xl border shadow-sm`}
-              whileHover={{ scale: 1.01 }}
-            >
-              <div className="flex justify-between mb-1">
-                <h5
-                  className={`font-medium ${
-                    isDarkMode ? "text-blue-300" : "text-blue-900"
-                  }`}
-                >
-                  {event.title}
-                </h5>
-                <span
-                  className={`text-sm ${
-                    isDarkMode ? "text-blue-400" : "text-blue-700"
-                  }`}
-                >
-                  {event.date}
-                </span>
-              </div>
-              <p
-                className={`text-sm ${
-                  isDarkMode ? "text-blue-400" : "text-blue-700"
-                }`}
+      <div className="space-y-4 relative z-10">
+        {events && events.length > 0 ? (
+          events
+            .sort(
+              (a, b) => new Date(b.eventDate || 0).getTime() - new Date(a.eventDate || 0).getTime()
+            )
+            .slice(0, 3)
+            .map((event) => (
+              <div
+                key={event._id}
+                onClick={() => (window.location.href = "/dashboard/events")}
+                className={`p-4 rounded-xl border ${
+                  isDarkMode
+                    ? "bg-slate-800/40 border-slate-700 hover:bg-slate-800"
+                    : "bg-slate-50 border-slate-100 hover:bg-slate-100"
+                } transition-all hover:translate-x-1 cursor-pointer`}
               >
-                {event.description}
-              </p>
-            </motion.div>
-          ))}
+                <div className="flex justify-between items-start mb-1">
+                  <h5
+                    className={`font-semibold text-sm ${
+                      isDarkMode ? "text-slate-100" : "text-slate-900"
+                    }`}
+                  >
+                    {event.title}
+                  </h5>
+                  <span
+                    className={`text-[10px] font-bold uppercase tracking-wider ${
+                      isDarkMode ? "text-slate-500" : "text-slate-400"
+                    }`}
+                  >
+                    {event.eventDate 
+                      ? new Date(event.eventDate).toLocaleDateString()
+                      : "No Date"}
+                  </span>
+                </div>
+                <p
+                  className={`text-xs line-clamp-2 ${
+                    isDarkMode ? "text-slate-400" : "text-slate-600"
+                  }`}
+                >
+                  {event.description}
+                </p>
+              </div>
+            ))
+        ) : (
+          <div className="py-8 text-center text-sm text-slate-500">
+            No recent activities
+          </div>
+        )}
       </div>
-    </motion.div>
+    </GlowingCard>
   );
 };
 

@@ -1,7 +1,17 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Info, CheckCircle, ChevronRight, Mail, Sparkles } from "lucide-react";
+import {
+  Info,
+  CheckCircle,
+  ChevronRight,
+  Mail,
+  Search,
+  BookOpen,
+  Handshake,
+  Megaphone,
+} from "lucide-react";
 import { useTheme } from "../contexts/ThemeContext";
+import { GlowingCard, TextGenerateEffect } from "../components/ui/aceternity";
 
 // Animation variants
 const containerVariants = {
@@ -30,6 +40,45 @@ const itemVariants = {
 const LearnMorePage: React.FC = () => {
   const { isDarkMode } = useTheme();
 
+  const pillars = [
+    {
+      title: "Research",
+      description:
+        "Conducting innovative research projects in emerging technologies",
+      icon: <Search className="w-5 h-5" />,
+      color: isDarkMode
+        ? "bg-blue-900/30 text-blue-400 border-blue-800/50"
+        : "bg-blue-50 text-blue-700 border-blue-200",
+    },
+    {
+      title: "Education",
+      description:
+        "Creating learning resources and organizing workshops",
+      icon: <BookOpen className="w-5 h-5" />,
+      color: isDarkMode
+        ? "bg-emerald-900/30 text-emerald-400 border-emerald-800/50"
+        : "bg-emerald-50 text-emerald-700 border-emerald-200",
+    },
+    {
+      title: "Services",
+      description:
+        "Providing technical assistance to university departments and external organizations",
+      icon: <Handshake className="w-5 h-5" />,
+      color: isDarkMode
+        ? "bg-amber-900/30 text-amber-400 border-amber-800/50"
+        : "bg-amber-50 text-amber-700 border-amber-200",
+    },
+    {
+      title: "Outreach",
+      description:
+        "Engaging with the community through tech events and knowledge-sharing initiatives",
+      icon: <Megaphone className="w-5 h-5" />,
+      color: isDarkMode
+        ? "bg-rose-900/30 text-rose-400 border-rose-800/50"
+        : "bg-rose-50 text-rose-700 border-rose-200",
+    },
+  ];
+
   return (
     <motion.main
       className="flex-grow max-w-7xl w-full mx-auto px-4 py-8 sm:px-6 lg:px-8 relative z-10"
@@ -37,23 +86,15 @@ const LearnMorePage: React.FC = () => {
       animate="visible"
       variants={containerVariants}
     >
-      <motion.div
+      <GlowingCard
         className={`${
-          isDarkMode
-            ? "bg-gray-800/80 backdrop-blur-lg border-gray-700"
-            : "bg-white/80 backdrop-blur-lg border-blue-100"
-        } p-8 rounded-2xl border shadow-lg relative overflow-hidden`}
-        variants={itemVariants}
-        whileHover={{
-          boxShadow: `0 8px 30px ${
-            isDarkMode ? "rgba(59, 130, 246, 0.2)" : "rgba(59, 130, 246, 0.15)"
-          }`,
-        }}
+          isDarkMode ? "!bg-slate-900 !border-slate-800" : "!bg-white !border-slate-200"
+        } rounded-2xl p-8`}
       >
         <div className="flex items-center gap-3 mb-6">
           <div
             className={`p-3 ${
-              isDarkMode ? "bg-blue-900" : "bg-blue-100"
+              isDarkMode ? "bg-blue-900/40" : "bg-blue-50"
             } rounded-full`}
           >
             <Info
@@ -64,7 +105,7 @@ const LearnMorePage: React.FC = () => {
           </div>
           <h2
             className={`text-2xl font-bold ${
-              isDarkMode ? "text-blue-400" : "text-blue-900"
+              isDarkMode ? "text-slate-100" : "text-slate-900"
             }`}
           >
             About RESO
@@ -74,7 +115,7 @@ const LearnMorePage: React.FC = () => {
         <motion.div className="space-y-6" variants={containerVariants}>
           <motion.p
             className={`${
-              isDarkMode ? "text-gray-300" : "text-gray-700"
+              isDarkMode ? "text-slate-300" : "text-slate-600"
             } leading-relaxed`}
             variants={itemVariants}
           >
@@ -88,26 +129,25 @@ const LearnMorePage: React.FC = () => {
             <div className="flex items-center gap-3 mb-4">
               <div
                 className={`p-2 rounded-lg ${
-                  isDarkMode ? "bg-purple-900" : "bg-purple-100"
+                  isDarkMode ? "bg-slate-800" : "bg-slate-100"
                 }`}
               >
-                <Sparkles
+                <BookOpen
                   className={`w-5 h-5 ${
-                    isDarkMode ? "text-purple-400" : "text-purple-600"
+                    isDarkMode ? "text-slate-300" : "text-slate-600"
                   }`}
                 />
               </div>
-              <h2
-                className={`text-2xl font-bold ${
-                  isDarkMode ? "text-purple-300" : "text-purple-900"
+              <TextGenerateEffect
+                words="Our Mission"
+                className={`text-2xl ${
+                  isDarkMode ? "text-slate-100" : "text-slate-900"
                 }`}
-              >
-                Our Mission
-              </h2>
+              />
             </div>
             <p
               className={`${
-                isDarkMode ? "text-gray-300" : "text-gray-700"
+                isDarkMode ? "text-slate-300" : "text-slate-600"
               } leading-relaxed`}
             >
               Our mission is to create a collaborative environment that enables
@@ -119,140 +159,46 @@ const LearnMorePage: React.FC = () => {
 
           <motion.div className="mt-10" variants={itemVariants}>
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 rounded-lg bg-indigo-100">
-                <CheckCircle className="w-5 h-5 text-indigo-600" />
+              <div
+                className={`p-2 rounded-lg ${
+                  isDarkMode ? "bg-slate-800" : "bg-slate-100"
+                }`}
+              >
+                <CheckCircle
+                  className={`w-5 h-5 ${
+                    isDarkMode ? "text-slate-300" : "text-slate-600"
+                  }`}
+                />
               </div>
-              <h2 className="text-2xl font-bold text-indigo-900">
+              <h2
+                className={`text-2xl font-bold ${
+                  isDarkMode ? "text-slate-100" : "text-slate-900"
+                }`}
+              >
                 Key Pillars
               </h2>
             </div>
             <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-              <motion.li
-                className={`${
-                  isDarkMode
-                    ? "bg-gradient-to-r from-blue-900/40 to-indigo-900/40 border-blue-800"
-                    : "bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-100"
-                } border p-4 rounded-xl shadow-sm`}
-                whileHover={{
-                  y: -5,
-                  boxShadow: `0 4px 20px ${
-                    isDarkMode
-                      ? "rgba(59, 130, 246, 0.2)"
-                      : "rgba(59, 130, 246, 0.15)"
-                  }`,
-                }}
-              >
-                <h3
-                  className={`font-bold ${
-                    isDarkMode ? "text-blue-300" : "text-blue-800"
-                  } text-lg mb-2`}
+              {pillars.map((pillar) => (
+                <motion.li
+                  key={pillar.title}
+                  className={`${pillar.color} border p-4 rounded-xl shadow-sm`}
+                  whileHover={{
+                    y: -5,
+                    transition: {
+                      type: "spring",
+                      stiffness: 300,
+                      damping: 20,
+                    },
+                  }}
                 >
-                  Research
-                </h3>
-                <p
-                  className={`${
-                    isDarkMode ? "text-blue-200" : "text-blue-700"
-                  }`}
-                >
-                  Conducting innovative research projects in emerging
-                  technologies
-                </p>
-              </motion.li>
-
-              <motion.li
-                className={`${
-                  isDarkMode
-                    ? "bg-gradient-to-r from-indigo-900/40 to-purple-900/40 border-indigo-800"
-                    : "bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-100"
-                } border p-4 rounded-xl shadow-sm`}
-                whileHover={{
-                  y: -5,
-                  boxShadow: `0 4px 20px ${
-                    isDarkMode
-                      ? "rgba(79, 70, 229, 0.2)"
-                      : "rgba(79, 70, 229, 0.15)"
-                  }`,
-                }}
-              >
-                <h3
-                  className={`font-bold ${
-                    isDarkMode ? "text-indigo-300" : "text-indigo-800"
-                  } text-lg mb-2`}
-                >
-                  Education
-                </h3>
-                <p
-                  className={`${
-                    isDarkMode ? "text-indigo-200" : "text-indigo-700"
-                  }`}
-                >
-                  Creating learning resources and organizing workshops
-                </p>
-              </motion.li>
-
-              <motion.li
-                className={`${
-                  isDarkMode
-                    ? "bg-gradient-to-r from-purple-900/40 to-pink-900/40 border-purple-800"
-                    : "bg-gradient-to-r from-purple-50 to-pink-50 border-purple-100"
-                } border p-4 rounded-xl shadow-sm`}
-                whileHover={{
-                  y: -5,
-                  boxShadow: `0 4px 20px ${
-                    isDarkMode
-                      ? "rgba(139, 92, 246, 0.2)"
-                      : "rgba(139, 92, 246, 0.15)"
-                  }`,
-                }}
-              >
-                <h3
-                  className={`font-bold ${
-                    isDarkMode ? "text-purple-300" : "text-purple-800"
-                  } text-lg mb-2`}
-                >
-                  Services
-                </h3>
-                <p
-                  className={`${
-                    isDarkMode ? "text-purple-200" : "text-purple-700"
-                  }`}
-                >
-                  Providing technical assistance to university departments and
-                  external organizations
-                </p>
-              </motion.li>
-
-              <motion.li
-                className={`${
-                  isDarkMode
-                    ? "bg-gradient-to-r from-pink-900/40 to-red-900/40 border-pink-800"
-                    : "bg-gradient-to-r from-pink-50 to-red-50 border-pink-100"
-                } border p-4 rounded-xl shadow-sm`}
-                whileHover={{
-                  y: -5,
-                  boxShadow: `0 4px 20px ${
-                    isDarkMode
-                      ? "rgba(219, 39, 119, 0.2)"
-                      : "rgba(219, 39, 119, 0.15)"
-                  }`,
-                }}
-              >
-                <h3
-                  className={`font-bold ${
-                    isDarkMode ? "text-pink-300" : "text-pink-800"
-                  } text-lg mb-2`}
-                >
-                  Outreach
-                </h3>
-                <p
-                  className={`${
-                    isDarkMode ? "text-pink-200" : "text-pink-700"
-                  }`}
-                >
-                  Engaging with the community through tech events and
-                  knowledge-sharing initiatives
-                </p>
-              </motion.li>
+                  <div className="flex items-center gap-2 mb-2">
+                    {pillar.icon}
+                    <h3 className="font-bold text-lg">{pillar.title}</h3>
+                  </div>
+                  <p className="text-sm opacity-80">{pillar.description}</p>
+                </motion.li>
+              ))}
             </ul>
           </motion.div>
 
@@ -260,18 +206,18 @@ const LearnMorePage: React.FC = () => {
             <div className="flex items-center gap-3 mb-4">
               <div
                 className={`p-2 rounded-lg ${
-                  isDarkMode ? "bg-green-900" : "bg-green-100"
+                  isDarkMode ? "bg-emerald-900/40" : "bg-emerald-50"
                 }`}
               >
                 <Mail
                   className={`w-5 h-5 ${
-                    isDarkMode ? "text-green-400" : "text-green-600"
+                    isDarkMode ? "text-emerald-400" : "text-emerald-600"
                   }`}
                 />
               </div>
               <h2
                 className={`text-2xl font-bold ${
-                  isDarkMode ? "text-green-300" : "text-green-800"
+                  isDarkMode ? "text-slate-100" : "text-slate-900"
                 }`}
               >
                 Join Us
@@ -279,7 +225,7 @@ const LearnMorePage: React.FC = () => {
             </div>
             <p
               className={`mb-6 ${
-                isDarkMode ? "text-gray-300" : "text-gray-700"
+                isDarkMode ? "text-slate-300" : "text-slate-600"
               }`}
             >
               We're always looking for passionate individuals to join our team.
@@ -289,7 +235,7 @@ const LearnMorePage: React.FC = () => {
             <div className="flex flex-wrap gap-4">
               <motion.a
                 href="mailto:reso@mmmut.ac.in"
-                className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-purple-600 hover:to-blue-600 text-white px-5 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -304,8 +250,8 @@ const LearnMorePage: React.FC = () => {
                   to="/dashboard"
                   className={`flex items-center gap-2 ${
                     isDarkMode
-                      ? "bg-gray-700 hover:bg-gray-600 text-white border-gray-600"
-                      : "bg-white hover:bg-gray-50 text-gray-900 border-gray-200"
+                      ? "bg-slate-800 hover:bg-slate-700 text-white border-slate-700"
+                      : "bg-white hover:bg-slate-50 text-slate-900 border-slate-200"
                   } px-5 py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border`}
                 >
                   Go to Dashboard
@@ -315,7 +261,7 @@ const LearnMorePage: React.FC = () => {
             </div>
           </motion.div>
         </motion.div>
-      </motion.div>
+      </GlowingCard>
     </motion.main>
   );
 };

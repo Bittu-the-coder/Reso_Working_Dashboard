@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import { useTheme } from "../../contexts/ThemeContext";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, ArrowRight, LayoutDashboard } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/useAuthStore";
+import { GlowingCard, Spotlight } from "../../components/ui/aceternity";
 
 export const LoginPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -15,7 +16,6 @@ export const LoginPage: React.FC = () => {
   const { isDarkMode } = useTheme();
   const navigate = useNavigate();
 
-  // Use Zustand store
   const {
     login,
     user,
@@ -23,14 +23,12 @@ export const LoginPage: React.FC = () => {
     error: authError,
   } = useAuthStore();
 
-  // Redirect if already authenticated
   useEffect(() => {
     if (user) {
       navigate("/dashboard");
     }
   }, [user, navigate]);
 
-  // Handle auth errors
   useEffect(() => {
     if (authError) {
       toast.error(authError);
@@ -64,244 +62,154 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      style={{
-        backgroundImage:
-          "url('https://plus.unsplash.com/premium_photo-1661767467261-4a4bed92a507?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8dGVhbXxlbnwwfHwwfHx8MA%3D%3D')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-      }}
+    <div
       className={`min-h-screen flex items-center justify-center ${
-        isDarkMode ? "bg-gray-900" : "bg-gray-50"
-      } py-12 px-4 sm:px-6 lg:px-8 relative backdrop-blur-sm`}
+        isDarkMode ? "bg-slate-950" : "bg-slate-50"
+      } py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden`}
     >
-      {/* Overlay with blur effect */}
-      <div
-        className="absolute inset-0 backdrop-blur-[2px]"
-        style={{
-          backgroundColor: isDarkMode
-            ? "rgba(17, 24, 39, 0.7)"
-            : "rgba(255, 255, 255, 0.5)",
-        }}
-      ></div>
+      <div className="absolute inset-0 dot-pattern opacity-30 pointer-events-none" />
+      
+      <Spotlight
+        className="-top-40 left-0 md:left-60 md:-top-20"
+        fill={isDarkMode ? "#1e40af" : "#3b82f6"}
+      />
 
       <motion.div
-        className={`max-w-md w-full space-y-8 ${
-          isDarkMode ? "bg-gray-800/80 text-white" : "bg-white/90"
-        } backdrop-blur-md p-8 rounded-xl shadow-xl relative z-10`}
+        className="max-w-md w-full relative z-10"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2, duration: 0.5 }}
       >
-        <div>
-          <h2
-            className={`mt-2 text-center text-3xl font-extrabold ${
-              isDarkMode ? "text-white" : "text-gray-900"
-            }`}
-          >
-            Sign in to your account
-          </h2>
-          <p
-            className={`mt-2 text-center text-sm ${
-              isDarkMode ? "text-gray-300" : "text-gray-600"
-            }`}
-          >
-            Don't have an account?{" "}
-            <Link
-              to="/signup"
-              className={`font-medium ${
-                isDarkMode
-                  ? "text-blue-400 hover:text-blue-300"
-                  : "text-blue-600 hover:text-blue-500"
-              }`}
-            >
-              Sign up
-            </Link>
-          </p>
-        </div>
-
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <div>
-              <label
-                htmlFor="email"
-                className={`block text-sm font-medium mb-1 ${
-                  isDarkMode ? "text-gray-300" : "text-gray-700"
-                }`}
-              >
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className={`w-full rounded-lg px-4 py-2 ${
-                  isDarkMode
-                    ? "bg-gray-700 border-gray-600 text-white"
-                    : "bg-white border-gray-300 text-gray-900"
-                } border focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                placeholder="Enter your email"
-                required
-                disabled={authLoading}
-              />
+        <GlowingCard className={`${isDarkMode ? "!bg-slate-900/80" : "!bg-white/80"} backdrop-blur-xl p-8`}>
+          <div className="text-center mb-8">
+            <div className={`mx-auto w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${
+              isDarkMode ? "bg-blue-900/40 text-blue-400" : "bg-blue-50 text-blue-600"
+            }`}>
+              <LayoutDashboard size={28} />
             </div>
-
-            <div>
-              <label
-                htmlFor="password"
-                className={`block text-sm font-medium mb-1 ${
-                  isDarkMode ? "text-gray-300" : "text-gray-700"
-                }`}
-              >
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  id="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className={`w-full rounded-lg px-4 py-2 pr-10 ${
-                    isDarkMode
-                      ? "bg-gray-700 border-gray-600 text-white"
-                      : "bg-white border-gray-300 text-gray-900"
-                  } border focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                  placeholder="Enter your password"
-                  required
-                  disabled={authLoading}
-                />
-                <button
-                  type="button"
-                  onClick={togglePasswordVisibility}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2"
-                  tabIndex={-1}
-                  disabled={authLoading}
-                >
-                  {showPassword ? (
-                    <EyeOff size={18} className="text-gray-500" />
-                  ) : (
-                    <Eye size={18} className="text-gray-500" />
-                  )}
-                </button>
-              </div>
-            </div>
+            <h2 className={`text-3xl font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>
+              Welcome Back
+            </h2>
+            <p className={`mt-2 text-sm ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}>
+              Enter your credentials to access your dashboard
+            </p>
           </div>
 
-          <div className="flex items-center justify-between">
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div className="space-y-4">
+              <div>
+                <label className={`block text-sm font-medium mb-1.5 ${isDarkMode ? "text-slate-300" : "text-slate-700"}`}>
+                  Email Address
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                    <Mail size={18} />
+                  </div>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className={`w-full rounded-xl pl-10 pr-4 py-2.5 ${
+                      isDarkMode
+                        ? "bg-slate-800 border-slate-700 text-white placeholder-slate-500"
+                        : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400"
+                    } border focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all`}
+                    placeholder="name@example.com"
+                    required
+                    disabled={authLoading}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between mb-1.5">
+                  <label className={`text-sm font-medium ${isDarkMode ? "text-slate-300" : "text-slate-700"}`}>
+                    Password
+                  </label>
+                  <Link
+                    to="/forgot-password"
+                    className={`text-xs font-medium ${
+                      isDarkMode ? "text-blue-400 hover:text-blue-300" : "text-blue-600 hover:text-blue-500"
+                    }`}
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                    <Lock size={18} />
+                  </div>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className={`w-full rounded-xl pl-10 pr-12 py-2.5 ${
+                      isDarkMode
+                        ? "bg-slate-800 border-slate-700 text-white placeholder-slate-500"
+                        : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400"
+                    } border focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all`}
+                    placeholder="••••••••"
+                    required
+                    disabled={authLoading}
+                  />
+                  <button
+                    type="button"
+                    onClick={togglePasswordVisibility}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300 transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center">
               <input
                 id="remember"
-                name="remember"
                 type="checkbox"
-                className={`h-4 w-4 rounded border ${
-                  isDarkMode
-                    ? "border-gray-600 bg-gray-700 checked:bg-blue-600"
-                    : "border-gray-300 bg-white checked:bg-blue-600"
-                } focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                disabled={authLoading}
-              />
-              <label
-                htmlFor="remember"
-                className={`ml-2 block text-sm ${
-                  isDarkMode ? "text-gray-300" : "text-gray-700"
+                className={`h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500/50 ${
+                  isDarkMode ? "bg-slate-800 border-slate-700" : "bg-white"
                 }`}
-              >
-                Remember me
+              />
+              <label htmlFor="remember" className={`ml-2 block text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>
+                Remember me for 30 days
               </label>
             </div>
-            <Link
-              to="/forgot-password"
-              className={`text-sm font-medium ${
-                isDarkMode
-                  ? "text-blue-400 hover:text-blue-300"
-                  : "text-blue-600 hover:text-blue-500"
+
+            <button
+              type="submit"
+              disabled={authLoading}
+              className={`w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold text-white transition-all ${
+                authLoading 
+                  ? "bg-blue-600/50 cursor-not-allowed" 
+                  : "bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20 active:scale-[0.98]"
               }`}
             >
-              Forgot password?
-            </Link>
-          </div>
+              {authLoading ? (
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <>
+                  Sign In <ArrowRight size={18} />
+                </>
+              )}
+            </button>
 
-          <motion.button
-            type="submit"
-            disabled={authLoading}
-            className={`w-full py-2.5 px-4 rounded-lg ${
-              authLoading ? "opacity-70 cursor-not-allowed" : ""
-            } bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium shadow-md hover:shadow-lg transition-all duration-200`}
-            whileHover={{ scale: authLoading ? 1 : 1.02 }}
-            whileTap={{ scale: authLoading ? 1 : 0.98 }}
-          >
-            {authLoading ? "Logging in..." : "Login"}
-          </motion.button>
-
-          <div className="relative my-6">
-            <div
-              className={`absolute inset-0 flex items-center`}
-              aria-hidden="true"
-            >
-              <div
-                className={`w-full border-t ${
-                  isDarkMode ? "border-gray-600" : "border-gray-300"
-                }`}
-              ></div>
-            </div>
-            {/* <div className="relative flex justify-center">
-              <span
-                className={`px-2 text-sm ${
-                  isDarkMode
-                    ? "bg-gray-800 text-gray-400"
-                    : "bg-white text-gray-500"
+            <p className={`text-center text-sm ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}>
+              Don't have an account?{" "}
+              <Link
+                to="/signup"
+                className={`font-semibold ${
+                  isDarkMode ? "text-blue-400 hover:text-blue-300" : "text-blue-600 hover:text-blue-700"
                 }`}
               >
-                Or continue with
-              </span>
-            </div>*/}
-          </div>
-
-          {/* <div className="flex justify-center">
-            <motion.button
-              type="button"
-              className={`py-2.5 w-full px-4 rounded-lg border ${
-                isDarkMode
-                  ? "bg-gray-700/60 border-gray-600 hover:bg-gray-700"
-                  : "bg-white border-gray-300 hover:bg-gray-50"
-              } flex items-center justify-center`}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <svg
-                className="w-5 h-5 mr-2"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                  fill="#4285F4"
-                />
-                <path
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                  fill="#34A853"
-                />
-                <path
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                  fill="#FBBC05"
-                />
-                <path
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                  fill="#EA4335"
-                />
-              </svg>
-              Google
-            </motion.button>
-          </div> */}
-        </form>
+                Create an account
+              </Link>
+            </p>
+          </form>
+        </GlowingCard>
       </motion.div>
-    </motion.div>
+    </div>
   );
 };

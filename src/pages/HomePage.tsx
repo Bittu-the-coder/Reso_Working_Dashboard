@@ -1,7 +1,19 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FileText, ExternalLink, ChevronRight, Sparkles } from "lucide-react";
+import {
+  FileText,
+  ExternalLink,
+  ChevronRight,
+  BookOpen,
+  Code2,
+  GraduationCap,
+} from "lucide-react";
 import { useTheme } from "../contexts/ThemeContext";
+import {
+  Spotlight,
+  TextGenerateEffect,
+  GlowingCard,
+} from "../components/ui/aceternity";
 
 // Animation variants
 const containerVariants = {
@@ -26,17 +38,6 @@ const itemVariants = {
   },
 };
 
-const floatingAnimation = {
-  animate: {
-    y: [0, -10, 0],
-    transition: {
-      duration: 3,
-      repeat: Infinity,
-      ease: "easeInOut" as const,
-    },
-  },
-};
-
 const HomePage: React.FC = () => {
   const { isDarkMode } = useTheme();
 
@@ -47,6 +48,12 @@ const HomePage: React.FC = () => {
       animate="visible"
       variants={containerVariants}
     >
+      {/* Spotlight Effect */}
+      <Spotlight
+        className="-top-40 left-0 md:left-60 md:-top-20"
+        fill={isDarkMode ? "#1e40af" : "#3b82f6"}
+      />
+
       {/* Hero Section */}
       <motion.div
         className="flex flex-col lg:flex-row gap-8 mb-12"
@@ -58,7 +65,7 @@ const HomePage: React.FC = () => {
           whileHover={{ scale: 1.02 }}
           transition={{ type: "spring", stiffness: 300, damping: 20 }}
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-900/30 to-purple-900/30 z-10 rounded-2xl"></div>
+          <div className="absolute inset-0 bg-slate-900/30 z-10 rounded-2xl"></div>
           <img
             src="https://images.pexels.com/photos/590016/pexels-photo-590016.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
             alt="Team working together"
@@ -71,12 +78,18 @@ const HomePage: React.FC = () => {
             transition={{ delay: 0.5 }}
           >
             <motion.div
-              variants={floatingAnimation}
-              animate="animate"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-2 rounded-full border border-blue-100 mb-4 shadow-md"
+              animate={{
+                y: [0, -6, 0],
+                transition: {
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                },
+              }}
+              className="inline-flex items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full border border-slate-200 mb-4 shadow-md"
             >
-              <Sparkles className="w-4 h-4 text-blue-600" />
-              <span className="text-sm font-medium text-blue-900">
+              <BookOpen className="w-4 h-4 text-blue-600" />
+              <span className="text-sm font-medium text-slate-800">
                 Innovative Research & Education
               </span>
             </motion.div>
@@ -94,34 +107,36 @@ const HomePage: React.FC = () => {
           className="lg:w-1/2 flex flex-col justify-center"
           variants={itemVariants}
         >
-          <motion.div
+          <GlowingCard
             className={`${
-              isDarkMode
-                ? "bg-gray-800/80 border-gray-700"
-                : "bg-white/80 border-blue-100"
-            } backdrop-blur-lg rounded-2xl p-8 border shadow-lg relative overflow-hidden`}
-            whileHover={{
-              boxShadow: "0 8px 30px rgba(59, 130, 246, 0.15)",
-            }}
+              isDarkMode ? "!bg-slate-900 !border-slate-800" : "!bg-white !border-slate-200"
+            } rounded-2xl p-8`}
           >
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              className="p-3 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full w-fit mb-6"
+              className={`p-3 ${
+                isDarkMode ? "bg-blue-900/40" : "bg-blue-50"
+              } rounded-full w-fit mb-6`}
             >
-              <Sparkles
+              <BookOpen
                 className={`w-6 h-6 ${
                   isDarkMode ? "text-blue-400" : "text-blue-600"
                 }`}
               />
             </motion.div>
-            <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-6">
-              Welcome to RESO Dashboard
-            </h2>{" "}
+
+            <TextGenerateEffect
+              words="Welcome to RESO Dashboard"
+              className={`text-3xl mb-6 ${
+                isDarkMode ? "text-white" : "text-slate-900"
+              }`}
+            />
+
             <p
               className={`text-lg mb-6 ${
-                isDarkMode ? "text-gray-300" : "text-gray-700"
+                isDarkMode ? "text-slate-300" : "text-slate-600"
               }`}
             >
               Access all our resources, events, and project information in one
@@ -135,7 +150,7 @@ const HomePage: React.FC = () => {
               >
                 <Link
                   to="/dashboard"
-                  className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-purple-600 hover:to-blue-600 text-white px-5 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
                 >
                   Go to Dashboard
                   <ChevronRight className="w-5 h-5" />
@@ -150,8 +165,8 @@ const HomePage: React.FC = () => {
                   to="/learn-more"
                   className={`flex items-center gap-2 ${
                     isDarkMode
-                      ? "bg-gray-700 hover:bg-gray-600 text-white border-gray-600"
-                      : "bg-white hover:bg-gray-50 text-gray-900 border-gray-200"
+                      ? "bg-slate-800 hover:bg-slate-700 text-white border-slate-700"
+                      : "bg-white hover:bg-slate-50 text-slate-900 border-slate-200"
                   } px-5 py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border`}
                 >
                   Learn More
@@ -159,31 +174,27 @@ const HomePage: React.FC = () => {
                 </Link>
               </motion.div>
             </div>
-            {/* Decorative Elements */}
-            <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-purple-200 rounded-full opacity-20" />
-            <div className="absolute top-10 right-20 w-16 h-16 bg-blue-200 rounded-full opacity-30" />
-          </motion.div>
+          </GlowingCard>
         </motion.div>
       </motion.div>
 
       {/* Featured Resources Section */}
       <motion.div className="mt-12" variants={itemVariants}>
-        {" "}
         <div className="flex items-center gap-3 mb-6">
           <div
             className={`p-2 ${
-              isDarkMode ? "bg-indigo-900" : "bg-indigo-100"
+              isDarkMode ? "bg-blue-900/40" : "bg-blue-50"
             } rounded-lg`}
           >
             <FileText
               className={`w-6 h-6 ${
-                isDarkMode ? "text-indigo-400" : "text-indigo-600"
+                isDarkMode ? "text-blue-400" : "text-blue-600"
               }`}
             />
           </div>
           <h3
             className={`text-2xl font-bold ${
-              isDarkMode ? "text-indigo-300" : "text-indigo-900"
+              isDarkMode ? "text-slate-100" : "text-slate-900"
             }`}
           >
             Featured Resources
@@ -194,41 +205,33 @@ const HomePage: React.FC = () => {
           variants={containerVariants}
         >
           {/* Resource Card 1 */}
-          <motion.div
-            className={`${
-              isDarkMode
-                ? "bg-gray-800/80 border-gray-700"
-                : "bg-white/80 border-blue-100"
-            } backdrop-blur-lg border rounded-xl overflow-hidden shadow-lg relative`}
-            variants={itemVariants}
-            whileHover={{
-              y: -5,
-              boxShadow: "0 8px 30px rgba(59, 130, 246, 0.15)",
-            }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          >
-            <div className="p-6 relative z-10">
+          <motion.div variants={itemVariants}>
+            <GlowingCard
+              className={`h-full ${
+                isDarkMode ? "!bg-slate-900 !border-slate-800" : "!bg-white !border-slate-200"
+              }`}
+            >
               <div className="flex items-center mb-4">
                 <div
                   className={`p-2 rounded-full ${
                     isDarkMode
-                      ? "bg-blue-900 text-blue-400"
-                      : "bg-blue-100 text-blue-600"
+                      ? "bg-blue-900/40 text-blue-400"
+                      : "bg-blue-50 text-blue-600"
                   } mr-3`}
                 >
                   <FileText size={24} />
                 </div>
                 <h4
                   className={`text-xl font-semibold ${
-                    isDarkMode ? "text-blue-300" : "text-blue-900"
+                    isDarkMode ? "text-slate-100" : "text-slate-900"
                   }`}
                 >
                   Research Papers
                 </h4>
               </div>
               <p
-                className={` mb-6 ${
-                  isDarkMode ? "text-gray-300" : "text-gray-600"
+                className={`mb-6 ${
+                  isDarkMode ? "text-slate-400" : "text-slate-600"
                 }`}
               >
                 Access our collection of research papers and publications from
@@ -236,46 +239,37 @@ const HomePage: React.FC = () => {
               </p>
               <Link
                 to="/dashboard?tab=docs"
-                className="flex items-center text-blue-600 hover:text-blue-800 font-medium"
+                className={`flex items-center font-medium ${
+                  isDarkMode
+                    ? "text-blue-400 hover:text-blue-300"
+                    : "text-blue-600 hover:text-blue-700"
+                }`}
               >
                 View Papers <ExternalLink className="ml-2 w-4 h-4" />
               </Link>
-            </div>
-
-            {/* Decorative corner elements */}
-            <div className="absolute -top-4 -left-4 w-8 h-8 border-t-2 border-l-2 border-blue-400 rounded-tl-lg" />
-            <div className="absolute -bottom-4 -right-4 w-8 h-8 border-b-2 border-r-2 border-blue-400 rounded-br-lg" />
+            </GlowingCard>
           </motion.div>
 
           {/* Resource Card 2 */}
-          <motion.div
-            className={`${
-              isDarkMode
-                ? "bg-gray-800/80 border-gray-700"
-                : "bg-white/80 border-purple-100"
-            } backdrop-blur-lg border rounded-xl overflow-hidden shadow-lg relative`}
-            variants={itemVariants}
-            whileHover={{
-              y: -5,
-              boxShadow: "0 8px 30px rgba(139, 92, 246, 0.15)",
-            }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          >
-            {" "}
-            <div className="p-6 relative z-10">
+          <motion.div variants={itemVariants}>
+            <GlowingCard
+              className={`h-full ${
+                isDarkMode ? "!bg-slate-900 !border-slate-800" : "!bg-white !border-slate-200"
+              }`}
+            >
               <div className="flex items-center mb-4">
                 <div
                   className={`p-2 rounded-full ${
                     isDarkMode
-                      ? "bg-purple-900 text-purple-400"
-                      : "bg-purple-100 text-purple-600"
+                      ? "bg-emerald-900/40 text-emerald-400"
+                      : "bg-emerald-50 text-emerald-600"
                   } mr-3`}
                 >
-                  <FileText size={24} />
+                  <Code2 size={24} />
                 </div>
                 <h4
                   className={`text-xl font-semibold ${
-                    isDarkMode ? "text-purple-300" : "text-purple-900"
+                    isDarkMode ? "text-slate-100" : "text-slate-900"
                   }`}
                 >
                   Project Repository
@@ -283,65 +277,45 @@ const HomePage: React.FC = () => {
               </div>
               <p
                 className={`mb-6 ${
-                  isDarkMode ? "text-gray-300" : "text-gray-600"
+                  isDarkMode ? "text-slate-400" : "text-slate-600"
                 }`}
               >
                 Explore our GitHub repositories and contribute to ongoing
                 projects.
-              </p>{" "}
+              </p>
               <Link
                 to="/dashboard?tab=projects"
                 className={`flex items-center font-medium ${
                   isDarkMode
-                    ? "text-purple-400 hover:text-purple-300"
-                    : "text-purple-600 hover:text-purple-800"
+                    ? "text-emerald-400 hover:text-emerald-300"
+                    : "text-emerald-600 hover:text-emerald-700"
                 }`}
               >
                 View Projects <ExternalLink className="ml-2 w-4 h-4" />
               </Link>
-            </div>
-            {/* Decorative corner elements */}{" "}
-            <div
-              className={`absolute -top-4 -left-4 w-8 h-8 border-t-2 border-l-2 ${
-                isDarkMode ? "border-purple-600" : "border-purple-400"
-              } rounded-tl-lg`}
-            />
-            <div
-              className={`absolute -bottom-4 -right-4 w-8 h-8 border-b-2 border-r-2 ${
-                isDarkMode ? "border-purple-600" : "border-purple-400"
-              } rounded-br-lg`}
-            />
+            </GlowingCard>
           </motion.div>
 
           {/* Resource Card 3 */}
-          <motion.div
-            className={`${
-              isDarkMode
-                ? "bg-gray-800/80 border-gray-700"
-                : "bg-white/80 border-indigo-100"
-            } backdrop-blur-lg border rounded-xl overflow-hidden shadow-lg relative`}
-            variants={itemVariants}
-            whileHover={{
-              y: -5,
-              boxShadow: "0 8px 30px rgba(79, 70, 229, 0.15)",
-            }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          >
-            {" "}
-            <div className="p-6 relative z-10">
+          <motion.div variants={itemVariants}>
+            <GlowingCard
+              className={`h-full ${
+                isDarkMode ? "!bg-slate-900 !border-slate-800" : "!bg-white !border-slate-200"
+              }`}
+            >
               <div className="flex items-center mb-4">
                 <div
                   className={`p-2 rounded-full ${
                     isDarkMode
-                      ? "bg-indigo-900 text-indigo-400"
-                      : "bg-indigo-100 text-indigo-600"
+                      ? "bg-amber-900/40 text-amber-400"
+                      : "bg-amber-50 text-amber-600"
                   } mr-3`}
                 >
-                  <FileText size={24} />
+                  <GraduationCap size={24} />
                 </div>
                 <h4
                   className={`text-xl font-semibold ${
-                    isDarkMode ? "text-indigo-300" : "text-indigo-900"
+                    isDarkMode ? "text-slate-100" : "text-slate-900"
                   }`}
                 >
                   Educational Materials
@@ -349,34 +323,23 @@ const HomePage: React.FC = () => {
               </div>
               <p
                 className={`mb-6 ${
-                  isDarkMode ? "text-gray-300" : "text-gray-600"
+                  isDarkMode ? "text-slate-400" : "text-slate-600"
                 }`}
               >
                 Access tutorials, guides, and educational content created by our
                 team.
-              </p>{" "}
+              </p>
               <Link
                 to="/dashboard?tab=docs"
                 className={`flex items-center font-medium ${
                   isDarkMode
-                    ? "text-indigo-400 hover:text-indigo-300"
-                    : "text-indigo-600 hover:text-indigo-800"
+                    ? "text-amber-400 hover:text-amber-300"
+                    : "text-amber-600 hover:text-amber-700"
                 }`}
               >
                 View Materials <ExternalLink className="ml-2 w-4 h-4" />
               </Link>
-            </div>
-            {/* Decorative corner elements */}{" "}
-            <div
-              className={`absolute -top-4 -left-4 w-8 h-8 border-t-2 border-l-2 ${
-                isDarkMode ? "border-indigo-600" : "border-indigo-400"
-              } rounded-tl-lg`}
-            />
-            <div
-              className={`absolute -bottom-4 -right-4 w-8 h-8 border-b-2 border-r-2 ${
-                isDarkMode ? "border-indigo-600" : "border-indigo-400"
-              } rounded-br-lg`}
-            />
+            </GlowingCard>
           </motion.div>
         </motion.div>
       </motion.div>

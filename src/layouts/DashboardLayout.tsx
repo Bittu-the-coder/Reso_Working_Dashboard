@@ -5,6 +5,8 @@ import {
   FileText,
   Settings,
   NotebookPen,
+  CalendarDays,
+  FolderKanban,
 } from "lucide-react";
 import { useTheme } from "../contexts/ThemeContext";
 import Footer from "../components/Footer";
@@ -15,6 +17,7 @@ interface NavigationItem {
   name: string;
   icon: React.ReactNode;
   path: string;
+  submenu?: { name: string; path: string }[];
 }
 
 const DashboardLayout: React.FC = () => {
@@ -25,16 +28,16 @@ const DashboardLayout: React.FC = () => {
     () => [
       { name: "Overview", icon: <BarChart3 size={20} />, path: "/dashboard" },
       { name: "Teams", icon: <Users size={20} />, path: "/dashboard/teams" },
-      // {
-      //   name: "Events",
-      //   icon: <CalendarClock size={20} />,
-      //   path: "/dashboard/events",
-      // },
-      // {
-      //   name: "Projects",
-      //   icon: <Code size={20} />,
-      //   path: "/dashboard/projects",
-      // },
+      {
+        name: "Events",
+        icon: <CalendarDays size={20} />,
+        path: "/dashboard/events",
+      },
+      {
+        name: "Projects",
+        icon: <FolderKanban size={20} />,
+        path: "/dashboard/projects",
+      },
       { name: "Tasks", icon: <FileText size={20} />, path: "/dashboard/tasks" },
       {
         name: "Documents",
@@ -53,17 +56,20 @@ const DashboardLayout: React.FC = () => {
   return (
     <div
       className={`flex flex-col min-h-screen ${
-        isDarkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"
-      }`}
+        isDarkMode ? "bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-900"
+      } relative overflow-hidden`}
     >
-      <div className="flex flex-1">
+      {/* Background patterns */}
+      <div className="absolute inset-0 dot-pattern opacity-20 pointer-events-none" />
+      
+      <div className="flex flex-1 relative z-10">
         <Sidebar navigationItems={navigationItems} />
 
-        <div className="flex-1 px-4 py-8 md:p-8 overflow-y-auto">
-          <div className="mt-6">
+        <main className="flex-1 px-4 py-8 md:p-8 lg:p-12 overflow-y-auto">
+          <div className="max-w-7xl mx-auto">
             <DashboardRoutes />
           </div>
-        </div>
+        </main>
       </div>
 
       <Footer />

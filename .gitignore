@@ -25,5 +25,5 @@ backup
 *.sln
 *.sw?
 backend/.env
+.env
 package-lock.json
-

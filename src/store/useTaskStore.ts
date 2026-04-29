@@ -117,16 +117,13 @@ export const useTaskStore = create<TaskStoreState>((set, get) => ({
   },
 
   // Get a single task by ID
-  getTaskById: async (teamId, taskId): Promise<ApiResponse<Task>> => {
+  getTaskById: async (taskId): Promise<ApiResponse<Task>> => {
     set({ loading: true, error: null });
     try {
       const token = get().getAuthToken();
-      const response = await axios.get(
-        `${API_URL}/tasks/teams/${teamId}/tasks/${taskId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await axios.get(`${API_URL}/tasks/${taskId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       set({ currentTask: response.data.data, loading: false });
       return { success: true, data: response.data.data };

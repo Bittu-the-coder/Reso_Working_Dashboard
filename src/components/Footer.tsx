@@ -10,8 +10,8 @@ const Footer: React.FC = () => {
     <motion.footer
       className={`border-t ${
         isDarkMode
-          ? "border-gray-700 bg-gray-800/50"
-          : "border-blue-100 bg-white/50"
+          ? "border-slate-800 bg-slate-900/50"
+          : "border-slate-200 bg-white/50"
       } mt-8 backdrop-blur-sm`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -20,7 +20,7 @@ const Footer: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
         <motion.div
           className={`flex justify-center items-center gap-2 text-center text-sm ${
-            isDarkMode ? "text-blue-400" : "text-blue-600"
+            isDarkMode ? "text-slate-400" : "text-slate-600"
           }`}
           whileHover={{ scale: 1.02 }}
         >

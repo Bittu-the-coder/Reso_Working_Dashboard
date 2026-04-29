@@ -12,6 +12,9 @@ router.route('/teams/:teamId/tasks')
 router.route('/teamstasks')
   .get(protect, getAllTeamsTasks);
 
+router.route('/:taskId')
+  .get(protect, getTaskById);
+
 router.route('/teams/:teamId/tasks/:taskId')
   .get(protect, getTaskById)
   .put(protect, upload.array('uploads'), updateTask)

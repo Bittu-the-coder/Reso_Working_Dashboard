@@ -189,7 +189,12 @@ const getAllTasksFromTeam = asyncHandler(async (req, res, next) => {
 // get all the tasks in which user is involved irrespective of team
 const getAllTeamsTasks = asyncHandler(async (req, res, next) => {
     try {
-        const tasks = await Task.find({ assignedTo: req.user._id });
+        const tasks = await Task.find({
+            $or: [
+                { assignedTo: req.user._id },
+                { createdBy: req.user._id }
+            ]
+        });
         sendSuccess(res, { tasks }, "Tasks fetched successfully");
     } catch (error) {
         console.error("Error while fetching tasks:", error);

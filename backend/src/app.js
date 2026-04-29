@@ -18,8 +18,19 @@ const app = express();
 const allowedOrigins = [
   "https://reso-working-dashboard.vercel.app",
   "http://localhost:3000",
-  "http://localhost:5173"
+  "http://localhost:5173",
+  "http://localhost:5174"
 ];
+
+// Add FRONTEND_URL from environment if it exists
+if (process.env.FRONTEND_URL) {
+  const envOrigins = process.env.FRONTEND_URL.split(',').map(o => o.trim());
+  envOrigins.forEach(origin => {
+    if (!allowedOrigins.includes(origin)) {
+      allowedOrigins.push(origin);
+    }
+  });
+}
 
 // Enhanced CORS configuration
 const corsOptions = {
@@ -116,9 +127,9 @@ app.use((err, req, res, next) => {
 // Error handler (should be after all route handlers)
 app.use(errorHandler);
 
-// For local development
-if (process.env.NODE_ENV !== "production") {
-  const PORT = process.env.PORT || 5000;
+// For local development and traditional server hosting (not serverless like Vercel)
+if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
+  const PORT = process.env.PORT || 3030;
   app.listen(PORT, () => {
     console.log(`Server is running on port http://localhost:${PORT}`);
   });
