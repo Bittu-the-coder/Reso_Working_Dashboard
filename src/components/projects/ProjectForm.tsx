@@ -13,9 +13,10 @@ interface Project {
 interface ProjectFormProps {
   project?: Partial<Project>;
   onSubmit: (formData: Project) => void;
+  onCancel?: () => void;
 }
 
-const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSubmit }) => {
+const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSubmit, onCancel }) => {
   const { isDarkMode } = useTheme();
   const [formData, setFormData] = useState<Project>({
     name: project?.name || "",
@@ -151,16 +152,29 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSubmit }) => {
             <option value="critical">Critical</option>
           </select>
         </div>
-        <button
-          type="submit"
-          className={`px-4 py-2 rounded ${
-            isDarkMode
-              ? "bg-blue-600 hover:bg-blue-500"
-              : "bg-blue-500 hover:bg-blue-600"
-          } text-white`}
-        >
-          {project ? "Update Project" : "Create Project"}
-        </button>
+        <div className="flex gap-4">
+          <button
+            type="submit"
+            className={`flex-1 px-4 py-2 rounded ${
+              isDarkMode
+                ? "bg-blue-600 hover:bg-blue-500"
+                : "bg-blue-500 hover:bg-blue-600"
+            } text-white font-bold`}
+          >
+            {project ? "Update Project" : "Create Project"}
+          </button>
+          {onCancel && (
+            <button
+              type="button"
+              onClick={onCancel}
+              className={`px-4 py-2 rounded border font-bold ${
+                isDarkMode ? "bg-gray-700 border-gray-600 text-gray-300" : "bg-white border-gray-300 text-gray-600"
+              }`}
+            >
+              Cancel
+            </button>
+          )}
+        </div>
       </form>
     </motion.div>
   );

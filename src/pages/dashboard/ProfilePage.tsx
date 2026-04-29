@@ -8,10 +8,7 @@ import {
   Save,
   Check,
   X,
-  Menu,
-  ChevronRight,
   Trash2,
-  Mail,
   ShieldCheck,
   BellRing,
 } from "lucide-react";

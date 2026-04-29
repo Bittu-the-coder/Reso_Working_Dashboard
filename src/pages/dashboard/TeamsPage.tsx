@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Users, Plus, Mail, Crown, Shield, User, Settings2 } from "lucide-react";
+import { Users, Plus, Settings2 } from "lucide-react";
 import { useTheme } from "../../contexts/ThemeContext";
 import { toast } from "react-hot-toast";
 import { useTeamStore } from "../../store/useTeamStore";
 import CreateTeamModal from "../../components/teams/CreateTeamModal";
 import { GlowingCard, TextGenerateEffect } from "../../components/ui/aceternity";
 
-import type { CreateTeamData, Team, TeamMember } from "../../types";
+import type { CreateTeamData, Team } from "../../types";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -20,7 +20,7 @@ const containerVariants = {
   },
 };
 
-const itemVariants = {
+const itemVariants: any = {
   hidden: { y: 20, opacity: 0 },
   visible: {
     y: 0,
@@ -62,16 +62,6 @@ const TeamsPage: React.FC = () => {
     navigate(`/dashboard/teams/${teamId}`);
   };
 
-  const getRoleIcon = (role: string): React.ReactNode => {
-    switch (role.toLowerCase()) {
-      case "owner":
-        return <Crown className="w-3.5 h-3.5 text-amber-500" />;
-      case "admin":
-        return <Shield className="w-3.5 h-3.5 text-blue-500" />;
-      default:
-        return <User className="w-3.5 h-3.5 text-slate-400" />;
-    }
-  };
 
   if (loading) {
     return (
@@ -164,7 +154,7 @@ const TeamsPage: React.FC = () => {
                   </div>
 
                   <div className="flex -space-x-2 overflow-hidden">
-                    {team.members.slice(0, 5).map((member, idx) => (
+                    {team.members.slice(0, 5).map((member) => (
                       <div
                         key={member._id}
                         className={`inline-block h-8 w-8 rounded-full ring-2 ${isDarkMode ? "ring-slate-900 bg-slate-800" : "ring-white bg-slate-100"} flex items-center justify-center text-[10px] font-bold overflow-hidden`}

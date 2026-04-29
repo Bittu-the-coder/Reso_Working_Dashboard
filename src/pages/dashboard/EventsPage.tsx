@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTheme } from "../../contexts/ThemeContext";
-import EventForm from "../../components/events/EventForm";
+import EventForm, { type EventData } from "../../components/events/EventForm";
 import EventList from "../../components/events/EventList";
 import { useEventStore } from "../../store/useEventStore";
 import { useTeamStore } from "../../store/useTeamStore";
@@ -16,15 +16,14 @@ const EventsPage = () => {
     getUserEvents, 
     createEvent, 
     deleteEvent, 
-    respondToEvent,
-    loading 
+    respondToEvent 
   } = useEventStore();
 
   const { teams, getMyTeams } = useTeamStore();
   
   const [showForm, setShowForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [newEvent, setNewEvent] = useState({
+  const [newEvent, setNewEvent] = useState<EventData>({
     title: "",
     date: "",
     description: "",

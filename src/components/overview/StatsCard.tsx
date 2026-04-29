@@ -7,7 +7,6 @@ interface StatsCardProps {
   title: string;
   icon: ReactNode;
   value: string | number;
-  colorClass: string;
   bgColorClass: string;
   iconColorClass: string;
 }
@@ -16,7 +15,6 @@ const StatsCard = ({
   title,
   icon,
   value,
-  colorClass,
   bgColorClass,
   iconColorClass,
 }: StatsCardProps) => {

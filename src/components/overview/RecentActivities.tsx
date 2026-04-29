@@ -2,12 +2,7 @@ import { useTheme } from "../../contexts/ThemeContext";
 import { Calendar } from "lucide-react";
 import { GlowingCard } from "../ui/aceternity";
 
-interface Event {
-  _id: string | number;
-  title: string;
-  date: string;
-  description: string;
-}
+import type { Event } from "../../types";
 
 interface RecentActivitiesProps {
   events: Event[];

@@ -67,6 +67,7 @@ export interface TeamMember {
   department: string;
   userId: userId;
   role: string;
+  avatar?: string;
   joinedAt?: string;
   isAcceptedInvite?: boolean;
 }
@@ -180,7 +181,7 @@ export interface TaskStoreState {
   ) => Promise<ApiResponse<Task>>;
   getTeamTasks: (teamId: string) => Promise<ApiResponse<Task[]>>;
   getUserTasks: () => Promise<ApiResponse<Task[]>>;
-  getTaskById: (teamId: string, taskId: string) => Promise<ApiResponse<Task>>;
+  getTaskById: (taskId: string) => Promise<ApiResponse<Task>>;
   updateTask: (
     teamId: string,
     taskId: string,

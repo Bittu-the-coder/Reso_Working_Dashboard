@@ -2,7 +2,7 @@ import { CalendarDays, Save, X } from "lucide-react";
 import { useTheme } from "../../contexts/ThemeContext";
 import { GlowingCard } from "../ui/aceternity";
 
-interface EventData {
+export interface EventData {
   title: string;
   date: string;
   description: string;

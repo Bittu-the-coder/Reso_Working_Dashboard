@@ -110,7 +110,7 @@ const TasksPage: React.FC = () => {
     }
 
     if (filters.priority) {
-      result = result.filter((task) => task.priority.toLowerCase() === filters.priority.toLowerCase());
+      result = result.filter((task) => (task.priority || "").toLowerCase() === filters.priority.toLowerCase());
     }
 
     if (filters.search) {
@@ -314,7 +314,7 @@ const TasksPage: React.FC = () => {
                         {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : "No deadline"}
                       </div>
                       <div className="flex items-center -space-x-1.5">
-                        {task.assignedTo?.slice(0, 3).map((userId, idx) => (
+                        {task.assignedTo?.slice(0, 3).map((_, idx) => (
                           <div
                             key={idx}
                             className={`h-6 w-6 rounded-full border-2 ${isDarkMode ? "border-slate-900 bg-slate-800" : "border-white bg-slate-100"} flex items-center justify-center text-[8px] font-bold`}

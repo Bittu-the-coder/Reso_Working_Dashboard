@@ -20,8 +20,7 @@ const ProjectsPage = () => {
     updateProject,
     deleteProject,
     clearCurrentProject,
-    getProjectById,
-    loading
+    getProjectById
   } = useProjectStore();
 
   const { teams, getMyTeams } = useTeamStore();
